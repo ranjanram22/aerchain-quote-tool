@@ -74,3 +74,12 @@ export async function sendFollowup(rfxId: string, vendorId: string, toEmail: str
   refresh();
   return { ok: true };
 }
+
+// A reply arrived from a vendor who was not on the original invite list.
+export async function addVendorToRfx(rfxId: string, vendorId: string): Promise<Result> {
+  const { error } = await db().from("rfx_vendors").insert({ rfx_id: rfxId, vendor_id: vendorId, status: "invited" });
+  if (error) return { ok: false, error: error.message };
+  await audit(rfxId, "vendor_added_to_rfx", `vendor:${vendorId}`, null, null, "Added after publishing (no invitation email)");
+  refresh();
+  return { ok: true };
+}

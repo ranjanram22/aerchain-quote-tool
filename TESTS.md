@@ -43,8 +43,14 @@ All answers passed the number post-check (some after one regeneration).
 | Publish to 3 vendors | 3 invitations in Outbox, status Sent |
 | Pasted email reply (per 100, per set, each, per kg, freight per trip × trips/month) | 5/5 lines extracted and converted; freight ₹3,200 × 60/yr computed |
 
-## Unseen inputs
-_(Phase 6)_
+## Unseen inputs (2026-09-30) — never used while writing prompts
+| Input | Vendor | Result | Verdict |
+|---|---|---|---|
+| `sahyadri_rates.csv` — odd headers, `price_INR_per_1000`, 10 items, own dimensions columns | Sahyadri Corrupack (new) | 10/10 items matched to the right RFx lines; ÷1000 conversion correct; partition "per set" remark respected; "Transport extra at actuals (approx Rs 18000 per truck)" → ⚠ freight (no trip count); no questionnaire → 12 unanswered | Pass |
+| `KKB_quotation_scan.pdf` — image-only, skewed, noisy, prices per dozen | Kolhapur Kraft Boxes (new) | 7/7 items correct (₹158/dozen → ₹13.17/pc etc.); 1.5% discount above ₹25 L/quarter → conditional ⚠; ISO claimed without certificate → mandatory "unclear" ⚠; two freight rates (₹1.20/pc boxes, ₹0.80/kg sheets) → ⚠ freight (not auto-applied) | Pass (split freight basis left to buyer) |
+| `WhatsApp Chat with Vinod Sai Packaging.txt` — bare numbers, "5 ply all sizes 2% less than what we gave you in March", "49 per kilo approx 3.3 kg" | Sai Packaging (new) | 4 bare prices read as per piece; 7-ply ₹49/kg × 3.3 kg = ₹161.70; "2% less than March" → ⚠ price needed on 9 lines (no March record — never guessed); "ISO certificate will send tomorrow" → mandatory unclear | Pass (one ⚠ per line is noisy) |
+| Vendor D rate card photo re-sent as iPhone **HEIC** | Mahalaxmi | Converted (heic-convert) and read: 29/30 identical to the JPEG run | Pass. Note: a newer reply supersedes the old one entirely, so the ISO certificate from the earlier reply no longer counts until it is re-sent |
+
 
 ## Unrehearsed questions
 _(Phase 6)_

@@ -18,6 +18,7 @@ export interface WorkspaceData {
   extractionMeta: ExtractionMeta[];
   history: ResponseHistory[];
   vendorEmails: Record<string, string | null>;
+  otherVendors: { id: string; name: string }[];
 }
 
 export async function loadWorkspace(rfxId: string): Promise<WorkspaceData> {
@@ -39,6 +40,8 @@ export async function loadWorkspace(rfxId: string): Promise<WorkspaceData> {
   const latestExt = new Map<string, ExtractionMeta>();
   for (const e of (ext.data ?? []) as ExtractionMeta[]) if (!latestExt.has(e.response_id)) latestExt.set(e.response_id, e);
   const { data: vendors } = await db().from("vendors").select("id,email").in("id", bundle.vendors.map((v) => v.id).concat(none));
+  const { data: all } = await db().from("vendors").select("id,name").order("name");
+  const invited = new Set(bundle.vendors.map((v) => v.id));
   return {
     bundle,
     cmp,
@@ -48,5 +51,6 @@ export async function loadWorkspace(rfxId: string): Promise<WorkspaceData> {
     extractionMeta: [...latestExt.values()],
     history: (history.data ?? []) as ResponseHistory[],
     vendorEmails: Object.fromEntries((vendors ?? []).map((v) => [v.id, v.email])),
+    otherVendors: (all ?? []).filter((v) => !invited.has(v.id)),
   };
 }

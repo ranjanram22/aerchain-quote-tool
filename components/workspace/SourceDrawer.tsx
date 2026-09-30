@@ -148,7 +148,10 @@ export default function SourceDrawer({ data, cell, onClose }: { data: WorkspaceD
             {url && (
               <section>
                 <h3 className="mb-1 text-xs font-semibold uppercase tracking-wide text-slate-500">Original file</h3>
-                {isImage ? (
+                {/\.(heic|heif)$/i.test(file!.filename) ? (
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img src={`/api/files/${file!.id}/preview`} alt={file!.filename} className="w-full rounded border border-slate-200" />
+                ) : isImage ? (
                   // eslint-disable-next-line @next/next/no-img-element
                   <img src={url} alt={file!.filename} className="w-full rounded border border-slate-200" />
                 ) : file?.filename.toLowerCase().endsWith(".pdf") ? (

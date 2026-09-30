@@ -4,6 +4,7 @@
 import * as XLSX from "xlsx";
 import mammoth from "mammoth";
 import sharp from "sharp";
+import heicConvert from "heic-convert";
 import type { ChatCompletionContentPart } from "openai/resources/chat/completions";
 
 export interface InputFile {
@@ -62,9 +63,16 @@ async function docxToParagraphs(buf: Buffer): Promise<string> {
     .join("\n");
 }
 
+export async function heicToJpeg(data: Buffer): Promise<Buffer> {
+  const out = await heicConvert({ buffer: new Uint8Array(data), format: "JPEG", quality: 0.9 });
+  return Buffer.from(out as unknown as ArrayBuffer);
+}
+
 async function imageToDataUrl(f: InputFile): Promise<string> {
-  // Normalise every image (incl. HEIC where supported) to a JPEG ≤ 2000 px on the long side.
-  const jpg = await sharp(f.data).rotate().resize({ width: 2000, height: 2000, fit: "inside", withoutEnlargement: true }).jpeg({ quality: 88 }).toBuffer();
+  // iPhone photos (HEIC/HEIF) are converted first; then every image is
+  // normalised to a JPEG ≤ 2000 px on the long side.
+  const src = /\.(heic|heif)$/i.test(f.filename) || f.mime === "image/heic" || f.mime === "image/heif" ? await heicToJpeg(f.data) : f.data;
+  const jpg = await sharp(src).rotate().resize({ width: 2000, height: 2000, fit: "inside", withoutEnlargement: true }).jpeg({ quality: 88 }).toBuffer();
   return `data:image/jpeg;base64,${jpg.toString("base64")}`;
 }
 

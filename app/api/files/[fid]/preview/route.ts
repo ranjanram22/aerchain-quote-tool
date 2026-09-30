@@ -1,6 +1,7 @@
 import * as XLSX from "xlsx";
 import mammoth from "mammoth";
 import { db, STORAGE_BUCKET } from "@/lib/supabase";
+import { heicToJpeg } from "@/lib/extract/preprocess";
 
 // Read-only HTML preview of Word / Excel / CSV / text files, so the original
 // can be shown next to the extracted data. Cell references are kept visible.
@@ -20,6 +21,13 @@ export async function GET(_req: Request, ctx: RouteContext<"/api/files/[fid]/pre
   if (error || !data) return new Response("Could not load file", { status: 500 });
   const buf = Buffer.from(await data.arrayBuffer());
   const name = f.filename.toLowerCase();
+  if (/\.(heic|heif)$/.test(name)) {
+    try {
+      return new Response(new Uint8Array(await heicToJpeg(buf)), { headers: { "content-type": "image/jpeg" } });
+    } catch {
+      return new Response("Could not convert this HEIC image", { status: 500 });
+    }
+  }
   let body = "";
   try {
     if (name.endsWith(".docx")) {

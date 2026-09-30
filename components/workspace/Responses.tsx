@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import type { WorkspaceData } from "@/lib/workspace-data";
-import { sendFollowup } from "@/app/actions/rfx";
+import { sendFollowup, addVendorToRfx } from "@/app/actions/rfx";
 import OpenItemForm, { kindLabel } from "./OpenItemForm";
 import { dt, inr, pct, STATE_META } from "./format";
 
@@ -100,9 +100,22 @@ export default function Responses({ data }: { data: WorkspaceData }) {
     return () => clearInterval(t);
   }, [processing, router]);
   const [focus, setFocus] = useState<Record<string, string>>({});
+  const [late, setLate] = useState("");
+  const [addPending, startAdd] = useTransition();
 
   return (
     <div className="space-y-6">
+      {data.otherVendors.length > 0 && (
+        <div className="flex flex-wrap items-center gap-2 rounded-lg border border-dashed border-slate-300 bg-white px-4 py-2 text-xs text-slate-600">
+          Reply from a vendor not on the invite list?
+          <select value={late} onChange={(e) => setLate(e.target.value)} className="rounded border border-slate-300 px-2 py-1">
+            <option value="">Choose vendor…</option>
+            {data.otherVendors.map((v) => <option key={v.id} value={v.id}>{v.name}</option>)}
+          </select>
+          <button disabled={!late || addPending} onClick={() => startAdd(async () => { await addVendorToRfx(bundle.rfx.id, late); setLate(""); })} className="rounded border border-slate-300 px-2 py-1 hover:bg-slate-50 disabled:opacity-50">Add to this RFx</button>
+          <span className="text-slate-400">New vendors: Home → Admin → Vendors.</span>
+        </div>
+      )}
       {bundle.vendors.map((v) => {
         const resp = bundle.responses.find((r) => r.vendor_id === v.id);
         const files = resp ? bundle.files.filter((f) => f.response_id === resp.id) : [];
@@ -137,6 +150,11 @@ export default function Responses({ data }: { data: WorkspaceData }) {
               </div>
             )}
 
+            {resp && resp.processing_status === "done" && resp.error && (
+              <div className="mx-4 mt-3 rounded-md border border-amber-300 bg-amber-50 p-3 text-xs text-amber-900">
+                ⚠ Part of this reply couldn&apos;t be read: {resp.error}. Below is what we got — please check the extracted values, or ask the vendor to resend.
+              </div>
+            )}
             {resp && resp.processing_status === "done" && (
               <div className="grid gap-4 p-4 lg:grid-cols-2">
                 <div className="space-y-2">
@@ -149,7 +167,10 @@ export default function Responses({ data }: { data: WorkspaceData }) {
                     ))}
                   </div>
                   {resp.raw_email_text && (!pf || files.length === 0) && <pre className="max-h-[420px] overflow-auto whitespace-pre-wrap rounded border border-slate-200 bg-slate-50 p-3 text-[11px]">{resp.raw_email_text}</pre>}
-                  {pf && url && (/\.(png|jpe?g|webp|gif)$/i.test(pf.filename) ? (
+                  {pf && url && (/\.(heic|heif)$/i.test(pf.filename) ? (
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <img src={`/api/files/${pf.id}/preview`} alt={pf.filename} className="max-h-[520px] w-full rounded border border-slate-200 object-contain" />
+                  ) : /\.(png|jpe?g|webp|gif)$/i.test(pf.filename) ? (
                     // eslint-disable-next-line @next/next/no-img-element
                     <img src={url} alt={pf.filename} className="max-h-[520px] w-full rounded border border-slate-200 object-contain" />
                   ) : /\.pdf$/i.test(pf.filename) ? (
