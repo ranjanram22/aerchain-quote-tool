@@ -69,3 +69,8 @@ Every meaningful decision: what, alternatives considered, why.
 
 ## Out of scope (deliberate)
 Real email send/receive; vendor portal; authentication and roles (a VP uses the same buyer view); multi-currency beyond the INR/USD seed (code supports any rate in `fx_rates`); formal award memo/approval workflow; ERP/PO integration; local image deskewing/OCR (the vision model handles it); mobile layout polish.
+
+### T6. Hosting region: Mumbai for both Vercel functions and Supabase
+- **What**: `vercel.json` pins functions to `bom1` (Mumbai); the Supabase project is created in Mumbai (ap-south-1).
+- **Alternatives**: Vercel default (US East) with Supabase anywhere.
+- **Why**: Every page load makes several database queries; keeping functions and database in the same region avoids ~200 ms per query round trip. Mumbai also suits an Indian buyer.
