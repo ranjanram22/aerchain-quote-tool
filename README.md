@@ -28,7 +28,8 @@ Paste `supabase/schema.sql` into Supabase → SQL Editor → New query → Run. 
 
 ## Seed demo data
 
-`npm run seed` (available from Phase 1).
+- `npm run seed:files` regenerates the vendor documents in `seed/files/`, the rate card to photograph in `seed/print/`, and the test inputs in `samples/unseen/`.
+- `npm run seed` **resets** the database to the demo state: 5 vendors, 30-product catalog, FX rates, last-year prices, the Chakan FY27 RFx (30 lines, 12 questions) and the 5 invitation emails. From Phase 2 it also runs the real extraction pipeline on the vendor files.
 
 ## Redeploy
 

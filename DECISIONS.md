@@ -74,3 +74,23 @@ Real email send/receive; vendor portal; authentication and roles (a VP uses the 
 - **What**: `vercel.json` pins functions to `bom1` (Mumbai); the Supabase project is created in Mumbai (ap-south-1).
 - **Alternatives**: Vercel default (US East) with Supabase anywhere.
 - **Why**: Every page load makes several database queries; keeping functions and database in the same region avoids ~200 ms per query round trip. Mumbai also suits an Indian buyer.
+
+## Seed data
+
+### S1. Box weights stated in the RFx spec for standard 3-ply and 5-ply shippers only
+- **What**: Lines 1–16 carry `approx_weight_kg` in their RFx spec (known from the current contract). 7-ply boxes, mailers, printed boxes, partitions and edge protectors do not.
+- **Alternatives**: No weights anywhere (every per-kg quote becomes ⚠); weights on every line (per-kg quotes never need input).
+- **Why**: Realistic: buyers know the weight of the standard boxes they already buy, not of every SKU. It lets the incumbent's "₹42/kg for the 5-ply" be converted from a stated fact (shown as a conversion with the source), while a vendor's per-kg price on a 7-ply box with no printed weight correctly becomes ⚠ needs input.
+
+### S2. Seed story designed through prices, verified by a script
+- **What**: Vendor prices are generated as reference price × a per-category multiplier (`seed/quotes.ts`); `seed/check-story.ts` checks that the designed answers hold (incumbent headline-cheapest; per-line winners change with freight and with the conditional discount; the deviation line is the only reason vendor C looks cheapest there).
+- **Why**: SPEC §8 says to adjust seed prices, not code, if the story doesn't hold. The ground truth never enters the database: extracted values come only from running the pipeline on the generated files.
+
+### S3. `npm run seed` resets the demo database
+- **What**: The seed deletes all RFx, vendors, products, FX and last-year rows, then reloads them.
+- **Why**: A repeatable known starting state for the demo. The live demo database is a single-tenant prototype, so there is no customer data to protect.
+
+### S4. Vendor A freight allocated pro-rata to line value
+- **What**: Vendor A states USD 850 per shipment and about 4 shipments per month. Annual freight = amount × shipments/year, converted to INR and spread across that vendor's quoted lines in proportion to line value (qty × unit price).
+- **Alternatives**: Allocate by volume or weight (needs data we don't have); per piece (ignores that big boxes fill trucks faster).
+- **Why**: Value-weighted allocation needs no invented facts, and the method is stated in the tooltip so a buyer can challenge it.
