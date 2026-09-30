@@ -1,0 +1,1206 @@
+{
+ "vendor": "Transpac Global Packaging (India) Pvt Ltd",
+ "model": "anthropic/claude-sonnet-5.5",
+ "overall_confidence": 0.95,
+ "created_at": "2026-09-30T16:43:02.292512+00:00",
+ "extraction": {
+  "notes": [
+   "Every supplier row maps one-to-one to an RFx line (30 of 30), matched by size, ply, flute, GSM, BF and print. Supplier S/N order differs from RFx line order: S/N 1-3 are the printed items (RFx 23-25) and S/N 26-30 are partitions, sheet, pad and edge guard (RFx 28, 29, 26, 27, 30).",
+   "No spec deviations found. The supplier does not state flute for the printed and 7-ply items, or the print sides, but the sizes match uniquely.",
+   "Terms differ from the RFx: prices are in USD, not INR; FCA Bhiwandi, not DAP Chakan; freight is extra at USD 850 per shipment (about 4 shipments per month, recorded as 48 per year); payment is 45 days from invoice, not 60 days from GRN; validity is 60 days, not 90.",
+   "The Total cell (Commercial Offer!H39) and the Ext. Value column are empty, so no totals were recorded.",
+   "Prices are converted to INR at invoicing (SBI TT selling rate), so the INR amount depends on the exchange rate on the invoice date. This is recorded as written.",
+   "Lead time days are recorded as 15 (the less favourable printed-item figure). The unit is working days, not calendar days.",
+   "The ISO 9001 certificate expires 2028-01-14, before the contract ends on 2028-03-31. The FSC certificate is valid through 2029-06-19.",
+   "Q3 was answered yes: in-house testing is confirmed and a CoA is given with every lot. Q10 gave only counts of customers, with names on request, so no boolean was set."
+  ],
+  "references": [],
+  "attachments": [
+   {
+    "file": "Transpac_Offer_TGP-IN-Q-26-0917.xlsx",
+    "type": "quote",
+    "summary": "Commercial offer (30 priced items in USD, FCA Bhiwandi, commercial terms) plus a Compliance sheet with questionnaire answers",
+    "provenance": {
+     "file": "Transpac_Offer_TGP-IN-Q-26-0917.xlsx",
+     "locator": "Commercial Offer!A1",
+     "snippet": "TRANSPAC GLOBAL PACKAGING (INDIA) PVT LTD"
+    },
+    "certificate": null
+   },
+   {
+    "file": "Transpac_ISO9001_2015.pdf",
+    "type": "certificate",
+    "summary": "ISO 9001:2015 certificate of registration, scope: manufacture and distribution of corrugated and printed packaging",
+    "provenance": {
+     "file": "Transpac_ISO9001_2015.pdf",
+     "locator": "page 1",
+     "snippet": "Certificate No.: QMS/IN/88213 Date of issue: 15 January 2025 Valid until: 14 January 2028"
+    },
+    "certificate": {
+     "holder": "TRANSPAC GLOBAL PACKAGING (INDIA) PVT LTD",
+     "issuer": "GLOBAL ASSURANCE REGISTRAR (SINGAPORE) PTE LTD",
+     "cert_no": "QMS/IN/88213",
+     "standard": "ISO 9001:2015",
+     "fact_type": "iso9001_cert",
+     "issued_on": "2025-01-15",
+     "valid_until": "2028-01-14"
+    }
+   },
+   {
+    "file": "Transpac_FSC_CoC.pdf",
+    "type": "certificate",
+    "summary": "FSC Chain of Custody certificate, scope: corrugated boxes and sheets, FSC Mix and FSC Recycled. The certification body is not named, only 'Forest Stewardship Council — accredited certification body'.",
+    "provenance": {
+     "file": "Transpac_FSC_CoC.pdf",
+     "locator": "page 1",
+     "snippet": "Certificate No.: FSC-C171204 Date of issue: 20 June 2024 Valid until: 19 June 2029"
+    },
+    "certificate": {
+     "holder": "TRANSPAC GLOBAL PACKAGING (INDIA) PVT LTD",
+     "issuer": null,
+     "cert_no": "FSC-C171204",
+     "standard": "FSC-STD-40-004 V3-1 (Chain of Custody)",
+     "fact_type": "fsc_cert",
+     "issued_on": "2024-06-20",
+     "valid_until": "2029-06-19"
+    }
+   }
+  ],
+  "line_quotes": [
+   {
+    "origin": "stated",
+    "currency": "USD",
+    "deviation": [],
+    "basis_item": "piece",
+    "confidence": 0.96,
+    "provenance": {
+     "file": "Transpac_Offer_TGP-IN-Q-26-0917.xlsx",
+     "locator": "Commercial Offer!H9",
+     "snippet": "TGP-CB1161 | Printed RSC 3PLY - 1C Flexo | 300 x 200 x 150 | 3P 150/120/150 / BF18 | NOS | $0.139 (raw 0.139)"
+    },
+    "basis_count": null,
+    "price_basis": "per_unit",
+    "price_value": 0.139,
+    "rfx_line_no": 23,
+    "match_reason": "300x200x150, 3P 150/120/150 BF18, 1C flexo matches RFx line 23. B flute is not stated by the supplier, but the RFx has only one printed 300x200x150 line.",
+    "offered_spec": {
+     "bf": "18",
+     "ply": 3,
+     "print": "1C Flexo",
+     "paper_gsm": "150/120/150",
+     "dimensions_mm": "300 x 200 x 150"
+    },
+    "pieces_per_pack": null,
+    "match_confidence": 0.97,
+    "vendor_line_text": "Printed RSC 3PLY - 1C Flexo",
+    "weight_per_piece_kg": null,
+    "price_unit_as_written": "NOS (Unit Price)"
+   },
+   {
+    "origin": "stated",
+    "currency": "USD",
+    "deviation": [],
+    "basis_item": "piece",
+    "confidence": 0.96,
+    "provenance": {
+     "file": "Transpac_Offer_TGP-IN-Q-26-0917.xlsx",
+     "locator": "Commercial Offer!H10",
+     "snippet": "TGP-CB1168 | Printed RSC 5PLY - 2C Flexo | 400 x 300 x 250 | 5P 180/120/150/120/180 / BF20 | NOS | $0.360 (raw 0.36)"
+    },
+    "basis_count": null,
+    "price_basis": "per_unit",
+    "price_value": 0.36,
+    "rfx_line_no": 24,
+    "match_reason": "400x300x250, 5P 180/120/150/120/180 BF20, 2C flexo matches RFx line 24",
+    "offered_spec": {
+     "bf": "20",
+     "ply": 5,
+     "print": "2C Flexo",
+     "paper_gsm": "180/120/150/120/180",
+     "dimensions_mm": "400 x 300 x 250"
+    },
+    "pieces_per_pack": null,
+    "match_confidence": 0.97,
+    "vendor_line_text": "Printed RSC 5PLY - 2C Flexo",
+    "weight_per_piece_kg": null,
+    "price_unit_as_written": "NOS (Unit Price)"
+   },
+   {
+    "origin": "stated",
+    "currency": "USD",
+    "deviation": [],
+    "basis_item": "piece",
+    "confidence": 0.96,
+    "provenance": {
+     "file": "Transpac_Offer_TGP-IN-Q-26-0917.xlsx",
+     "locator": "Commercial Offer!H11",
+     "snippet": "TGP-CB1175 | Printed Mailer E-Flute - 2C Flexo | 280 x 200 x 70 | 3P 150/100/150 / BF18 | NOS | $0.198 (raw 0.198)"
+    },
+    "basis_count": null,
+    "price_basis": "per_unit",
+    "price_value": 0.198,
+    "rfx_line_no": 25,
+    "match_reason": "280x200x70, E flute, 3P 150/100/150 BF18, 2C flexo matches RFx line 25",
+    "offered_spec": {
+     "bf": "18",
+     "ply": 3,
+     "flute": "E",
+     "print": "2C Flexo",
+     "paper_gsm": "150/100/150",
+     "dimensions_mm": "280 x 200 x 70"
+    },
+    "pieces_per_pack": null,
+    "match_confidence": 0.97,
+    "vendor_line_text": "Printed Mailer E-Flute - 2C Flexo",
+    "weight_per_piece_kg": null,
+    "price_unit_as_written": "NOS (Unit Price)"
+   },
+   {
+    "origin": "stated",
+    "currency": "USD",
+    "deviation": [],
+    "basis_item": "piece",
+    "confidence": 0.97,
+    "provenance": {
+     "file": "Transpac_Offer_TGP-IN-Q-26-0917.xlsx",
+     "locator": "Commercial Offer!H12",
+     "snippet": "TGP-CB1007 | Shipper Carton 3PLY B-Flute RSC | 250 x 200 x 150 | 3P 150/120/150 / BF18 | NOS | $0.108 (raw 0.108)"
+    },
+    "basis_count": null,
+    "price_basis": "per_unit",
+    "price_value": 0.108,
+    "rfx_line_no": 1,
+    "match_reason": "250x200x150, B flute, 3P 150/120/150 BF18 matches RFx line 1",
+    "offered_spec": {
+     "bf": "18",
+     "ply": 3,
+     "flute": "B",
+     "print": "Plain",
+     "paper_gsm": "150/120/150",
+     "dimensions_mm": "250 x 200 x 150"
+    },
+    "pieces_per_pack": null,
+    "match_confidence": 0.98,
+    "vendor_line_text": "Shipper Carton 3PLY B-Flute RSC",
+    "weight_per_piece_kg": null,
+    "price_unit_as_written": "NOS (Unit Price)"
+   },
+   {
+    "origin": "stated",
+    "currency": "USD",
+    "deviation": [],
+    "basis_item": "piece",
+    "confidence": 0.97,
+    "provenance": {
+     "file": "Transpac_Offer_TGP-IN-Q-26-0917.xlsx",
+     "locator": "Commercial Offer!H13",
+     "snippet": "TGP-CB1014 | Shipper Carton 3PLY B-Flute RSC | 300 x 200 x 200 | 3P 150/120/150 / BF18 | NOS | $0.134 (raw 0.134)"
+    },
+    "basis_count": null,
+    "price_basis": "per_unit",
+    "price_value": 0.134,
+    "rfx_line_no": 2,
+    "match_reason": "300x200x200, B flute, 3P BF18 matches RFx line 2",
+    "offered_spec": {
+     "bf": "18",
+     "ply": 3,
+     "flute": "B",
+     "print": "Plain",
+     "paper_gsm": "150/120/150",
+     "dimensions_mm": "300 x 200 x 200"
+    },
+    "pieces_per_pack": null,
+    "match_confidence": 0.98,
+    "vendor_line_text": "Shipper Carton 3PLY B-Flute RSC",
+    "weight_per_piece_kg": null,
+    "price_unit_as_written": "NOS (Unit Price)"
+   },
+   {
+    "origin": "stated",
+    "currency": "USD",
+    "deviation": [],
+    "basis_item": "piece",
+    "confidence": 0.97,
+    "provenance": {
+     "file": "Transpac_Offer_TGP-IN-Q-26-0917.xlsx",
+     "locator": "Commercial Offer!H14",
+     "snippet": "TGP-CB1021 | Shipper Carton 3PLY B-Flute RSC | 300 x 250 x 150 | 3P 150/120/150 / BF18 | NOS | $0.139 (raw 0.139)"
+    },
+    "basis_count": null,
+    "price_basis": "per_unit",
+    "price_value": 0.139,
+    "rfx_line_no": 3,
+    "match_reason": "300x250x150, B flute, 3P BF18 matches RFx line 3",
+    "offered_spec": {
+     "bf": "18",
+     "ply": 3,
+     "flute": "B",
+     "print": "Plain",
+     "paper_gsm": "150/120/150",
+     "dimensions_mm": "300 x 250 x 150"
+    },
+    "pieces_per_pack": null,
+    "match_confidence": 0.98,
+    "vendor_line_text": "Shipper Carton 3PLY B-Flute RSC",
+    "weight_per_piece_kg": null,
+    "price_unit_as_written": "NOS (Unit Price)"
+   },
+   {
+    "origin": "stated",
+    "currency": "USD",
+    "deviation": [],
+    "basis_item": "piece",
+    "confidence": 0.97,
+    "provenance": {
+     "file": "Transpac_Offer_TGP-IN-Q-26-0917.xlsx",
+     "locator": "Commercial Offer!H15",
+     "snippet": "TGP-CB1028 | Shipper Carton 3PLY C-Flute RSC | 350 x 250 x 200 | 3P 150/120/150 / BF18 | NOS | $0.164 (raw 0.164)"
+    },
+    "basis_count": null,
+    "price_basis": "per_unit",
+    "price_value": 0.164,
+    "rfx_line_no": 4,
+    "match_reason": "350x250x200, C flute, 3P BF18 matches RFx line 4",
+    "offered_spec": {
+     "bf": "18",
+     "ply": 3,
+     "flute": "C",
+     "print": "Plain",
+     "paper_gsm": "150/120/150",
+     "dimensions_mm": "350 x 250 x 200"
+    },
+    "pieces_per_pack": null,
+    "match_confidence": 0.98,
+    "vendor_line_text": "Shipper Carton 3PLY C-Flute RSC",
+    "weight_per_piece_kg": null,
+    "price_unit_as_written": "NOS (Unit Price)"
+   },
+   {
+    "origin": "stated",
+    "currency": "USD",
+    "deviation": [],
+    "basis_item": "piece",
+    "confidence": 0.97,
+    "provenance": {
+     "file": "Transpac_Offer_TGP-IN-Q-26-0917.xlsx",
+     "locator": "Commercial Offer!H16",
+     "snippet": "TGP-CB1035 | Shipper Carton 3PLY B-Flute RSC | 200 x 150 x 100 | 3P 150/120/150 / BF16 | NOS | $0.095 (raw 0.095)"
+    },
+    "basis_count": null,
+    "price_basis": "per_unit",
+    "price_value": 0.095,
+    "rfx_line_no": 5,
+    "match_reason": "200x150x100, B flute, 3P BF16 matches RFx line 5",
+    "offered_spec": {
+     "bf": "16",
+     "ply": 3,
+     "flute": "B",
+     "print": "Plain",
+     "paper_gsm": "150/120/150",
+     "dimensions_mm": "200 x 150 x 100"
+    },
+    "pieces_per_pack": null,
+    "match_confidence": 0.98,
+    "vendor_line_text": "Shipper Carton 3PLY B-Flute RSC",
+    "weight_per_piece_kg": null,
+    "price_unit_as_written": "NOS (Unit Price)"
+   },
+   {
+    "origin": "stated",
+    "currency": "USD",
+    "deviation": [],
+    "basis_item": "piece",
+    "confidence": 0.97,
+    "provenance": {
+     "file": "Transpac_Offer_TGP-IN-Q-26-0917.xlsx",
+     "locator": "Commercial Offer!H17",
+     "snippet": "TGP-CB1042 | Shipper Carton 3PLY C-Flute RSC | 400 x 300 x 200 | 3P 150/120/150 / BF18 | NOS | $0.184 (raw 0.184)"
+    },
+    "basis_count": null,
+    "price_basis": "per_unit",
+    "price_value": 0.184,
+    "rfx_line_no": 6,
+    "match_reason": "400x300x200, C flute, 3P BF18 matches RFx line 6",
+    "offered_spec": {
+     "bf": "18",
+     "ply": 3,
+     "flute": "C",
+     "print": "Plain",
+     "paper_gsm": "150/120/150",
+     "dimensions_mm": "400 x 300 x 200"
+    },
+    "pieces_per_pack": null,
+    "match_confidence": 0.98,
+    "vendor_line_text": "Shipper Carton 3PLY C-Flute RSC",
+    "weight_per_piece_kg": null,
+    "price_unit_as_written": "NOS (Unit Price)"
+   },
+   {
+    "origin": "stated",
+    "currency": "USD",
+    "deviation": [],
+    "basis_item": "piece",
+    "confidence": 0.97,
+    "provenance": {
+     "file": "Transpac_Offer_TGP-IN-Q-26-0917.xlsx",
+     "locator": "Commercial Offer!H18",
+     "snippet": "TGP-CB1049 | Shipper Carton 3PLY B-Flute RSC | 250 x 250 x 250 | 3P 150/120/150 / BF18 | NOS | $0.151 (raw 0.151)"
+    },
+    "basis_count": null,
+    "price_basis": "per_unit",
+    "price_value": 0.151,
+    "rfx_line_no": 7,
+    "match_reason": "250x250x250 cube, B flute, 3P BF18 matches RFx line 7",
+    "offered_spec": {
+     "bf": "18",
+     "ply": 3,
+     "flute": "B",
+     "print": "Plain",
+     "paper_gsm": "150/120/150",
+     "dimensions_mm": "250 x 250 x 250"
+    },
+    "pieces_per_pack": null,
+    "match_confidence": 0.98,
+    "vendor_line_text": "Shipper Carton 3PLY B-Flute RSC",
+    "weight_per_piece_kg": null,
+    "price_unit_as_written": "NOS (Unit Price)"
+   },
+   {
+    "origin": "stated",
+    "currency": "USD",
+    "deviation": [],
+    "basis_item": "piece",
+    "confidence": 0.97,
+    "provenance": {
+     "file": "Transpac_Offer_TGP-IN-Q-26-0917.xlsx",
+     "locator": "Commercial Offer!H19",
+     "snippet": "TGP-CB1056 | Shipper Carton 3PLY B-Flute RSC | 320 x 220 x 120 | 3P 150/120/150 / BF16 | NOS | $0.125 (raw 0.125)"
+    },
+    "basis_count": null,
+    "price_basis": "per_unit",
+    "price_value": 0.125,
+    "rfx_line_no": 8,
+    "match_reason": "320x220x120, B flute, 3P BF16 matches RFx line 8",
+    "offered_spec": {
+     "bf": "16",
+     "ply": 3,
+     "flute": "B",
+     "print": "Plain",
+     "paper_gsm": "150/120/150",
+     "dimensions_mm": "320 x 220 x 120"
+    },
+    "pieces_per_pack": null,
+    "match_confidence": 0.98,
+    "vendor_line_text": "Shipper Carton 3PLY B-Flute RSC",
+    "weight_per_piece_kg": null,
+    "price_unit_as_written": "NOS (Unit Price)"
+   },
+   {
+    "origin": "stated",
+    "currency": "USD",
+    "deviation": [],
+    "basis_item": "piece",
+    "confidence": 0.97,
+    "provenance": {
+     "file": "Transpac_Offer_TGP-IN-Q-26-0917.xlsx",
+     "locator": "Commercial Offer!H20",
+     "snippet": "TGP-CB1063 | Shipper Carton 5PLY BC-Flute RSC | 400 x 300 x 300 | 5P 180/120/150/120/180 / BF20 | NOS | $0.345 (raw 0.345)"
+    },
+    "basis_count": null,
+    "price_basis": "per_unit",
+    "price_value": 0.345,
+    "rfx_line_no": 9,
+    "match_reason": "400x300x300, 5P BF20 BC flute matches RFx line 9",
+    "offered_spec": {
+     "bf": "20",
+     "ply": 5,
+     "flute": "BC",
+     "print": "Plain",
+     "paper_gsm": "180/120/150/120/180",
+     "dimensions_mm": "400 x 300 x 300"
+    },
+    "pieces_per_pack": null,
+    "match_confidence": 0.98,
+    "vendor_line_text": "Shipper Carton 5PLY BC-Flute RSC",
+    "weight_per_piece_kg": null,
+    "price_unit_as_written": "NOS (Unit Price)"
+   },
+   {
+    "origin": "stated",
+    "currency": "USD",
+    "deviation": [],
+    "basis_item": "piece",
+    "confidence": 0.97,
+    "provenance": {
+     "file": "Transpac_Offer_TGP-IN-Q-26-0917.xlsx",
+     "locator": "Commercial Offer!H21",
+     "snippet": "TGP-CB1070 | Shipper Carton 5PLY BC-Flute RSC | 450 x 350 x 300 | 5P 180/120/150/120/180 / BF20 | NOS | $0.407 (raw 0.407)"
+    },
+    "basis_count": null,
+    "price_basis": "per_unit",
+    "price_value": 0.407,
+    "rfx_line_no": 10,
+    "match_reason": "450x350x300, 5P BF20 BC flute matches RFx line 10",
+    "offered_spec": {
+     "bf": "20",
+     "ply": 5,
+     "flute": "BC",
+     "print": "Plain",
+     "paper_gsm": "180/120/150/120/180",
+     "dimensions_mm": "450 x 350 x 300"
+    },
+    "pieces_per_pack": null,
+    "match_confidence": 0.98,
+    "vendor_line_text": "Shipper Carton 5PLY BC-Flute RSC",
+    "weight_per_piece_kg": null,
+    "price_unit_as_written": "NOS (Unit Price)"
+   },
+   {
+    "origin": "stated",
+    "currency": "USD",
+    "deviation": [],
+    "basis_item": "piece",
+    "confidence": 0.97,
+    "provenance": {
+     "file": "Transpac_Offer_TGP-IN-Q-26-0917.xlsx",
+     "locator": "Commercial Offer!H22",
+     "snippet": "TGP-CB1077 | Shipper Carton 5PLY BC-Flute RSC | 500 x 400 x 300 | 5P 180/120/150/120/180 / BF20 | NOS | $0.468 (raw 0.468)"
+    },
+    "basis_count": null,
+    "price_basis": "per_unit",
+    "price_value": 0.468,
+    "rfx_line_no": 11,
+    "match_reason": "500x400x300, 5P BF20 BC flute matches RFx line 11",
+    "offered_spec": {
+     "bf": "20",
+     "ply": 5,
+     "flute": "BC",
+     "print": "Plain",
+     "paper_gsm": "180/120/150/120/180",
+     "dimensions_mm": "500 x 400 x 300"
+    },
+    "pieces_per_pack": null,
+    "match_confidence": 0.98,
+    "vendor_line_text": "Shipper Carton 5PLY BC-Flute RSC",
+    "weight_per_piece_kg": null,
+    "price_unit_as_written": "NOS (Unit Price)"
+   },
+   {
+    "origin": "stated",
+    "currency": "USD",
+    "deviation": [],
+    "basis_item": "piece",
+    "confidence": 0.97,
+    "provenance": {
+     "file": "Transpac_Offer_TGP-IN-Q-26-0917.xlsx",
+     "locator": "Commercial Offer!H23",
+     "snippet": "TGP-CB1084 | Shipper Carton 5PLY BC-Flute RSC | 500 x 300 x 250 | 5P 180/120/150/120/180 / BF20 | NOS | $0.379 (raw 0.379)"
+    },
+    "basis_count": null,
+    "price_basis": "per_unit",
+    "price_value": 0.379,
+    "rfx_line_no": 12,
+    "match_reason": "500x300x250, 5P BF20 BC flute matches RFx line 12",
+    "offered_spec": {
+     "bf": "20",
+     "ply": 5,
+     "flute": "BC",
+     "print": "Plain",
+     "paper_gsm": "180/120/150/120/180",
+     "dimensions_mm": "500 x 300 x 250"
+    },
+    "pieces_per_pack": null,
+    "match_confidence": 0.98,
+    "vendor_line_text": "Shipper Carton 5PLY BC-Flute RSC",
+    "weight_per_piece_kg": null,
+    "price_unit_as_written": "NOS (Unit Price)"
+   },
+   {
+    "origin": "stated",
+    "currency": "USD",
+    "deviation": [],
+    "basis_item": "piece",
+    "confidence": 0.97,
+    "provenance": {
+     "file": "Transpac_Offer_TGP-IN-Q-26-0917.xlsx",
+     "locator": "Commercial Offer!H24",
+     "snippet": "TGP-CB1091 | Shipper Carton 5PLY BC-Flute RSC | 600 x 400 x 400 | 5P 180/120/150/120/180 / BF22 | NOS | $0.635 (raw 0.635)"
+    },
+    "basis_count": null,
+    "price_basis": "per_unit",
+    "price_value": 0.635,
+    "rfx_line_no": 13,
+    "match_reason": "600x400x400, 5P BF22 BC flute matches RFx line 13",
+    "offered_spec": {
+     "bf": "22",
+     "ply": 5,
+     "flute": "BC",
+     "print": "Plain",
+     "paper_gsm": "180/120/150/120/180",
+     "dimensions_mm": "600 x 400 x 400"
+    },
+    "pieces_per_pack": null,
+    "match_confidence": 0.98,
+    "vendor_line_text": "Shipper Carton 5PLY BC-Flute RSC",
+    "weight_per_piece_kg": null,
+    "price_unit_as_written": "NOS (Unit Price)"
+   },
+   {
+    "origin": "stated",
+    "currency": "USD",
+    "deviation": [],
+    "basis_item": "piece",
+    "confidence": 0.97,
+    "provenance": {
+     "file": "Transpac_Offer_TGP-IN-Q-26-0917.xlsx",
+     "locator": "Commercial Offer!H25",
+     "snippet": "TGP-CB1098 | Shipper Carton 5PLY BC-Flute RSC | 450 x 300 x 350 | 5P 180/120/150/120/180 / BF20 | NOS | $0.396 (raw 0.396)"
+    },
+    "basis_count": null,
+    "price_basis": "per_unit",
+    "price_value": 0.396,
+    "rfx_line_no": 14,
+    "match_reason": "450x300x350, 5P BF20 BC flute matches RFx line 14",
+    "offered_spec": {
+     "bf": "20",
+     "ply": 5,
+     "flute": "BC",
+     "print": "Plain",
+     "paper_gsm": "180/120/150/120/180",
+     "dimensions_mm": "450 x 300 x 350"
+    },
+    "pieces_per_pack": null,
+    "match_confidence": 0.98,
+    "vendor_line_text": "Shipper Carton 5PLY BC-Flute RSC",
+    "weight_per_piece_kg": null,
+    "price_unit_as_written": "NOS (Unit Price)"
+   },
+   {
+    "origin": "stated",
+    "currency": "USD",
+    "deviation": [],
+    "basis_item": "piece",
+    "confidence": 0.97,
+    "provenance": {
+     "file": "Transpac_Offer_TGP-IN-Q-26-0917.xlsx",
+     "locator": "Commercial Offer!H26",
+     "snippet": "TGP-CB1105 | Shipper Carton 5PLY BC-Flute RSC | 550 x 450 x 350 | 5P 180/120/150/120/180 / BF22 | NOS | $0.546 (raw 0.546)"
+    },
+    "basis_count": null,
+    "price_basis": "per_unit",
+    "price_value": 0.546,
+    "rfx_line_no": 15,
+    "match_reason": "550x450x350, 5P BF22 BC flute matches RFx line 15",
+    "offered_spec": {
+     "bf": "22",
+     "ply": 5,
+     "flute": "BC",
+     "print": "Plain",
+     "paper_gsm": "180/120/150/120/180",
+     "dimensions_mm": "550 x 450 x 350"
+    },
+    "pieces_per_pack": null,
+    "match_confidence": 0.98,
+    "vendor_line_text": "Shipper Carton 5PLY BC-Flute RSC",
+    "weight_per_piece_kg": null,
+    "price_unit_as_written": "NOS (Unit Price)"
+   },
+   {
+    "origin": "stated",
+    "currency": "USD",
+    "deviation": [],
+    "basis_item": "piece",
+    "confidence": 0.97,
+    "provenance": {
+     "file": "Transpac_Offer_TGP-IN-Q-26-0917.xlsx",
+     "locator": "Commercial Offer!H27",
+     "snippet": "TGP-CB1112 | Shipper Carton 5PLY BC-Flute RSC | 600 x 500 x 450 | 5P 180/120/150/120/180 / BF22 | NOS | $0.747 (raw 0.747)"
+    },
+    "basis_count": null,
+    "price_basis": "per_unit",
+    "price_value": 0.747,
+    "rfx_line_no": 16,
+    "match_reason": "600x500x450, 5P BF22 BC flute matches RFx line 16",
+    "offered_spec": {
+     "bf": "22",
+     "ply": 5,
+     "flute": "BC",
+     "print": "Plain",
+     "paper_gsm": "180/120/150/120/180",
+     "dimensions_mm": "600 x 500 x 450"
+    },
+    "pieces_per_pack": null,
+    "match_confidence": 0.98,
+    "vendor_line_text": "Shipper Carton 5PLY BC-Flute RSC",
+    "weight_per_piece_kg": null,
+    "price_unit_as_written": "NOS (Unit Price)"
+   },
+   {
+    "origin": "stated",
+    "currency": "USD",
+    "deviation": [],
+    "basis_item": "piece",
+    "confidence": 0.97,
+    "provenance": {
+     "file": "Transpac_Offer_TGP-IN-Q-26-0917.xlsx",
+     "locator": "Commercial Offer!H28",
+     "snippet": "TGP-CB1119 | HD Export Carton 7PLY | 600 x 400 x 500 | 7P 200/120/150/120/150/120/200 / BF24 | NOS | $1.241 (raw 1.241)"
+    },
+    "basis_count": null,
+    "price_basis": "per_unit",
+    "price_value": 1.241,
+    "rfx_line_no": 17,
+    "match_reason": "600x400x500, 7P BF24 matches RFx line 17",
+    "offered_spec": {
+     "bf": "24",
+     "ply": 7,
+     "print": "Plain",
+     "paper_gsm": "200/120/150/120/150/120/200",
+     "dimensions_mm": "600 x 400 x 500"
+    },
+    "pieces_per_pack": null,
+    "match_confidence": 0.98,
+    "vendor_line_text": "HD Export Carton 7PLY",
+    "weight_per_piece_kg": null,
+    "price_unit_as_written": "NOS (Unit Price)"
+   },
+   {
+    "origin": "stated",
+    "currency": "USD",
+    "deviation": [],
+    "basis_item": "piece",
+    "confidence": 0.97,
+    "provenance": {
+     "file": "Transpac_Offer_TGP-IN-Q-26-0917.xlsx",
+     "locator": "Commercial Offer!H29",
+     "snippet": "TGP-CB1126 | HD Export Carton 7PLY | 800 x 600 x 500 | 7P 200/120/150/120/150/120/200 / BF24 | NOS | $1.810 (raw 1.81)"
+    },
+    "basis_count": null,
+    "price_basis": "per_unit",
+    "price_value": 1.81,
+    "rfx_line_no": 18,
+    "match_reason": "800x600x500, 7P BF24 matches RFx line 18",
+    "offered_spec": {
+     "bf": "24",
+     "ply": 7,
+     "print": "Plain",
+     "paper_gsm": "200/120/150/120/150/120/200",
+     "dimensions_mm": "800 x 600 x 500"
+    },
+    "pieces_per_pack": null,
+    "match_confidence": 0.98,
+    "vendor_line_text": "HD Export Carton 7PLY",
+    "weight_per_piece_kg": null,
+    "price_unit_as_written": "NOS (Unit Price)"
+   },
+   {
+    "origin": "stated",
+    "currency": "USD",
+    "deviation": [],
+    "basis_item": "piece",
+    "confidence": 0.97,
+    "provenance": {
+     "file": "Transpac_Offer_TGP-IN-Q-26-0917.xlsx",
+     "locator": "Commercial Offer!H30",
+     "snippet": "TGP-CB1133 | HD Export Carton 7PLY | 500 x 400 x 400 | 7P 200/120/150/120/150/120/200 / BF24 | NOS | $0.989 (raw 0.989)"
+    },
+    "basis_count": null,
+    "price_basis": "per_unit",
+    "price_value": 0.989,
+    "rfx_line_no": 19,
+    "match_reason": "500x400x400, 7P BF24 matches RFx line 19",
+    "offered_spec": {
+     "bf": "24",
+     "ply": 7,
+     "print": "Plain",
+     "paper_gsm": "200/120/150/120/150/120/200",
+     "dimensions_mm": "500 x 400 x 400"
+    },
+    "pieces_per_pack": null,
+    "match_confidence": 0.98,
+    "vendor_line_text": "HD Export Carton 7PLY",
+    "weight_per_piece_kg": null,
+    "price_unit_as_written": "NOS (Unit Price)"
+   },
+   {
+    "origin": "stated",
+    "currency": "USD",
+    "deviation": [],
+    "basis_item": "piece",
+    "confidence": 0.97,
+    "provenance": {
+     "file": "Transpac_Offer_TGP-IN-Q-26-0917.xlsx",
+     "locator": "Commercial Offer!H31",
+     "snippet": "TGP-CB1140 | E-Flute Die Cut Mailer (tuck front) | 250 x 180 x 60 | 3P 150/100/150 / BF18 | NOS | $0.156 (raw 0.156)"
+    },
+    "basis_count": null,
+    "price_basis": "per_unit",
+    "price_value": 0.156,
+    "rfx_line_no": 20,
+    "match_reason": "250x180x60 E flute mailer, 3P 150/100/150 BF18 matches RFx line 20",
+    "offered_spec": {
+     "bf": "18",
+     "ply": 3,
+     "flute": "E",
+     "print": "Plain",
+     "paper_gsm": "150/100/150",
+     "dimensions_mm": "250 x 180 x 60"
+    },
+    "pieces_per_pack": null,
+    "match_confidence": 0.98,
+    "vendor_line_text": "E-Flute Die Cut Mailer (tuck front)",
+    "weight_per_piece_kg": null,
+    "price_unit_as_written": "NOS (Unit Price)"
+   },
+   {
+    "origin": "stated",
+    "currency": "USD",
+    "deviation": [],
+    "basis_item": "piece",
+    "confidence": 0.97,
+    "provenance": {
+     "file": "Transpac_Offer_TGP-IN-Q-26-0917.xlsx",
+     "locator": "Commercial Offer!H32",
+     "snippet": "TGP-CB1147 | E-Flute Die Cut Mailer (tuck front) | 300 x 220 x 80 | 3P 150/100/150 / BF18 | NOS | $0.198 (raw 0.198)"
+    },
+    "basis_count": null,
+    "price_basis": "per_unit",
+    "price_value": 0.198,
+    "rfx_line_no": 21,
+    "match_reason": "300x220x80 E flute mailer matches RFx line 21",
+    "offered_spec": {
+     "bf": "18",
+     "ply": 3,
+     "flute": "E",
+     "print": "Plain",
+     "paper_gsm": "150/100/150",
+     "dimensions_mm": "300 x 220 x 80"
+    },
+    "pieces_per_pack": null,
+    "match_confidence": 0.98,
+    "vendor_line_text": "E-Flute Die Cut Mailer (tuck front)",
+    "weight_per_piece_kg": null,
+    "price_unit_as_written": "NOS (Unit Price)"
+   },
+   {
+    "origin": "stated",
+    "currency": "USD",
+    "deviation": [],
+    "basis_item": "piece",
+    "confidence": 0.97,
+    "provenance": {
+     "file": "Transpac_Offer_TGP-IN-Q-26-0917.xlsx",
+     "locator": "Commercial Offer!H33",
+     "snippet": "TGP-CB1154 | E-Flute Die Cut Mailer (tuck front) | 350 x 250 x 100 | 3P 180/100/150 / BF18 | NOS | $0.252 (raw 0.252)"
+    },
+    "basis_count": null,
+    "price_basis": "per_unit",
+    "price_value": 0.252,
+    "rfx_line_no": 22,
+    "match_reason": "350x250x100 E flute mailer, 3P 180/100/150 BF18 matches RFx line 22",
+    "offered_spec": {
+     "bf": "18",
+     "ply": 3,
+     "flute": "E",
+     "print": "Plain",
+     "paper_gsm": "180/100/150",
+     "dimensions_mm": "350 x 250 x 100"
+    },
+    "pieces_per_pack": null,
+    "match_confidence": 0.98,
+    "vendor_line_text": "E-Flute Die Cut Mailer (tuck front)",
+    "weight_per_piece_kg": null,
+    "price_unit_as_written": "NOS (Unit Price)"
+   },
+   {
+    "origin": "stated",
+    "currency": "USD",
+    "deviation": [],
+    "basis_item": "set",
+    "confidence": 0.96,
+    "provenance": {
+     "file": "Transpac_Offer_TGP-IN-Q-26-0917.xlsx",
+     "locator": "Commercial Offer!H34",
+     "snippet": "TGP-CB1196 | Partition Insert 4 x 3 | 400 x 300 x 280 | 3P 150/120/150 / BF16 | SET | $0.093 (raw 0.093)"
+    },
+    "basis_count": null,
+    "price_basis": "per_unit",
+    "price_value": 0.093,
+    "rfx_line_no": 28,
+    "match_reason": "4x3 (12-cell) partition, 400x300x280, 3P BF16 matches RFx line 28",
+    "offered_spec": {
+     "bf": "16",
+     "ply": 3,
+     "cells": "4 x 3",
+     "paper_gsm": "150/120/150",
+     "dimensions_mm": "400 x 300 x 280"
+    },
+    "pieces_per_pack": null,
+    "match_confidence": 0.97,
+    "vendor_line_text": "Partition Insert 4 x 3",
+    "weight_per_piece_kg": null,
+    "price_unit_as_written": "SET (Unit Price)"
+   },
+   {
+    "origin": "stated",
+    "currency": "USD",
+    "deviation": [],
+    "basis_item": "set",
+    "confidence": 0.96,
+    "provenance": {
+     "file": "Transpac_Offer_TGP-IN-Q-26-0917.xlsx",
+     "locator": "Commercial Offer!H35",
+     "snippet": "TGP-CB1203 | Partition Insert 6 x 4 | 500 x 400 x 280 | 3P 150/120/150 / BF16 | SET | $0.150 (raw 0.15)"
+    },
+    "basis_count": null,
+    "price_basis": "per_unit",
+    "price_value": 0.15,
+    "rfx_line_no": 29,
+    "match_reason": "6x4 (24-cell) partition, 500x400x280, 3P BF16 matches RFx line 29",
+    "offered_spec": {
+     "bf": "16",
+     "ply": 3,
+     "cells": "6 x 4",
+     "paper_gsm": "150/120/150",
+     "dimensions_mm": "500 x 400 x 280"
+    },
+    "pieces_per_pack": null,
+    "match_confidence": 0.97,
+    "vendor_line_text": "Partition Insert 6 x 4",
+    "weight_per_piece_kg": null,
+    "price_unit_as_written": "SET (Unit Price)"
+   },
+   {
+    "origin": "stated",
+    "currency": "USD",
+    "deviation": [],
+    "basis_item": "kg",
+    "confidence": 0.96,
+    "provenance": {
+     "file": "Transpac_Offer_TGP-IN-Q-26-0917.xlsx",
+     "locator": "Commercial Offer!H36",
+     "snippet": "TGP-CB1182 | Corr. Sheet 3PLY | 1000 x 800 | 3P 150/120/150 / BF16 | KG | $0.554 (raw 0.554)"
+    },
+    "basis_count": null,
+    "price_basis": "per_kg",
+    "price_value": 0.554,
+    "rfx_line_no": 26,
+    "match_reason": "1000x800 3-ply sheet, 3P 150/120/150 BF16, priced per kg, matches RFx line 26",
+    "offered_spec": {
+     "bf": "16",
+     "ply": 3,
+     "print": "Plain",
+     "paper_gsm": "150/120/150",
+     "dimensions_mm": "1000 x 800"
+    },
+    "pieces_per_pack": null,
+    "match_confidence": 0.97,
+    "vendor_line_text": "Corr. Sheet 3PLY",
+    "weight_per_piece_kg": null,
+    "price_unit_as_written": "KG (Unit Price)"
+   },
+   {
+    "origin": "stated",
+    "currency": "USD",
+    "deviation": [],
+    "basis_item": "kg",
+    "confidence": 0.96,
+    "provenance": {
+     "file": "Transpac_Offer_TGP-IN-Q-26-0917.xlsx",
+     "locator": "Commercial Offer!H37",
+     "snippet": "TGP-CB1189 | Corr. Pad 5PLY | 1200 x 1000 | 5P 180/120/150/120/180 / BF18 | KG | $0.588 (raw 0.588)"
+    },
+    "basis_count": null,
+    "price_basis": "per_kg",
+    "price_value": 0.588,
+    "rfx_line_no": 27,
+    "match_reason": "1200x1000 5-ply pad, 5P BF18, priced per kg, matches RFx line 27",
+    "offered_spec": {
+     "bf": "18",
+     "ply": 5,
+     "print": "Plain",
+     "paper_gsm": "180/120/150/120/180",
+     "dimensions_mm": "1200 x 1000"
+    },
+    "pieces_per_pack": null,
+    "match_confidence": 0.97,
+    "vendor_line_text": "Corr. Pad 5PLY",
+    "weight_per_piece_kg": null,
+    "price_unit_as_written": "KG (Unit Price)"
+   },
+   {
+    "origin": "stated",
+    "currency": "USD",
+    "deviation": [],
+    "basis_item": "piece",
+    "confidence": 0.96,
+    "provenance": {
+     "file": "Transpac_Offer_TGP-IN-Q-26-0917.xlsx",
+     "locator": "Commercial Offer!H38",
+     "snippet": "TGP-CB1210 | Edge Guard L-Profile | 50x50x5 T, L=1000 | Paperboard 5mm | NOS | $0.072 (raw 0.072)"
+    },
+    "basis_count": null,
+    "price_basis": "per_unit",
+    "price_value": 0.072,
+    "rfx_line_no": 30,
+    "match_reason": "50x50x5 T, L=1000, paperboard 5mm L-profile matches RFx line 30",
+    "offered_spec": {
+     "type": "Edge protector L-profile",
+     "print": "Plain",
+     "material": "Paperboard 5mm",
+     "dimensions_mm": "50x50x5 T, L=1000"
+    },
+    "pieces_per_pack": null,
+    "match_confidence": 0.96,
+    "vendor_line_text": "Edge Guard L-Profile",
+    "weight_per_piece_kg": null,
+    "price_unit_as_written": "NOS (Unit Price)"
+   }
+  ],
+  "image_quality": [],
+  "commercial_terms": {
+   "gst": {
+    "text": "GST @18% extra as applicable, invoiced in INR at the SBI TT selling rate on the invoice date.",
+    "provenance": {
+     "file": "Transpac_Offer_TGP-IN-Q-26-0917.xlsx",
+     "locator": "Commercial Offer!A43",
+     "snippet": "Taxes: GST @18% extra as applicable, invoiced in INR at the SBI TT selling rate on the invoice date."
+    }
+   },
+   "other": [
+    {
+     "text": "Prices quoted in USD (RFx prefers INR); GST invoiced in INR at the SBI TT selling rate on the invoice date.",
+     "label": "Currency",
+     "provenance": {
+      "file": "Transpac_Offer_TGP-IN-Q-26-0917.xlsx",
+      "locator": "Commercial Offer!F4:G4",
+      "snippet": "Currency: | USD"
+     }
+    },
+    {
+     "text": "2,000 nos per SKU per call-off.",
+     "label": "MOQ",
+     "provenance": {
+      "file": "Transpac_Offer_TGP-IN-Q-26-0917.xlsx",
+      "locator": "Commercial Offer!A46",
+      "snippet": "MOQ: 2,000 nos per SKU per call-off."
+     }
+    },
+    {
+     "text": "Offer Ref TGP/IN/Q/26-0917 dated 29-Sep-2026",
+     "label": "Offer reference and date",
+     "provenance": {
+      "file": "Transpac_Offer_TGP-IN-Q-26-0917.xlsx",
+      "locator": "Commercial Offer!B4:B5",
+      "snippet": "TGP/IN/Q/26-0917 | 29-Sep-2026"
+     }
+    }
+   ],
+   "freight": {
+    "note": "Freight: Not included. Road freight to Chakan charged at USD 850 per shipment (32 ft FTL). Estimated 4 shipments per month for the volumes above.",
+    "basis": "per_shipment",
+    "amount": 850,
+    "currency": "USD",
+    "provenance": {
+     "file": "Transpac_Offer_TGP-IN-Q-26-0917.xlsx",
+     "locator": "Commercial Offer!A42",
+     "snippet": "Freight: Not included. Road freight to Chakan charged at USD 850 per shipment (32 ft FTL). Estimated 4 shipments per month for the volumes above."
+    },
+    "shipments_per_year": 48
+   },
+   "incoterm": {
+    "text": "FCA Bhiwandi (RFx requires DAP Chakan)",
+    "provenance": {
+     "file": "Transpac_Offer_TGP-IN-Q-26-0917.xlsx",
+     "locator": "Commercial Offer!F5:G5",
+     "snippet": "Price basis: | FCA Bhiwandi"
+    }
+   },
+   "validity": {
+    "text": "60 days (RFx requires 90 days)",
+    "provenance": {
+     "file": "Transpac_Offer_TGP-IN-Q-26-0917.xlsx",
+     "locator": "Commercial Offer!F6:G6",
+     "snippet": "Validity: | 60 days"
+    }
+   },
+   "discounts": [],
+   "lead_time": {
+    "days": 15,
+    "text": "12 working days from PO for plain cartons; 15 working days for printed items.",
+    "provenance": {
+     "file": "Transpac_Offer_TGP-IN-Q-26-0917.xlsx",
+     "locator": "Commercial Offer!A45",
+     "snippet": "Lead time: 12 working days from PO for plain cartons; 15 working days for printed items."
+    }
+   },
+   "payment_terms": {
+    "text": "45 days from invoice (RFx requires 60 days from GRN)",
+    "provenance": {
+     "file": "Transpac_Offer_TGP-IN-Q-26-0917.xlsx",
+     "locator": "Commercial Offer!A44",
+     "snippet": "Payment: 45 days from invoice."
+    }
+   }
+  },
+  "overall_confidence": 0.95,
+  "questionnaire_answers": [
+   {
+    "q_no": 1,
+    "confidence": 0.97,
+    "provenance": {
+     "file": "Transpac_Offer_TGP-IN-Q-26-0917.xlsx",
+     "locator": "Compliance!B3",
+     "snippet": "Yes – ISO 9001:2015, cert no. QMS/IN/88213 (copy attached)"
+    },
+    "value_bool": true,
+    "value_unit": null,
+    "answer_text": "Yes – ISO 9001:2015, cert no. QMS/IN/88213 (copy attached)",
+    "value_number": null
+   },
+   {
+    "q_no": 2,
+    "confidence": 0.97,
+    "provenance": {
+     "file": "Transpac_Offer_TGP-IN-Q-26-0917.xlsx",
+     "locator": "Compliance!B4",
+     "snippet": "Yes – FSC Chain of Custody, FSC-C171204 (copy attached)"
+    },
+    "value_bool": true,
+    "value_unit": null,
+    "answer_text": "Yes – FSC Chain of Custody, FSC-C171204 (copy attached)",
+    "value_number": null
+   },
+   {
+    "q_no": 3,
+    "confidence": 0.93,
+    "provenance": {
+     "file": "Transpac_Offer_TGP-IN-Q-26-0917.xlsx",
+     "locator": "Compliance!B5",
+     "snippet": "Yes – full lab at Bhiwandi; CoA with every lot"
+    },
+    "value_bool": true,
+    "value_unit": null,
+    "answer_text": "Yes – full lab at Bhiwandi; CoA with every lot",
+    "value_number": null
+   },
+   {
+    "q_no": 4,
+    "confidence": 0.95,
+    "provenance": {
+     "file": "Transpac_Offer_TGP-IN-Q-26-0917.xlsx",
+     "locator": "Compliance!B6",
+     "snippet": "1,200 MT per month (India)"
+    },
+    "value_bool": null,
+    "value_unit": "MT/month",
+    "answer_text": "1,200 MT per month (India)",
+    "value_number": 1200
+   },
+   {
+    "q_no": 5,
+    "confidence": 0.93,
+    "provenance": {
+     "file": "Transpac_Offer_TGP-IN-Q-26-0917.xlsx",
+     "locator": "Compliance!B7",
+     "snippet": "Converting plant at Bhiwandi, approx. 190 km"
+    },
+    "value_bool": null,
+    "value_unit": "km",
+    "answer_text": "Converting plant at Bhiwandi, approx. 190 km",
+    "value_number": 190
+   },
+   {
+    "q_no": 6,
+    "confidence": 0.9,
+    "provenance": {
+     "file": "Transpac_Offer_TGP-IN-Q-26-0917.xlsx",
+     "locator": "Compliance!B8",
+     "snippet": "12 working days (plain), 15 (printed)"
+    },
+    "value_bool": null,
+    "value_unit": "working days",
+    "answer_text": "12 working days (plain), 15 (printed)",
+    "value_number": 15
+   },
+   {
+    "q_no": 7,
+    "confidence": 0.97,
+    "provenance": {
+     "file": "Transpac_Offer_TGP-IN-Q-26-0917.xlsx",
+     "locator": "Compliance!B9",
+     "snippet": "45 days from invoice (group policy; 60 days not possible)"
+    },
+    "value_bool": false,
+    "value_unit": null,
+    "answer_text": "45 days from invoice (group policy; 60 days not possible)",
+    "value_number": null
+   },
+   {
+    "q_no": 8,
+    "confidence": 0.95,
+    "provenance": {
+     "file": "Transpac_Offer_TGP-IN-Q-26-0917.xlsx",
+     "locator": "Compliance!B10",
+     "snippet": "Incoming reel testing (GSM, BF, moisture), inline caliper checks, AQL 1.5 final inspection"
+    },
+    "value_bool": null,
+    "value_unit": null,
+    "answer_text": "Incoming reel testing (GSM, BF, moisture), inline caliper checks, AQL 1.5 final inspection",
+    "value_number": null
+   },
+   {
+    "q_no": 9,
+    "confidence": 0.97,
+    "provenance": {
+     "file": "Transpac_Offer_TGP-IN-Q-26-0917.xlsx",
+     "locator": "Compliance!B11",
+     "snippet": "Yes – up to 4-colour flexo in-house"
+    },
+    "value_bool": true,
+    "value_unit": null,
+    "answer_text": "Yes – up to 4-colour flexo in-house",
+    "value_number": null
+   },
+   {
+    "q_no": 10,
+    "confidence": 0.9,
+    "provenance": {
+     "file": "Transpac_Offer_TGP-IN-Q-26-0917.xlsx",
+     "locator": "Compliance!B12",
+     "snippet": "Supplying 3 multinational FMCG and 2 pharma companies in West India (names on request)"
+    },
+    "value_bool": null,
+    "value_unit": null,
+    "answer_text": "Supplying 3 multinational FMCG and 2 pharma companies in West India (names on request)",
+    "value_number": null
+   },
+   {
+    "q_no": 11,
+    "confidence": 0.95,
+    "provenance": {
+     "file": "Transpac_Offer_TGP-IN-Q-26-0917.xlsx",
+     "locator": "Compliance!B13",
+     "snippet": "Backup converting at group plant in Chennai; 3 weeks of paper stock"
+    },
+    "value_bool": null,
+    "value_unit": null,
+    "answer_text": "Backup converting at group plant in Chennai; 3 weeks of paper stock",
+    "value_number": null
+   },
+   {
+    "q_no": 12,
+    "confidence": 0.96,
+    "provenance": {
+     "file": "Transpac_Offer_TGP-IN-Q-26-0917.xlsx",
+     "locator": "Compliance!B14",
+     "snippet": "27AAHCT4821K1Z6"
+    },
+    "value_bool": null,
+    "value_unit": null,
+    "answer_text": "GSTIN 27AAHCT4821K1Z6",
+    "value_number": null
+   }
+  ]
+ }
+}

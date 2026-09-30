@@ -6,7 +6,7 @@ import { LINES, VENDORS, LAST_YEAR } from "./data";
 import * as Q from "./quotes";
 
 const fx = 88.4;
-function expected(k: string, n: number): number | null | "needs_input" {
+export function expected(k: string, n: number): number | null | "needs_input" {
   const l = LINES[n - 1];
   if (k === "A") return Q.usdA(n) * fx;
   if (k === "B") return l.unit === "kg" ? Q.bRate(n) : Q.bRate(n) / 100;
@@ -43,4 +43,4 @@ async function main() {
   console.log("\nOpen items:", cmp.openItems.length);
   cmp.openItems.forEach((o) => console.log(`  [${o.kind}] ${o.message.slice(0, 190)}`));
 }
-main().catch((e) => { console.error(e); process.exit(1); });
+if (process.argv[1]?.endsWith("verify.ts")) main().catch((e) => { console.error(e); process.exit(1); });

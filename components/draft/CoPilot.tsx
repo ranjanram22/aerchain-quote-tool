@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState, useTransition } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { readNdjson } from "@/lib/stream";
 import { saveHeader, saveTerms, addLine, saveLine, deleteLine, saveQuestions, deleteDraft, publishDraft } from "@/app/actions/draft";
 
 type Row = Record<string, unknown>;
@@ -46,6 +47,7 @@ export default function CoPilot({ rfx, lines, questions, vendors }: DraftProps) 
   const [msgs, setMsgs] = useState<Msg[]>([]);
   const [input, setInput] = useState("");
   const [busy, setBusy] = useState(false);
+  const [status, setStatus] = useState<string | null>(null);
   const [err, setErr] = useState<string | null>(null);
   const [pending, start] = useTransition();
   const [publishing, setPublishing] = useState(false);
@@ -67,15 +69,17 @@ export default function CoPilot({ rfx, lines, questions, vendors }: DraftProps) 
     setMsgs((m) => [...m, { role: "user", content: text }]);
     setInput(""); setBusy(true); setErr(null);
     try {
+      setStatus(null);
       const r = await fetch(`/api/rfx/${rfx.id}/copilot`, { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ message: text, history }) });
-      const j = await r.json();
-      if (!r.ok) throw new Error(j.error);
+      if (!r.ok) { const e = await r.json().catch(() => ({})); throw new Error(e.error ?? "Something went wrong."); }
+      const j = await readNdjson<{ reply: string; actions: string[] }>(r, (t) => { setStatus(t); router.refresh(); });
       setMsgs((m) => [...m, { role: "assistant", content: j.reply, actions: j.actions }]);
       router.refresh();
     } catch (e) {
       setMsgs((m) => [...m, { role: "assistant", content: `⚠ ${e instanceof Error ? e.message : String(e)}` }]);
     } finally {
       setBusy(false);
+      setStatus(null);
     }
   };
   const act = (f: () => Promise<{ ok: boolean; error?: string }>) => start(async () => { const r = await f(); if (!r.ok) setErr(r.error ?? "Failed"); else setErr(null); });
@@ -115,7 +119,11 @@ export default function CoPilot({ rfx, lines, questions, vendors }: DraftProps) 
                 {m.actions && m.actions.length > 0 && <div className="mt-1.5 space-y-0.5 border-t border-slate-100 pt-1.5 text-[11px] text-emerald-700">{m.actions.map((a, j) => <div key={j}>✓ {a}</div>)}</div>}
               </div>
             ))}
-            {busy && <div className="flex items-center gap-2 text-xs text-slate-500"><span className="h-2 w-2 animate-pulse rounded-full bg-indigo-500" /> Updating the draft…</div>}
+            {busy && (
+              <div className={`flex items-center gap-2 text-xs ${status && /busy|retrying|backup/i.test(status) ? "text-amber-700" : "text-slate-500"}`}>
+                <span className={`h-2 w-2 animate-pulse rounded-full ${status && /busy|retrying|backup/i.test(status) ? "bg-amber-500" : "bg-indigo-500"}`} /> {status ?? "Thinking…"}
+              </div>
+            )}
             <div ref={endRef} />
           </div>
           <div className="border-t border-slate-200 bg-white p-3">

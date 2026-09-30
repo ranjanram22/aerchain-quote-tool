@@ -1,6 +1,7 @@
 import "server-only";
 import type { ChatCompletionMessageParam, ChatCompletionMessageToolCall } from "openai/resources/chat/completions";
-import { chat } from "./llm";
+import { chat, type StatusFn } from "./llm";
+import { displayModel } from "./models";
 import { loadDraft, setHeader, setTerms, addLines, updateLine, removeLine, setQuestionnaire, searchCatalog, type Draft } from "./draft";
 
 const SYSTEM = `You are an RFx co-pilot for an industrial buyer. You help draft a request for quotation (RFx) by conversation and you record everything in the draft using tools. The draft is shown live next to the chat.
@@ -62,7 +63,7 @@ async function apply(rfxId: string, name: string, a: Record<string, unknown>): P
 
 export interface CopilotTurn { role: "user" | "assistant"; content: string }
 
-export async function copilotTurn(rfxId: string, message: string, history: CopilotTurn[]) {
+export async function copilotTurn(rfxId: string, message: string, history: CopilotTurn[], onStatus?: StatusFn) {
   const draft = await loadDraft(rfxId);
   const messages: ChatCompletionMessageParam[] = [
     { role: "system", content: `${SYSTEM}\n\nToday is ${new Date().toISOString().slice(0, 10)}.` },
@@ -73,8 +74,8 @@ export async function copilotTurn(rfxId: string, message: string, history: Copil
   let model: string | null = null;
   let reply = "";
   for (let round = 0; round < 6; round++) {
-    const r = await chat("copilot", { messages, tools: TOOLS, tool_choice: "auto", max_tokens: 6000, temperature: 0.2 });
-    model = r.model;
+    const r = await chat("copilot", { messages, tools: TOOLS, tool_choice: "auto", max_tokens: 8000, temperature: 0.2 }, { onStatus });
+    model = displayModel(r.model);
     const msg = r.completion.choices[0]?.message;
     const calls = (msg?.tool_calls ?? []) as ChatCompletionMessageToolCall[];
     if (!calls.length) { reply = msg?.content ?? ""; break; }
@@ -84,6 +85,7 @@ export async function copilotTurn(rfxId: string, message: string, history: Copil
       let args: Record<string, unknown> = {};
       try { args = JSON.parse(c.function.arguments || "{}"); } catch { /* empty */ }
       let out: unknown;
+      onStatus?.(`Updating draft: ${c.function.name.replace(/_/g, " ")}…`);
       try { out = await apply(rfxId, c.function.name, args); } catch (e) { out = `Error: ${e instanceof Error ? e.message : e}`; }
       if (c.function.name !== "search_catalog") actions.push(typeof out === "string" ? out : c.function.name);
       messages.push({ role: "tool", tool_call_id: c.id, content: JSON.stringify(out).slice(0, 12000) });

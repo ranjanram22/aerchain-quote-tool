@@ -1,0 +1,6 @@
+{
+  "_note": "Sonnet 5.5 results on the unseen samples, 2026-09-30, transcribed from the normalized output of that run (the rows were deleted by the later reseed). unit_inr = normalized ₹ per RFx unit; null = needs input.",
+  "Sahyadri Corrupack": { "lines": { "1": 9.05, "2": 11.25, "3": 11.70, "4": 13.65, "9": 30.40, "10": 35.90, "11": 41.50, "13": 56.20, "28": 7.60, "30": 6.15 }, "freight": "extra_unknown (approx Rs 18000 per truck, no trip count)", "discounts": 0, "questions_answered": 0 },
+  "Kolhapur Kraft Boxes": { "lines": { "17": 121.00, "20": 13.17, "21": 16.58, "22": 21.40, "25": 17.83, "26": 47.25, "27": 50.10 }, "freight": "not usable (two rates: Rs 1.20/pc boxes, Rs 0.80/kg sheets)", "discounts": 1, "questions_answered": 4 },
+  "Sai Packaging": { "lines": { "1": 9.40, "2": 11.60, "5": 7.95, "6": 15.20, "18": 161.70, "29": 12.10, "9": null, "10": null, "11": null, "12": null, "13": null, "14": null, "15": null, "16": null, "24": null }, "freight": "included", "discounts": 0, "questions_answered": 1 }
+}

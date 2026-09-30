@@ -44,6 +44,7 @@ export function buildGaps(b: RfxBundle, cmp: Comparison, vendorId: string): Gap[
         else if (sub === "reference_unresolved") gaps.push({ kind: "reference", lines: [d.line_no as number], what: `You wrote "${d.phrase}", but we have no earlier price on record for this line. Please state the price.` });
         else if (sub === "reference") gaps.push({ kind: "reference", lines: d.line_nos as number[], what: `You wrote "${d.phrase}". Please confirm the prices for these lines explicitly.` });
         else if (sub === "questionnaire") gaps.push({ kind: "questionnaire", what: `Your answer to Q${d.q_no} is incomplete ("${d.answer_text ?? ""}"). Please confirm fully.` });
+        else if (sub === "low_confidence_extraction") gaps.push({ kind: "legibility", lines: d.line_nos as number[], what: "Parts of your document were hard to read on our side. Please send a clear copy (Excel or PDF preferred) so we can confirm the prices." });
         else if (sub === "low_confidence") gaps.push({ kind: "unclear", lines: [d.line_no as number], what: `We could not read the price for this line with certainty ("${d.snippet ?? ""}"). Please confirm it.` });
         break;
       }

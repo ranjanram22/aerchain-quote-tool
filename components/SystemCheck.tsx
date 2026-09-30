@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 
 interface Health {
   openrouterKey: boolean;
+  geminiKey: boolean;
   supabaseEnv: boolean;
   schema: boolean;
   bucket: boolean;
@@ -47,7 +48,8 @@ export default function SystemCheck() {
   }
 
   const rows: [string, boolean | null][] = [
-    ["OpenRouter key set", health ? health.openrouterKey : null],
+    ["Gemini key set", health ? health.geminiKey : null],
+    ["OpenRouter key set (free models only)", health ? health.openrouterKey : null],
     ["Supabase keys set", health ? health.supabaseEnv : null],
     ["Database tables exist", health ? health.schema : null],
     ["File storage bucket exists", health ? health.bucket : null],

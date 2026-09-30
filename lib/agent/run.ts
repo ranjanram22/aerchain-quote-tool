@@ -1,11 +1,13 @@
 import "server-only";
 import type { ChatCompletionMessageParam, ChatCompletionMessageToolCall } from "openai/resources/chat/completions";
-import { chat } from "../llm";
+import { chat, type StatusFn } from "../llm";
+import { displayModel } from "../models";
 import { loadComparison } from "../rfx-data";
 import { TOOL_SCHEMAS, runTool, type Ctx, type ToolResult } from "./tools";
 import type { Answer, ChatTurn, MethodStep, AnswerTable, AnswerChart } from "./types";
 
-const MAX_TOOL_CALLS = 8;
+// Capped to keep each question within free-tier rate limits.
+const MAX_TOOL_CALLS = 6;
 
 const SYSTEM = `You are a senior procurement analyst helping a buyer decide an award on one RFx. You answer questions using ONLY the tools provided.
 
@@ -74,7 +76,7 @@ function checkNumbers(text: string, pool: number[], question: string): string[] 
   return [...new Set(bad)];
 }
 
-export async function answerQuestion(rfxId: string, question: string, history: ChatTurn[]): Promise<Answer> {
+export async function answerQuestion(rfxId: string, question: string, history: ChatTurn[], onStatus?: StatusFn): Promise<Answer> {
   const { bundle, cmp } = await loadComparison(rfxId);
   let tid = 0;
   const ctx: Ctx = { bundle, cmp, tables: new Map(), nextTableId: () => `T${++tid}` };
@@ -93,8 +95,8 @@ export async function answerQuestion(rfxId: string, question: string, history: C
 
   for (let round = 0; round < 10; round++) {
     const force = calls >= MAX_TOOL_CALLS;
-    const r = await chat("analysis", { messages, tools: force ? undefined : TOOL_SCHEMAS, tool_choice: force ? undefined : "auto", max_tokens: 4000, temperature: 0.1 });
-    model = r.model;
+    const r = await chat("analysis", { messages, tools: force ? undefined : TOOL_SCHEMAS, tool_choice: force ? undefined : "auto", max_tokens: 8000, temperature: 0.1 }, { onStatus });
+    model = displayModel(r.model);
     const msg = r.completion.choices[0]?.message;
     const toolCalls = (msg?.tool_calls ?? []) as ChatCompletionMessageToolCall[];
     if (!toolCalls.length) { finalText = msg?.content ?? ""; break; }
@@ -104,6 +106,7 @@ export async function answerQuestion(rfxId: string, question: string, history: C
       calls++;
       let args: Record<string, unknown> = {};
       try { args = JSON.parse(tc.function.arguments || "{}"); } catch { /* keep empty */ }
+      onStatus?.(`Running ${tc.function.name.replace(/_/g, " ")}…`);
       const res = calls > MAX_TOOL_CALLS ? ({ summary: "skipped (tool budget reached)", data: { error: "Tool budget reached; answer with what you have." } } as ToolResult) : runTool(ctx, tc.function.name, args);
       if (calls <= MAX_TOOL_CALLS) { results.push(res); method.push({ tool: tc.function.name, params: args, summary: res.summary }); }
       messages.push({ role: "tool", tool_call_id: tc.id, content: JSON.stringify(res.data).slice(0, 24000) });
@@ -119,7 +122,8 @@ export async function answerQuestion(rfxId: string, question: string, history: C
     regenerated = true;
     messages.push({ role: "assistant", content: finalText });
     messages.push({ role: "user", content: `These numbers in your answer do not appear in any tool result: ${unverified.join(", ")}. Rewrite the answer using only numbers from tool results (or omit them). Return the same JSON format.` });
-    const r2 = await chat("analysis", { messages, max_tokens: 3000, temperature: 0 });
+    onStatus?.("Re-checking numbers against the calculations…");
+    const r2 = await chat("analysis", { messages, max_tokens: 6000, temperature: 0 }, { onStatus });
     final = parseFinal(r2.completion.choices[0]?.message?.content ?? "");
     unverified = checkNumbers(final.text, pool, question);
   }

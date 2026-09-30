@@ -5,6 +5,7 @@ import { Bar, BarChart, CartesianGrid, Legend, Line, LineChart, ResponsiveContai
 import type { WorkspaceData } from "@/lib/workspace-data";
 import type { Answer, AnswerTable, AnswerChart, ChatTurn } from "@/lib/agent/types";
 import OpenItemForm from "./OpenItemForm";
+import { readNdjson } from "@/lib/stream";
 import { inr, inrShort } from "./format";
 
 const CHIPS = [
@@ -159,13 +160,14 @@ export default function Chat({ data }: { data: WorkspaceData }) {
   const [msgs, setMsgs] = useState<Msg[]>([]);
   const [input, setInput] = useState("");
   const [busy, setBusy] = useState(false);
+  const [status, setStatus] = useState<string | null>(null);
   const endRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     // Restore this viewer's chat after hydration (localStorage is browser-only).
     try {
       const s = localStorage.getItem(storeKey);
-      // eslint-disable-next-line react-hooks/set-state-in-effect
+       
       if (s) setMsgs(JSON.parse(s));
     } catch { /* ignore */ }
   }, [storeKey]);
@@ -180,15 +182,17 @@ export default function Chat({ data }: { data: WorkspaceData }) {
     setMsgs((m) => [...m, { role: "user", text: q }]);
     setInput("");
     setBusy(true);
+    setStatus(null);
     try {
       const r = await fetch(`/api/rfx/${data.bundle.rfx.id}/chat`, { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ question: q, history }) });
-      const j = await r.json();
-      if (!r.ok || j.error) setMsgs((m) => [...m, { role: "error", text: j.error ?? "Something went wrong." }]);
-      else setMsgs((m) => [...m, { role: "assistant", answer: j as Answer, question: q }]);
-    } catch {
-      setMsgs((m) => [...m, { role: "error", text: "Network error — please try again." }]);
+      if (!r.ok) { const j = await r.json().catch(() => ({})); throw new Error(j.error ?? "Something went wrong."); }
+      const answer = await readNdjson<Answer>(r, setStatus);
+      setMsgs((m) => [...m, { role: "assistant", answer, question: q }]);
+    } catch (e) {
+      setMsgs((m) => [...m, { role: "error", text: e instanceof Error ? e.message : "Network error — please try again." }]);
     } finally {
       setBusy(false);
+      setStatus(null);
     }
   };
 
@@ -213,7 +217,12 @@ export default function Chat({ data }: { data: WorkspaceData }) {
             <div key={i} className="rounded-lg border border-slate-200 bg-white px-3 py-2"><AnswerView a={m.answer} question={m.question} data={data} /></div>
           ),
         )}
-        {busy && <div className="flex items-center gap-2 text-xs text-slate-500"><span className="h-2 w-2 animate-pulse rounded-full bg-indigo-500" /> Analysing — calling tools and checking numbers…</div>}
+        {busy && (
+          <div className={`flex items-center gap-2 text-xs ${status && /busy|retrying|backup|not responding/i.test(status) ? "text-amber-700" : "text-slate-500"}`}>
+            <span className={`h-2 w-2 animate-pulse rounded-full ${status && /busy|retrying|backup/i.test(status) ? "bg-amber-500" : "bg-indigo-500"}`} />
+            {status ?? "Analysing — calling tools and checking numbers…"}
+          </div>
+        )}
         <div ref={endRef} />
       </div>
       <div className="border-t border-slate-100 p-3">

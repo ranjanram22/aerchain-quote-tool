@@ -1,14 +1,16 @@
 import "server-only";
+import { createHash } from "node:crypto";
 import type { ChatCompletionMessageParam } from "openai/resources/chat/completions";
 import { db, STORAGE_BUCKET } from "../supabase";
-import { chat, textOf } from "../llm";
-import { MODELS } from "../models";
+import { chat, textOf, type StatusFn } from "../llm";
+import { MODELS, displayModel } from "../models";
 import { syncOpenItems } from "../rfx-data";
 import { Extraction, type ExtractionT } from "./schema";
 import { EXTRACTION_SYSTEM, rfxBrief, type RfxContext } from "./prompt";
 import { toContentParts, kindOf, type InputFile } from "./preprocess";
 
-const ESCALATE_BELOW = 0.6;
+// Bump when the extraction contract changes so old cache entries are ignored.
+const CACHE_VERSION = "v1";
 
 function parseJson(text: string): unknown {
   let t = text.trim();
@@ -18,15 +20,17 @@ function parseJson(text: string): unknown {
   return JSON.parse(t.slice(a, b + 1));
 }
 
-interface Attempt { model: string; ok: boolean; error?: string; latency_ms: number; overall_confidence?: number }
+interface Attempt { model: string; ok: boolean; error?: string; latency_ms: number; overall_confidence?: number; cached?: boolean }
 
-async function callModel(task: "extraction" | "extraction_hard", messages: ChatCompletionMessageParam[], attempts: Attempt[]): Promise<{ data: ExtractionT; model: string; raw: string } | null> {
+// One model: first try, then one repair round with the validation errors.
+async function callModel(model: string, messages: ChatCompletionMessageParam[], attempts: Attempt[], onStatus?: StatusFn): Promise<{ data: ExtractionT; model: string } | null> {
   const started = Date.now();
+  const req = { max_tokens: 60000, temperature: 0, response_format: { type: "json_object" as const } };
   let r;
   try {
-    r = await chat(task, { messages, max_tokens: 32000, temperature: 0 });
+    r = await chat("extraction", { messages, ...req }, { models: [model], onStatus });
   } catch (e) {
-    attempts.push({ model: MODELS[task].model, ok: false, error: e instanceof Error ? e.message.slice(0, 300) : String(e), latency_ms: Date.now() - started });
+    attempts.push({ model, ok: false, error: e instanceof Error ? e.message.slice(0, 300) : String(e), latency_ms: Date.now() - started });
     return null;
   }
   const raw = textOf(r);
@@ -34,45 +38,70 @@ async function callModel(task: "extraction" | "extraction_hard", messages: ChatC
   try {
     const parsed = Extraction.safeParse(parseJson(raw));
     if (parsed.success) {
-      attempts.push({ model: r.model, ok: true, latency_ms: Date.now() - started, overall_confidence: parsed.data.overall_confidence });
-      return { data: parsed.data, model: r.model, raw };
+      attempts.push({ model, ok: true, latency_ms: Date.now() - started, overall_confidence: parsed.data.overall_confidence });
+      return { data: parsed.data, model };
     }
     err = parsed.error.issues.slice(0, 15).map((i) => `${i.path.join(".")}: ${i.message}`).join("; ");
   } catch (e) {
     err = e instanceof Error ? e.message : String(e);
   }
-  attempts.push({ model: r.model, ok: false, error: `Invalid output: ${err.slice(0, 400)}`, latency_ms: Date.now() - started });
-  // One repair round on the same model with the validation errors.
+  attempts.push({ model, ok: false, error: `Invalid output: ${err.slice(0, 400)}`, latency_ms: Date.now() - started });
   const repairStart = Date.now();
   try {
-    const r2 = await chat(task, {
+    const r2 = await chat("extraction", {
       messages: [...messages, { role: "assistant", content: raw.slice(0, 60000) }, { role: "user", content: `Your output failed validation: ${err}\nReturn the complete corrected JSON object only.` }],
-      max_tokens: 32000,
-      temperature: 0,
-    });
-    const raw2 = textOf(r2);
-    const parsed2 = Extraction.safeParse(parseJson(raw2));
+      ...req,
+    }, { models: [model], onStatus });
+    const parsed2 = Extraction.safeParse(parseJson(textOf(r2)));
     if (parsed2.success) {
-      attempts.push({ model: r2.model, ok: true, latency_ms: Date.now() - repairStart, overall_confidence: parsed2.data.overall_confidence });
-      return { data: parsed2.data, model: r2.model, raw: raw2 };
+      attempts.push({ model, ok: true, latency_ms: Date.now() - repairStart, overall_confidence: parsed2.data.overall_confidence });
+      return { data: parsed2.data, model };
     }
-    attempts.push({ model: r2.model, ok: false, error: `Repair invalid: ${parsed2.error.issues.slice(0, 5).map((i) => i.path.join(".") + " " + i.message).join("; ")}`, latency_ms: Date.now() - repairStart });
+    attempts.push({ model, ok: false, error: `Repair invalid: ${parsed2.error.issues.slice(0, 5).map((i) => i.path.join(".") + " " + i.message).join("; ")}`, latency_ms: Date.now() - repairStart });
   } catch (e) {
-    attempts.push({ model: MODELS[task].model, ok: false, error: `Repair failed: ${e instanceof Error ? e.message.slice(0, 200) : e}`, latency_ms: Date.now() - repairStart });
+    attempts.push({ model, ok: false, error: `Repair failed: ${e instanceof Error ? e.message.slice(0, 200) : e}`, latency_ms: Date.now() - repairStart });
   }
   return null;
 }
 
-export interface RunResult { ok: boolean; model?: string; lines?: number; confidence?: number; error?: string; attempts: Attempt[] }
+// ---- cache: identical inputs never call a model twice ----
+function cacheKey(brief: string, files: InputFile[], email: string | null) {
+  const h = createHash("sha256");
+  h.update(JSON.stringify({ v: CACHE_VERSION, sys: EXTRACTION_SYSTEM, brief, email: email?.trim() ?? "", chain: MODELS.extraction.chain }));
+  for (const f of [...files].sort((a, b) => a.filename.localeCompare(b.filename))) {
+    h.update(f.filename);
+    h.update(createHash("sha256").update(f.data).digest("hex"));
+  }
+  return h.digest("hex");
+}
+const cachePath = (key: string) => `cache/extraction/${key}.json`;
 
-export async function runExtraction(responseId: string, opts: { deadlineMs?: number } = {}): Promise<RunResult> {
+async function readCache(key: string): Promise<{ data: ExtractionT; model: string } | null> {
+  const { data } = await db().storage.from(STORAGE_BUCKET).download(cachePath(key));
+  if (!data) return null;
+  try {
+    const j = JSON.parse(await data.text());
+    const parsed = Extraction.safeParse(j.data);
+    return parsed.success ? { data: parsed.data, model: j.model } : null;
+  } catch {
+    return null;
+  }
+}
+async function writeCache(key: string, v: { data: ExtractionT; model: string }) {
+  await db().storage.from(STORAGE_BUCKET).upload(cachePath(key), JSON.stringify({ ...v, cached_at: new Date().toISOString() }), { contentType: "application/json", upsert: true });
+}
+
+export interface RunResult { ok: boolean; model?: string; lines?: number; confidence?: number; error?: string; cached?: boolean; attempts: Attempt[] }
+
+export async function runExtraction(responseId: string, opts: { deadlineMs?: number; noCache?: boolean } = {}): Promise<RunResult> {
   const s = db();
-  const deadline = opts.deadlineMs ?? Date.now() + 10 * 60_000;
   const attempts: Attempt[] = [];
   const { data: resp, error: rErr } = await s.from("responses").select("*").eq("id", responseId).single();
   if (rErr || !resp) return { ok: false, error: rErr?.message ?? "Response not found", attempts };
   await s.from("responses").update({ processing_status: "processing", error: null }).eq("id", responseId);
   await s.from("response_files").update({ processing_status: "processing", error: null }).eq("response_id", responseId);
+  // Shown in the Responses tab while reading (e.g. "AI busy, retrying in 6s").
+  const onStatus: StatusFn = (m) => { void s.from("responses").update({ error: m }).eq("id", responseId).eq("processing_status", "processing"); };
 
   try {
     const [{ data: rfx }, { data: lines }, { data: questions }, { data: fileRows }] = await Promise.all([
@@ -93,22 +122,30 @@ export async function runExtraction(responseId: string, opts: { deadlineMs?: num
       files.push({ id: f.id, filename: f.filename, mime: f.mime, data: Buffer.from(await data.arrayBuffer()) });
     }
     const ctx: RfxContext = { title: rfx.title, rfx_date: rfx.rfx_date, currency_note: null, lines, questions, terms: rfx.terms ?? {} };
-    const { parts, hasImage, problems } = await toContentParts(files, resp.raw_email_text);
+    const brief = rfxBrief(ctx);
+    const { parts, problems } = await toContentParts(files, resp.raw_email_text);
     if (!parts.length) throw new Error("Nothing to read: no files and no email text.");
 
-    const messages: ChatCompletionMessageParam[] = [
-      { role: "system", content: EXTRACTION_SYSTEM },
-      { role: "user", content: [{ type: "text", text: rfxBrief(ctx) }, ...parts, { type: "text", text: "Now return the JSON object." }] },
-    ];
-
-    let result = await callModel("extraction", messages, attempts);
-    const shaky = (x: ExtractionT) => x.overall_confidence < ESCALATE_BELOW || (hasImage && x.image_quality.some((q) => q.readable === "partly" || q.readable === "no"));
-    // Escalate to the stronger model on failure or low confidence, if time allows (~4 min budget).
-    if ((!result || shaky(result.data)) && deadline - Date.now() > 240_000) {
-      const hard = await callModel("extraction_hard", messages, attempts);
-      if (hard && (!result || hard.data.overall_confidence >= result.data.overall_confidence)) result = hard;
+    const key = cacheKey(brief, files, resp.raw_email_text);
+    let result = opts.noCache ? null : await readCache(key);
+    const cached = !!result;
+    if (result) attempts.push({ model: result.model, ok: true, latency_ms: 0, overall_confidence: result.data.overall_confidence, cached: true });
+    else {
+      const messages: ChatCompletionMessageParam[] = [
+        { role: "system", content: EXTRACTION_SYSTEM },
+        { role: "user", content: [{ type: "text", text: brief }, ...parts, { type: "text", text: "Now return the JSON object." }] },
+      ];
+      // Walk the free-model chain until one returns a valid reading. Low
+      // confidence does NOT trigger a re-run: values are kept and flagged ⚠.
+      for (const model of MODELS.extraction.chain) {
+        if (opts.deadlineMs && opts.deadlineMs - Date.now() < 60_000) break;
+        result = await callModel(model, messages, attempts, onStatus);
+        if (result) break;
+        onStatus(`Could not get a valid reading from ${displayModel(model)}; trying the backup model…`);
+      }
+      if (!result) throw new Error("The AI could not produce a valid reading of this response. " + (attempts.at(-1)?.error ?? ""));
+      await writeCache(key, result);
     }
-    if (!result) throw new Error("The AI could not produce a valid reading of this response. " + (attempts.at(-1)?.error ?? ""));
 
     await persist(responseId, rfx.rfx_date, result.data, result.model, lines, questions, fileRows ?? [], attempts, problems);
     await s.from("responses").update({ processing_status: "done", error: problems.length ? problems.join("; ") : null }).eq("id", responseId);
@@ -118,7 +155,7 @@ export async function runExtraction(responseId: string, opts: { deadlineMs?: num
     }
     await s.from("rfxs").update({ status: "evaluating" }).eq("id", resp.rfx_id).in("status", ["sent", "collecting"]);
     await syncOpenItems(resp.rfx_id);
-    return { ok: true, model: result.model, lines: result.data.line_quotes.length, confidence: result.data.overall_confidence, attempts };
+    return { ok: true, model: result.model, lines: result.data.line_quotes.length, confidence: result.data.overall_confidence, cached, attempts };
   } catch (e) {
     const msg = e instanceof Error ? e.message : String(e);
     await s.from("responses").update({ processing_status: "error", error: msg.slice(0, 1000) }).eq("id", responseId);
@@ -242,7 +279,7 @@ async function persist(
     actor: "system",
     action: "extraction_run",
     target: `response:${responseId}`,
-    new_value: { model, lines: x.line_quotes.length, overall_confidence: x.overall_confidence, attempts: attempts.length },
+    new_value: { model, lines: x.line_quotes.length, overall_confidence: x.overall_confidence, attempts: attempts.length, cached: attempts.some((a) => a.cached) },
   });
 }
 

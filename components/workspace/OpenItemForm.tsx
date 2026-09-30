@@ -26,6 +26,7 @@ export function kindLabel(item: OpenItemRow) {
   if (sub === "reference") return "“Same as last year”";
   if (sub === "reference_unresolved") return "Price needed";
   if (sub === "questionnaire") return "Unclear mandatory answer";
+  if (sub === "low_confidence_extraction") return "Low-confidence reading";
   return KIND_LABEL[item.kind] ?? item.kind;
 }
 

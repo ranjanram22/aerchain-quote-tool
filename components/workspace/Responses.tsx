@@ -141,7 +141,7 @@ export default function Responses({ data }: { data: WorkspaceData }) {
             </header>
 
             {resp && (resp.processing_status === "pending" || resp.processing_status === "processing") && (
-              <div className="flex items-center gap-2 px-4 py-3 text-sm text-indigo-700"><span className="h-2 w-2 animate-pulse rounded-full bg-indigo-600" /> Reading {files.length} file(s){resp.raw_email_text ? " and the email text" : ""}… this page updates automatically.</div>
+              <div className="flex items-center gap-2 px-4 py-3 text-sm text-indigo-700"><span className="h-2 w-2 animate-pulse rounded-full bg-indigo-600" /> Reading {files.length} file(s){resp.raw_email_text ? " and the email text" : ""}… this page updates automatically.{resp.error && <span className="text-amber-700"> {resp.error}</span>}</div>
             )}
             {resp?.processing_status === "error" && (
               <div className="m-4 rounded-md border border-rose-200 bg-rose-50 p-3 text-xs text-rose-900">

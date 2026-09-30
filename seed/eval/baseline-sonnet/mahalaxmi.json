@@ -1,0 +1,1077 @@
+{
+ "vendor": "Mahalaxmi Packaging Works",
+ "model": "anthropic/claude-sonnet-5.5",
+ "overall_confidence": 0.8,
+ "created_at": "2026-09-30T16:43:07.811188+00:00",
+ "extraction": {
+  "notes": [
+   "No cover email was supplied; the reply is a photographed rate card plus an ISO certificate.",
+   "All 30 RFx lines are priced one-to-one in the same order and by the same size as the RFx. Row alignment was checked against sizes and the price sequence, but the photo is skewed, so confidence is capped at about 0.85.",
+   "Lines 17–19 (7-ply) and 26–27 (sheet, pad) are priced per kg. The RFx unit for 17–19 is piece; the buyer's system must convert using the stated weights (2.45 kg for line 17, 1.95 kg for line 19; none for line 18).",
+   "The rate card does not state flute type or BF, so flute/BF deviations cannot be assessed (e.g. C flute for lines 4 and 6; E flute for mailers). The rate card gives only ply and paper GSM, which match the RFx.",
+   "Payment 30 days is shorter than the requested 60 days from GRN. This is a commercial deviation.",
+   "Rates are valid till 31 Dec 2026, which is under the 90 days required from the RFx date (22 Sep 2026) and ends before the contract period starts on 1 Apr 2027.",
+   "Freight is included for 'Pune district deliveries'. Chakan lies in Pune district, so this is taken to cover it. Incoterm (DAP) is not stated explicitly.",
+   "GST rate is not stated, only 'ex-GST' and the GSTIN.",
+   "Q2 (FSC), Q8, Q9 (in-house flexo; 1C and 2C printed items are priced but no explicit claim), Q10 and Q11 are not addressed.",
+   "The ISO certificate covers the Nashik plant and is valid through the contract period."
+  ],
+  "references": [],
+  "attachments": [
+   {
+    "file": "Mahalaxmi_ISO.pdf",
+    "type": "certificate",
+    "summary": "ISO 9001:2015 certificate of registration, scope: manufacture of corrugated boxes, sheets and heavy-duty cartons. Validity subject to surveillance audits.",
+    "provenance": {
+     "file": "Mahalaxmi_ISO.pdf",
+     "locator": "page 1",
+     "snippet": "Certificate No.: QRO/IN/QMS/77120 Date of issue: 10 May 2025 Valid until: 09 May 2028"
+    },
+    "certificate": {
+     "holder": "MAHALAXMI PACKAGING WORKS",
+     "issuer": "Quality Research Organization (QRO) India",
+     "cert_no": "QRO/IN/QMS/77120",
+     "standard": "ISO 9001:2015",
+     "fact_type": "iso9001_cert",
+     "issued_on": "2025-05-10",
+     "valid_until": "2028-05-09"
+    }
+   },
+   {
+    "file": "rate-card-photo.jpg",
+    "type": "quote",
+    "summary": "Photo of the supplier's printed rate card (30 rows, INR, w.e.f. 15 Sept 2026) with notes on freight, payment, delivery, validity and capacity.",
+    "provenance": {
+     "file": "rate-card-photo.jpg",
+     "locator": "photo, title",
+     "snippet": "MAHALAXMI PACKAGING WORKS RATE CARD — w.e.f. 15 Sept 2026"
+    },
+    "certificate": null
+   }
+  ],
+  "line_quotes": [
+   {
+    "origin": "stated",
+    "currency": "INR",
+    "deviation": [],
+    "basis_item": "piece",
+    "confidence": 0.85,
+    "provenance": {
+     "file": "rate-card-photo.jpg",
+     "locator": "photo, printed row 1",
+     "snippet": "1 3-ply RSC box 250x200x150 3P 150/120/150 9.48 /pc"
+    },
+    "basis_count": null,
+    "price_basis": "per_unit",
+    "price_value": 9.48,
+    "rfx_line_no": 1,
+    "match_reason": "Same size, ply and paper GSM; rate card row order follows the RFx",
+    "offered_spec": {
+     "ply": 3,
+     "paper_gsm": "150/120/150",
+     "dimensions_mm": "250x200x150"
+    },
+    "pieces_per_pack": null,
+    "match_confidence": 0.95,
+    "vendor_line_text": "3-ply RSC box 250x200x150 3P 150/120/150",
+    "weight_per_piece_kg": null,
+    "price_unit_as_written": "/pc"
+   },
+   {
+    "origin": "stated",
+    "currency": "INR",
+    "deviation": [],
+    "basis_item": "piece",
+    "confidence": 0.85,
+    "provenance": {
+     "file": "rate-card-photo.jpg",
+     "locator": "photo, printed row 2",
+     "snippet": "2 3-ply RSC box 300x200x200 3P 150/120/150 11.74 /pc"
+    },
+    "basis_count": null,
+    "price_basis": "per_unit",
+    "price_value": 11.74,
+    "rfx_line_no": 2,
+    "match_reason": "Same size, ply and paper GSM",
+    "offered_spec": {
+     "ply": 3,
+     "paper_gsm": "150/120/150",
+     "dimensions_mm": "300x200x200"
+    },
+    "pieces_per_pack": null,
+    "match_confidence": 0.95,
+    "vendor_line_text": "3-ply RSC box 300x200x200 3P 150/120/150",
+    "weight_per_piece_kg": null,
+    "price_unit_as_written": "/pc"
+   },
+   {
+    "origin": "stated",
+    "currency": "INR",
+    "deviation": [],
+    "basis_item": "piece",
+    "confidence": 0.85,
+    "provenance": {
+     "file": "rate-card-photo.jpg",
+     "locator": "photo, printed row 3",
+     "snippet": "3 3-ply RSC box 300x250x150 3P 150/120/150 12.15 /pc"
+    },
+    "basis_count": null,
+    "price_basis": "per_unit",
+    "price_value": 12.15,
+    "rfx_line_no": 3,
+    "match_reason": "Same size, ply and paper GSM",
+    "offered_spec": {
+     "ply": 3,
+     "paper_gsm": "150/120/150",
+     "dimensions_mm": "300x250x150"
+    },
+    "pieces_per_pack": null,
+    "match_confidence": 0.95,
+    "vendor_line_text": "3-ply RSC box 300x250x150 3P 150/120/150",
+    "weight_per_piece_kg": null,
+    "price_unit_as_written": "/pc"
+   },
+   {
+    "origin": "stated",
+    "currency": "INR",
+    "deviation": [],
+    "basis_item": "piece",
+    "confidence": 0.85,
+    "provenance": {
+     "file": "rate-card-photo.jpg",
+     "locator": "photo, printed row 4",
+     "snippet": "4 3-ply RSC box 350x250x200 3P 150/120/150 14.32 /pc"
+    },
+    "basis_count": null,
+    "price_basis": "per_unit",
+    "price_value": 14.32,
+    "rfx_line_no": 4,
+    "match_reason": "Same size, ply and paper GSM; flute (C) not stated on rate card",
+    "offered_spec": {
+     "ply": 3,
+     "paper_gsm": "150/120/150",
+     "dimensions_mm": "350x250x200"
+    },
+    "pieces_per_pack": null,
+    "match_confidence": 0.95,
+    "vendor_line_text": "3-ply RSC box 350x250x200 3P 150/120/150",
+    "weight_per_piece_kg": null,
+    "price_unit_as_written": "/pc"
+   },
+   {
+    "origin": "stated",
+    "currency": "INR",
+    "deviation": [],
+    "basis_item": "piece",
+    "confidence": 0.85,
+    "provenance": {
+     "file": "rate-card-photo.jpg",
+     "locator": "photo, printed row 5",
+     "snippet": "5 3-ply RSC box 200x150x100 3P 150/120/150 8.34 /pc"
+    },
+    "basis_count": null,
+    "price_basis": "per_unit",
+    "price_value": 8.34,
+    "rfx_line_no": 5,
+    "match_reason": "Same size, ply and paper GSM",
+    "offered_spec": {
+     "ply": 3,
+     "paper_gsm": "150/120/150",
+     "dimensions_mm": "200x150x100"
+    },
+    "pieces_per_pack": null,
+    "match_confidence": 0.95,
+    "vendor_line_text": "3-ply RSC box 200x150x100 3P 150/120/150",
+    "weight_per_piece_kg": null,
+    "price_unit_as_written": "/pc"
+   },
+   {
+    "origin": "stated",
+    "currency": "INR",
+    "deviation": [],
+    "basis_item": "piece",
+    "confidence": 0.85,
+    "provenance": {
+     "file": "rate-card-photo.jpg",
+     "locator": "photo, printed row 6",
+     "snippet": "6 3-ply RSC box 400x300x200 3P 150/120/150 16.07 /pc"
+    },
+    "basis_count": null,
+    "price_basis": "per_unit",
+    "price_value": 16.07,
+    "rfx_line_no": 6,
+    "match_reason": "Same size, ply and paper GSM",
+    "offered_spec": {
+     "ply": 3,
+     "paper_gsm": "150/120/150",
+     "dimensions_mm": "400x300x200"
+    },
+    "pieces_per_pack": null,
+    "match_confidence": 0.95,
+    "vendor_line_text": "3-ply RSC box 400x300x200 3P 150/120/150",
+    "weight_per_piece_kg": null,
+    "price_unit_as_written": "/pc"
+   },
+   {
+    "origin": "stated",
+    "currency": "INR",
+    "deviation": [],
+    "basis_item": "piece",
+    "confidence": 0.85,
+    "provenance": {
+     "file": "rate-card-photo.jpg",
+     "locator": "photo, printed row 7",
+     "snippet": "7 3-ply RSC cube box 250x250x250 3P 150/120/150 13.18 /pc"
+    },
+    "basis_count": null,
+    "price_basis": "per_unit",
+    "price_value": 13.18,
+    "rfx_line_no": 7,
+    "match_reason": "Cube box, same size, ply and paper GSM",
+    "offered_spec": {
+     "ply": 3,
+     "paper_gsm": "150/120/150",
+     "dimensions_mm": "250x250x250"
+    },
+    "pieces_per_pack": null,
+    "match_confidence": 0.95,
+    "vendor_line_text": "3-ply RSC cube box 250x250x250 3P 150/120/150",
+    "weight_per_piece_kg": null,
+    "price_unit_as_written": "/pc"
+   },
+   {
+    "origin": "stated",
+    "currency": "INR",
+    "deviation": [],
+    "basis_item": "piece",
+    "confidence": 0.85,
+    "provenance": {
+     "file": "rate-card-photo.jpg",
+     "locator": "photo, printed row 8",
+     "snippet": "8 3-ply RSC box 320x220x120 3P 150/120/150 10.92 /pc"
+    },
+    "basis_count": null,
+    "price_basis": "per_unit",
+    "price_value": 10.92,
+    "rfx_line_no": 8,
+    "match_reason": "Same size, ply and paper GSM",
+    "offered_spec": {
+     "ply": 3,
+     "paper_gsm": "150/120/150",
+     "dimensions_mm": "320x220x120"
+    },
+    "pieces_per_pack": null,
+    "match_confidence": 0.95,
+    "vendor_line_text": "3-ply RSC box 320x220x120 3P 150/120/150",
+    "weight_per_piece_kg": null,
+    "price_unit_as_written": "/pc"
+   },
+   {
+    "origin": "stated",
+    "currency": "INR",
+    "deviation": [],
+    "basis_item": "piece",
+    "confidence": 0.83,
+    "provenance": {
+     "file": "rate-card-photo.jpg",
+     "locator": "photo, printed row 9",
+     "snippet": "9 5-ply RSC box 400x300x300 5P 180/120/150/120/180 31.93 /pc"
+    },
+    "basis_count": null,
+    "price_basis": "per_unit",
+    "price_value": 31.93,
+    "rfx_line_no": 9,
+    "match_reason": "Same size, ply and paper GSM",
+    "offered_spec": {
+     "ply": 5,
+     "paper_gsm": "180/120/150/120/180",
+     "dimensions_mm": "400x300x300"
+    },
+    "pieces_per_pack": null,
+    "match_confidence": 0.95,
+    "vendor_line_text": "5-ply RSC box 400x300x300 5P 180/120/150/120/180",
+    "weight_per_piece_kg": null,
+    "price_unit_as_written": "/pc"
+   },
+   {
+    "origin": "stated",
+    "currency": "INR",
+    "deviation": [],
+    "basis_item": "piece",
+    "confidence": 0.83,
+    "provenance": {
+     "file": "rate-card-photo.jpg",
+     "locator": "photo, printed row 10",
+     "snippet": "10 5-ply RSC box 450x350x300 5P 180/120/150/120/180 37.60 /pc"
+    },
+    "basis_count": null,
+    "price_basis": "per_unit",
+    "price_value": 37.6,
+    "rfx_line_no": 10,
+    "match_reason": "Same size, ply and paper GSM",
+    "offered_spec": {
+     "ply": 5,
+     "paper_gsm": "180/120/150/120/180",
+     "dimensions_mm": "450x350x300"
+    },
+    "pieces_per_pack": null,
+    "match_confidence": 0.95,
+    "vendor_line_text": "5-ply RSC box 450x350x300 5P 180/120/150/120/180",
+    "weight_per_piece_kg": null,
+    "price_unit_as_written": "/pc"
+   },
+   {
+    "origin": "stated",
+    "currency": "INR",
+    "deviation": [],
+    "basis_item": "piece",
+    "confidence": 0.83,
+    "provenance": {
+     "file": "rate-card-photo.jpg",
+     "locator": "photo, printed row 11",
+     "snippet": "11 5-ply RSC box 500x400x300 5P 180/120/150/120/180 43.26 /pc"
+    },
+    "basis_count": null,
+    "price_basis": "per_unit",
+    "price_value": 43.26,
+    "rfx_line_no": 11,
+    "match_reason": "Same size, ply and paper GSM",
+    "offered_spec": {
+     "ply": 5,
+     "paper_gsm": "180/120/150/120/180",
+     "dimensions_mm": "500x400x300"
+    },
+    "pieces_per_pack": null,
+    "match_confidence": 0.95,
+    "vendor_line_text": "5-ply RSC box 500x400x300 5P 180/120/150/120/180",
+    "weight_per_piece_kg": null,
+    "price_unit_as_written": "/pc"
+   },
+   {
+    "origin": "stated",
+    "currency": "INR",
+    "deviation": [],
+    "basis_item": "piece",
+    "confidence": 0.83,
+    "provenance": {
+     "file": "rate-card-photo.jpg",
+     "locator": "photo, printed row 12",
+     "snippet": "12 5-ply RSC box 500x300x250 5P 180/120/150/120/180 35.02 /pc"
+    },
+    "basis_count": null,
+    "price_basis": "per_unit",
+    "price_value": 35.02,
+    "rfx_line_no": 12,
+    "match_reason": "Same size, ply and paper GSM",
+    "offered_spec": {
+     "ply": 5,
+     "paper_gsm": "180/120/150/120/180",
+     "dimensions_mm": "500x300x250"
+    },
+    "pieces_per_pack": null,
+    "match_confidence": 0.95,
+    "vendor_line_text": "5-ply RSC box 500x300x250 5P 180/120/150/120/180",
+    "weight_per_piece_kg": null,
+    "price_unit_as_written": "/pc"
+   },
+   {
+    "origin": "stated",
+    "currency": "INR",
+    "deviation": [],
+    "basis_item": "piece",
+    "confidence": 0.83,
+    "provenance": {
+     "file": "rate-card-photo.jpg",
+     "locator": "photo, printed row 13",
+     "snippet": "13 5-ply RSC box 600x400x400 5P 180/120/150/120/180 58.71 /pc"
+    },
+    "basis_count": null,
+    "price_basis": "per_unit",
+    "price_value": 58.71,
+    "rfx_line_no": 13,
+    "match_reason": "Same size, ply and paper GSM",
+    "offered_spec": {
+     "ply": 5,
+     "paper_gsm": "180/120/150/120/180",
+     "dimensions_mm": "600x400x400"
+    },
+    "pieces_per_pack": null,
+    "match_confidence": 0.95,
+    "vendor_line_text": "5-ply RSC box 600x400x400 5P 180/120/150/120/180",
+    "weight_per_piece_kg": null,
+    "price_unit_as_written": "/pc"
+   },
+   {
+    "origin": "stated",
+    "currency": "INR",
+    "deviation": [],
+    "basis_item": "piece",
+    "confidence": 0.83,
+    "provenance": {
+     "file": "rate-card-photo.jpg",
+     "locator": "photo, printed row 14",
+     "snippet": "14 5-ply RSC box 450x300x350 5P 180/120/150/120/180 36.57 /pc"
+    },
+    "basis_count": null,
+    "price_basis": "per_unit",
+    "price_value": 36.57,
+    "rfx_line_no": 14,
+    "match_reason": "Same size, ply and paper GSM",
+    "offered_spec": {
+     "ply": 5,
+     "paper_gsm": "180/120/150/120/180",
+     "dimensions_mm": "450x300x350"
+    },
+    "pieces_per_pack": null,
+    "match_confidence": 0.95,
+    "vendor_line_text": "5-ply RSC box 450x300x350 5P 180/120/150/120/180",
+    "weight_per_piece_kg": null,
+    "price_unit_as_written": "/pc"
+   },
+   {
+    "origin": "stated",
+    "currency": "INR",
+    "deviation": [],
+    "basis_item": "piece",
+    "confidence": 0.83,
+    "provenance": {
+     "file": "rate-card-photo.jpg",
+     "locator": "photo, printed row 15",
+     "snippet": "15 5-ply RSC box 550x450x350 5P 180/120/150/120/180 50.47 /pc"
+    },
+    "basis_count": null,
+    "price_basis": "per_unit",
+    "price_value": 50.47,
+    "rfx_line_no": 15,
+    "match_reason": "Same size, ply and paper GSM",
+    "offered_spec": {
+     "ply": 5,
+     "paper_gsm": "180/120/150/120/180",
+     "dimensions_mm": "550x450x350"
+    },
+    "pieces_per_pack": null,
+    "match_confidence": 0.95,
+    "vendor_line_text": "5-ply RSC box 550x450x350 5P 180/120/150/120/180",
+    "weight_per_piece_kg": null,
+    "price_unit_as_written": "/pc"
+   },
+   {
+    "origin": "stated",
+    "currency": "INR",
+    "deviation": [],
+    "basis_item": "piece",
+    "confidence": 0.83,
+    "provenance": {
+     "file": "rate-card-photo.jpg",
+     "locator": "photo, printed row 16",
+     "snippet": "16 5-ply RSC box 600x500x450 5P 180/120/150/120/180 69.01 /pc"
+    },
+    "basis_count": null,
+    "price_basis": "per_unit",
+    "price_value": 69.01,
+    "rfx_line_no": 16,
+    "match_reason": "Same size, ply and paper GSM",
+    "offered_spec": {
+     "ply": 5,
+     "paper_gsm": "180/120/150/120/180",
+     "dimensions_mm": "600x500x450"
+    },
+    "pieces_per_pack": null,
+    "match_confidence": 0.95,
+    "vendor_line_text": "5-ply RSC box 600x500x450 5P 180/120/150/120/180",
+    "weight_per_piece_kg": null,
+    "price_unit_as_written": "/pc"
+   },
+   {
+    "origin": "stated",
+    "currency": "INR",
+    "deviation": [],
+    "basis_item": "kg",
+    "confidence": 0.8,
+    "provenance": {
+     "file": "rate-card-photo.jpg",
+     "locator": "photo, printed row 17",
+     "snippet": "17 7-ply heavy-duty box 600x400x500 7P 200/120/150/120/150/120/200 47.50 /kg 2.45 kg"
+    },
+    "basis_count": null,
+    "price_basis": "per_kg",
+    "price_value": 47.5,
+    "rfx_line_no": 17,
+    "match_reason": "Same size, ply and paper GSM; RFx unit is piece but supplier prices per kg",
+    "offered_spec": {
+     "ply": 7,
+     "paper_gsm": "200/120/150/120/150/120/200",
+     "dimensions_mm": "600x400x500"
+    },
+    "pieces_per_pack": null,
+    "match_confidence": 0.95,
+    "vendor_line_text": "7-ply heavy-duty box 600x400x500 7P 200/120/150/120/150/120/200",
+    "weight_per_piece_kg": 2.45,
+    "price_unit_as_written": "/kg"
+   },
+   {
+    "origin": "stated",
+    "currency": "INR",
+    "deviation": [],
+    "basis_item": "kg",
+    "confidence": 0.82,
+    "provenance": {
+     "file": "rate-card-photo.jpg",
+     "locator": "photo, printed row 18",
+     "snippet": "18 7-ply heavy-duty box 800x600x500 7P 200/120/150/120/150/120/200 49.00 /kg"
+    },
+    "basis_count": null,
+    "price_basis": "per_kg",
+    "price_value": 49,
+    "rfx_line_no": 18,
+    "match_reason": "Same size, ply and paper GSM; priced per kg; no weight per piece shown",
+    "offered_spec": {
+     "ply": 7,
+     "paper_gsm": "200/120/150/120/150/120/200",
+     "dimensions_mm": "800x600x500"
+    },
+    "pieces_per_pack": null,
+    "match_confidence": 0.95,
+    "vendor_line_text": "7-ply heavy-duty box 800x600x500 7P 200/120/150/120/150/120/200",
+    "weight_per_piece_kg": null,
+    "price_unit_as_written": "/kg"
+   },
+   {
+    "origin": "stated",
+    "currency": "INR",
+    "deviation": [],
+    "basis_item": "kg",
+    "confidence": 0.75,
+    "provenance": {
+     "file": "rate-card-photo.jpg",
+     "locator": "photo, printed row 19",
+     "snippet": "19 7-ply heavy-duty box 500x400x400 7P 200/120/150/120/150/120/200 47.50 /kg 1.95 kg"
+    },
+    "basis_count": null,
+    "price_basis": "per_kg",
+    "price_value": 47.5,
+    "rfx_line_no": 19,
+    "match_reason": "Same size, ply and paper GSM; priced per kg",
+    "offered_spec": {
+     "ply": 7,
+     "paper_gsm": "200/120/150/120/150/120/200",
+     "dimensions_mm": "500x400x400"
+    },
+    "pieces_per_pack": null,
+    "match_confidence": 0.95,
+    "vendor_line_text": "7-ply heavy-duty box 500x400x400 7P 200/120/150/120/150/120/200",
+    "weight_per_piece_kg": 1.95,
+    "price_unit_as_written": "/kg"
+   },
+   {
+    "origin": "stated",
+    "currency": "INR",
+    "deviation": [],
+    "basis_item": "piece",
+    "confidence": 0.82,
+    "provenance": {
+     "file": "rate-card-photo.jpg",
+     "locator": "photo, printed row 20",
+     "snippet": "20 Die-cut mailer box 250x180x60 3P 150/100/150 13.50 /pc"
+    },
+    "basis_count": null,
+    "price_basis": "per_unit",
+    "price_value": 13.5,
+    "rfx_line_no": 20,
+    "match_reason": "Same size, ply and paper GSM",
+    "offered_spec": {
+     "ply": 3,
+     "paper_gsm": "150/100/150",
+     "dimensions_mm": "250x180x60"
+    },
+    "pieces_per_pack": null,
+    "match_confidence": 0.95,
+    "vendor_line_text": "Die-cut mailer box 250x180x60 3P 150/100/150",
+    "weight_per_piece_kg": null,
+    "price_unit_as_written": "/pc"
+   },
+   {
+    "origin": "stated",
+    "currency": "INR",
+    "deviation": [],
+    "basis_item": "piece",
+    "confidence": 0.8,
+    "provenance": {
+     "file": "rate-card-photo.jpg",
+     "locator": "photo, printed row 21",
+     "snippet": "21 Die-cut mailer box 300x220x80 3P 150/100/150 17.20 /pc"
+    },
+    "basis_count": null,
+    "price_basis": "per_unit",
+    "price_value": 17.2,
+    "rfx_line_no": 21,
+    "match_reason": "Same size and paper GSM; ply column skewed in photo",
+    "offered_spec": {
+     "ply": 3,
+     "paper_gsm": "150/100/150",
+     "dimensions_mm": "300x220x80"
+    },
+    "pieces_per_pack": null,
+    "match_confidence": 0.93,
+    "vendor_line_text": "Die-cut mailer box 300x220x80 3P 150/100/150",
+    "weight_per_piece_kg": null,
+    "price_unit_as_written": "/pc"
+   },
+   {
+    "origin": "stated",
+    "currency": "INR",
+    "deviation": [],
+    "basis_item": "piece",
+    "confidence": 0.78,
+    "provenance": {
+     "file": "rate-card-photo.jpg",
+     "locator": "photo, printed row 22",
+     "snippet": "22 Die-cut mailer box 350x250x100 3P 180/100/150 21.80 /pc"
+    },
+    "basis_count": null,
+    "price_basis": "per_unit",
+    "price_value": 21.8,
+    "rfx_line_no": 22,
+    "match_reason": "Same size and paper GSM (180/100/150); ply column skewed in photo",
+    "offered_spec": {
+     "ply": 3,
+     "paper_gsm": "180/100/150",
+     "dimensions_mm": "350x250x100"
+    },
+    "pieces_per_pack": null,
+    "match_confidence": 0.93,
+    "vendor_line_text": "Die-cut mailer box 350x250x100 3P 180/100/150",
+    "weight_per_piece_kg": null,
+    "price_unit_as_written": "/pc"
+   },
+   {
+    "origin": "stated",
+    "currency": "INR",
+    "deviation": [],
+    "basis_item": "piece",
+    "confidence": 0.8,
+    "provenance": {
+     "file": "rate-card-photo.jpg",
+     "locator": "photo, printed row 23",
+     "snippet": "23 3-ply RSC box (1C print) 300x200x150 3P 150/120/150 12.71 /pc"
+    },
+    "basis_count": null,
+    "price_basis": "per_unit",
+    "price_value": 12.71,
+    "rfx_line_no": 23,
+    "match_reason": "Same size, ply, paper GSM and 1-colour print",
+    "offered_spec": {
+     "ply": 3,
+     "print": "1C print",
+     "paper_gsm": "150/120/150",
+     "dimensions_mm": "300x200x150"
+    },
+    "pieces_per_pack": null,
+    "match_confidence": 0.95,
+    "vendor_line_text": "3-ply RSC box (1C print) 300x200x150 3P 150/120/150",
+    "weight_per_piece_kg": null,
+    "price_unit_as_written": "/pc"
+   },
+   {
+    "origin": "stated",
+    "currency": "INR",
+    "deviation": [],
+    "basis_item": "piece",
+    "confidence": 0.8,
+    "provenance": {
+     "file": "rate-card-photo.jpg",
+     "locator": "photo, printed row 24",
+     "snippet": "24 5-ply RSC box (2C print) 400x300x250 5P 180/120/150/120/180 33.00 /pc"
+    },
+    "basis_count": null,
+    "price_basis": "per_unit",
+    "price_value": 33,
+    "rfx_line_no": 24,
+    "match_reason": "Same size, ply, paper GSM and 2-colour print",
+    "offered_spec": {
+     "ply": 5,
+     "print": "2C print",
+     "paper_gsm": "180/120/150/120/180",
+     "dimensions_mm": "400x300x250"
+    },
+    "pieces_per_pack": null,
+    "match_confidence": 0.95,
+    "vendor_line_text": "5-ply RSC box (2C print) 400x300x250 5P 180/120/150/120/180",
+    "weight_per_piece_kg": null,
+    "price_unit_as_written": "/pc"
+   },
+   {
+    "origin": "stated",
+    "currency": "INR",
+    "deviation": [],
+    "basis_item": "piece",
+    "confidence": 0.8,
+    "provenance": {
+     "file": "rate-card-photo.jpg",
+     "locator": "photo, printed row 25",
+     "snippet": "25 Printed mailer (2C print) 280x200x70 3P 150/100/150 18.12 /pc"
+    },
+    "basis_count": null,
+    "price_basis": "per_unit",
+    "price_value": 18.12,
+    "rfx_line_no": 25,
+    "match_reason": "Same size, paper GSM and 2-colour print",
+    "offered_spec": {
+     "ply": 3,
+     "print": "2C print",
+     "paper_gsm": "150/100/150",
+     "dimensions_mm": "280x200x70"
+    },
+    "pieces_per_pack": null,
+    "match_confidence": 0.95,
+    "vendor_line_text": "Printed mailer (2C print) 280x200x70 3P 150/100/150",
+    "weight_per_piece_kg": null,
+    "price_unit_as_written": "/pc"
+   },
+   {
+    "origin": "stated",
+    "currency": "INR",
+    "deviation": [],
+    "basis_item": "kg",
+    "confidence": 0.8,
+    "provenance": {
+     "file": "rate-card-photo.jpg",
+     "locator": "photo, printed row 26",
+     "snippet": "26 3-ply corrugated sheet 1000 x 800 3P 150/120/150 46.00 /kg"
+    },
+    "basis_count": null,
+    "price_basis": "per_kg",
+    "price_value": 46,
+    "rfx_line_no": 26,
+    "match_reason": "Same size, ply and paper GSM; priced per kg as RFx unit",
+    "offered_spec": {
+     "ply": 3,
+     "paper_gsm": "150/120/150",
+     "dimensions_mm": "1000 x 800"
+    },
+    "pieces_per_pack": null,
+    "match_confidence": 0.95,
+    "vendor_line_text": "3-ply corrugated sheet 1000 x 800 3P 150/120/150",
+    "weight_per_piece_kg": null,
+    "price_unit_as_written": "/kg"
+   },
+   {
+    "origin": "stated",
+    "currency": "INR",
+    "deviation": [],
+    "basis_item": "kg",
+    "confidence": 0.8,
+    "provenance": {
+     "file": "rate-card-photo.jpg",
+     "locator": "photo, printed row 27",
+     "snippet": "27 5-ply corrugated pad 1200 x 1000 5P 180/120/150/120/180 49.00 /kg"
+    },
+    "basis_count": null,
+    "price_basis": "per_kg",
+    "price_value": 49,
+    "rfx_line_no": 27,
+    "match_reason": "Same size, ply and paper GSM; priced per kg as RFx unit",
+    "offered_spec": {
+     "ply": 5,
+     "paper_gsm": "180/120/150/120/180",
+     "dimensions_mm": "1200 x 1000"
+    },
+    "pieces_per_pack": null,
+    "match_confidence": 0.95,
+    "vendor_line_text": "5-ply corrugated pad 1200 x 1000 5P 180/120/150/120/180",
+    "weight_per_piece_kg": null,
+    "price_unit_as_written": "/kg"
+   },
+   {
+    "origin": "stated",
+    "currency": "INR",
+    "deviation": [],
+    "basis_item": "set",
+    "confidence": 0.8,
+    "provenance": {
+     "file": "rate-card-photo.jpg",
+     "locator": "photo, printed row 28",
+     "snippet": "28 12-cell partition set for box 400x300x280 3P 150/120/150 8.03 /set"
+    },
+    "basis_count": null,
+    "price_basis": "per_unit",
+    "price_value": 8.03,
+    "rfx_line_no": 28,
+    "match_reason": "12-cell partition set, same size and paper GSM",
+    "offered_spec": {
+     "ply": 3,
+     "cells": 12,
+     "paper_gsm": "150/120/150",
+     "dimensions_mm": "400x300x280"
+    },
+    "pieces_per_pack": null,
+    "match_confidence": 0.93,
+    "vendor_line_text": "12-cell partition set for box 400x300x280 3P 150/120/150",
+    "weight_per_piece_kg": null,
+    "price_unit_as_written": "/set"
+   },
+   {
+    "origin": "stated",
+    "currency": "INR",
+    "deviation": [],
+    "basis_item": "set",
+    "confidence": 0.8,
+    "provenance": {
+     "file": "rate-card-photo.jpg",
+     "locator": "photo, printed row 29",
+     "snippet": "29 24-cell partition set for box 500x400x280 3P 150/120/150 12.98 /set"
+    },
+    "basis_count": null,
+    "price_basis": "per_unit",
+    "price_value": 12.98,
+    "rfx_line_no": 29,
+    "match_reason": "24-cell partition set, same size and paper GSM",
+    "offered_spec": {
+     "ply": 3,
+     "cells": 24,
+     "paper_gsm": "150/120/150",
+     "dimensions_mm": "500x400x280"
+    },
+    "pieces_per_pack": null,
+    "match_confidence": 0.93,
+    "vendor_line_text": "24-cell partition set for box 500x400x280 3P 150/120/150",
+    "weight_per_piece_kg": null,
+    "price_unit_as_written": "/set"
+   },
+   {
+    "origin": "stated",
+    "currency": "INR",
+    "deviation": [],
+    "basis_item": "piece",
+    "confidence": 0.8,
+    "provenance": {
+     "file": "rate-card-photo.jpg",
+     "locator": "photo, printed row 30",
+     "snippet": "30 Paperboard edge protector, 1000 mm 50x50x5, 1000L Board 5mm 6.53 /pc"
+    },
+    "basis_count": null,
+    "price_basis": "per_unit",
+    "price_value": 6.53,
+    "rfx_line_no": 30,
+    "match_reason": "Edge protector, same size and 5 mm board",
+    "offered_spec": {
+     "wall": "Board 5mm",
+     "dimensions_mm": "50x50x5, 1000L"
+    },
+    "pieces_per_pack": null,
+    "match_confidence": 0.95,
+    "vendor_line_text": "Paperboard edge protector, 1000 mm 50x50x5, 1000L Board 5mm",
+    "weight_per_piece_kg": null,
+    "price_unit_as_written": "/pc"
+   }
+  ],
+  "image_quality": [
+   {
+    "file": "rate-card-photo.jpg",
+    "issues": [
+     "Page photographed at a strong angle (perspective skew); the right-hand columns sit higher than the left-hand item names",
+     "Left edge cut off (header reads 'rices ex-GST')",
+     "Photo of a page or screen on a dark background, slight blur",
+     "Rate and ply columns were tied to rows by printed row numbers, sizes and price order; the 30 prices form a consistent sequence",
+     "Weight per piece column mostly '—'; 2.45 kg and 1.95 kg were assigned to rows 17 and 19 by position and are slightly uncertain"
+    ],
+    "readable": "mostly"
+   },
+   {
+    "file": "Mahalaxmi_ISO.pdf",
+    "issues": [],
+    "readable": "fully"
+   }
+  ],
+  "commercial_terms": {
+   "gst": {
+    "text": "Prices ex-GST; GST rate not stated. GSTIN on rate card header: 27AAPFM5512D1Z4",
+    "provenance": {
+     "file": "rate-card-photo.jpg",
+     "locator": "photo, header line under title",
+     "snippet": "rices ex-GST."
+    }
+   },
+   "other": [
+    {
+     "text": "Per kg items billed on actual weighed quantity. Weight per piece shown where standard.",
+     "label": "Per-kg billing",
+     "provenance": {
+      "file": "rate-card-photo.jpg",
+      "locator": "photo, notes at bottom",
+      "snippet": "Notes: Per kg items billed on actual weighed quantity. Weight per piece shown where standard."
+     }
+    },
+    {
+     "text": "RATE CARD — w.e.f. 15 Sept 2026",
+     "label": "Rate card effective date",
+     "provenance": {
+      "file": "rate-card-photo.jpg",
+      "locator": "photo, red banner",
+      "snippet": "RATE CARD — w.e.f. 15 Sept 2026"
+     }
+    },
+    {
+     "text": "ISO 9001:2015 certified • In-house burst & BCT lab • Capacity 450 MT / month",
+     "label": "Capacity and quality claims",
+     "provenance": {
+      "file": "rate-card-photo.jpg",
+      "locator": "photo, notes at bottom",
+      "snippet": "ISO 9001:2015 certified • In-house burst & BCT lab • Capacity 450 MT / month"
+     }
+    },
+    {
+     "text": "Plot 58, MIDC Ambad, Nashik 422010 • Ph 0253-238 6612 • GSTIN 27AAPFM5512D1Z4",
+     "label": "Supplier address and GSTIN",
+     "provenance": {
+      "file": "rate-card-photo.jpg",
+      "locator": "photo, header",
+      "snippet": "Plot 58, MIDC Ambad, Nashik 422010 • Ph 0253-238 6612 • GSTIN 27AAPFM5512D1Z4"
+     }
+    },
+    {
+     "text": "For Mahalaxmi Packaging Works — R. Patil",
+     "label": "Signatory",
+     "provenance": {
+      "file": "rate-card-photo.jpg",
+      "locator": "photo, bottom right",
+      "snippet": "For Mahalaxmi Packaging Works — R. Patil"
+     }
+    }
+   ],
+   "freight": {
+    "note": "Freight included for Pune district deliveries. (Chakan is in Pune district, so this is taken to cover the buyer's plant. The supplier does not name Chakan.)",
+    "basis": "included",
+    "amount": null,
+    "currency": null,
+    "provenance": {
+     "file": "rate-card-photo.jpg",
+     "locator": "photo, header line under title",
+     "snippet": "rices ex-GST. Freight included for Pune district deliveries. Rates per piece unless stated."
+    },
+    "shipments_per_year": null
+   },
+   "incoterm": null,
+   "validity": {
+    "text": "Rates valid till 31 Dec 2026 (rate card w.e.f. 15 Sept 2026)",
+    "provenance": {
+     "file": "rate-card-photo.jpg",
+     "locator": "photo, notes at bottom",
+     "snippet": "Rates valid till 31 Dec 2026."
+    }
+   },
+   "discounts": [],
+   "lead_time": {
+    "days": 7,
+    "text": "Delivery 5–7 days",
+    "provenance": {
+     "file": "rate-card-photo.jpg",
+     "locator": "photo, notes at bottom",
+     "snippet": "Delivery 5–7 days."
+    }
+   },
+   "payment_terms": {
+    "text": "Payment 30 days (RFx asks 60 days from GRN; reference point for the 30 days not stated)",
+    "provenance": {
+     "file": "rate-card-photo.jpg",
+     "locator": "photo, notes at bottom",
+     "snippet": "Payment 30 days."
+    }
+   }
+  },
+  "overall_confidence": 0.8,
+  "questionnaire_answers": [
+   {
+    "q_no": 1,
+    "confidence": 0.95,
+    "provenance": {
+     "file": "Mahalaxmi_ISO.pdf",
+     "locator": "page 1",
+     "snippet": "has been assessed and found to conform to the requirements of ISO 9001:2015"
+    },
+    "value_bool": true,
+    "value_unit": null,
+    "answer_text": "ISO 9001:2015 certificate supplied (QRO/IN/QMS/77120, valid until 09 May 2028); rate card also states 'ISO 9001:2015 certified'.",
+    "value_number": null
+   },
+   {
+    "q_no": 3,
+    "confidence": 0.7,
+    "provenance": {
+     "file": "rate-card-photo.jpg",
+     "locator": "photo, notes at bottom",
+     "snippet": "In-house burst & BCT lab"
+    },
+    "value_bool": null,
+    "value_unit": null,
+    "answer_text": "In-house burst & BCT lab stated. ECT testing and per-lot test reports are not mentioned.",
+    "value_number": null
+   },
+   {
+    "q_no": 4,
+    "confidence": 0.85,
+    "provenance": {
+     "file": "rate-card-photo.jpg",
+     "locator": "photo, notes at bottom",
+     "snippet": "Capacity 450 MT / month"
+    },
+    "value_bool": null,
+    "value_unit": "MT/month",
+    "answer_text": "Capacity 450 MT / month",
+    "value_number": 450
+   },
+   {
+    "q_no": 5,
+    "confidence": 0.85,
+    "provenance": {
+     "file": "Mahalaxmi_ISO.pdf",
+     "locator": "page 1",
+     "snippet": "Plot 58, MIDC Ambad, Nashik 422010, Maharashtra"
+    },
+    "value_bool": null,
+    "value_unit": null,
+    "answer_text": "Plant at Plot 58, MIDC Ambad, Nashik 422010, Maharashtra (address only). Distance to Chakan is not stated.",
+    "value_number": null
+   },
+   {
+    "q_no": 6,
+    "confidence": 0.8,
+    "provenance": {
+     "file": "rate-card-photo.jpg",
+     "locator": "photo, notes at bottom",
+     "snippet": "Delivery 5–7 days."
+    },
+    "value_bool": null,
+    "value_unit": "days",
+    "answer_text": "Delivery 5–7 days (less favourable end taken)",
+    "value_number": 7
+   },
+   {
+    "q_no": 7,
+    "confidence": 0.6,
+    "provenance": {
+     "file": "rate-card-photo.jpg",
+     "locator": "photo, notes at bottom",
+     "snippet": "Payment 30 days."
+    },
+    "value_bool": false,
+    "value_unit": null,
+    "answer_text": "Supplier states 'Payment 30 days', not 60 days from GRN. There is no explicit yes/no; read as not accepting 60 days.",
+    "value_number": null
+   },
+   {
+    "q_no": 12,
+    "confidence": 0.75,
+    "provenance": {
+     "file": "rate-card-photo.jpg",
+     "locator": "photo, header",
+     "snippet": "GSTIN 27AAPFM5512D1Z4"
+    },
+    "value_bool": null,
+    "value_unit": null,
+    "answer_text": "GSTIN 27AAPFM5512D1Z4 (read from a skewed photo header)",
+    "value_number": null
+   }
+  ]
+ }
+}

@@ -1,57 +1,37 @@
-// Single source of truth for every model ID used in the app.
-// Change a task's model here and nowhere else.
-// IDs verified against https://openrouter.ai/api/v1/models on 2026-09-30.
+// Single source of truth for every model used in the app. FREE MODELS ONLY.
+// Each task has an ordered chain: the first model is used; on repeated rate
+// limits / outages / invalid output the next one takes over.
+//
+// Model strings are "<provider>:<model id>":
+//   gemini:<id>      Google AI Studio (free tier), native SDK — reads PDFs and images
+//   openrouter:<id>  OpenRouter — only ":free" model ids are allowed (enforced below)
+//
+// Gemini IDs must match the project's own ListModels output: run
+// `npm run check:gemini` (seed/check-gemini.ts). Verification date in DECISIONS.md (T8).
 
-export type ModelTask =
-  | "extraction"
-  | "extraction_hard"
-  | "copilot"
-  | "analysis"
-  | "followup"
-  | "ping";
+export type ModelTask = "extraction" | "copilot" | "analysis" | "followup" | "ping";
+
+export const GEMINI_FLASH = "gemini:gemini-flash-latest"; // replaced with the verified ID after check:gemini
+export const GEMINI_FLASH_LITE = "gemini:gemini-flash-lite-latest"; // replaced with the verified ID after check:gemini
+export const NEMOTRON_FREE = "openrouter:nvidia/nemotron-3-ultra-550b-a55b:free";
 
 export interface ModelRoute {
-  model: string;
-  fallback: string;
+  chain: string[];
   timeoutMs: number;
 }
 
-export const EXTRACTION_MODEL = "anthropic/claude-sonnet-5.5";
-export const EXTRACTION_HARD_MODEL = "anthropic/claude-opus-5.5";
-export const COPILOT_MODEL = "nvidia/nemotron-3-ultra-550b-a55b:free";
-// Switched from the free Nemotron model after Phase 4 testing (see DECISIONS.md T7).
-export const ANALYSIS_MODEL = "anthropic/claude-sonnet-5.5";
-
 export const MODELS: Record<ModelTask, ModelRoute> = {
-  extraction: {
-    model: EXTRACTION_MODEL,
-    fallback: "anthropic/claude-sonnet-5",
-    timeoutMs: 240_000,
-  },
-  extraction_hard: {
-    model: EXTRACTION_HARD_MODEL,
-    fallback: "anthropic/claude-opus-5",
-    timeoutMs: 280_000,
-  },
-  copilot: {
-    model: COPILOT_MODEL,
-    // Paid variant of the same model: same behaviour, no free-tier rate limits.
-    fallback: "nvidia/nemotron-3-ultra-550b-a55b",
-    timeoutMs: 90_000,
-  },
-  analysis: {
-    model: ANALYSIS_MODEL,
-    fallback: "anthropic/claude-sonnet-5",
-    timeoutMs: 120_000,
-  },
-  followup: {
-    model: COPILOT_MODEL,
-    fallback: "nvidia/nemotron-3-ultra-550b-a55b",
-    timeoutMs: 60_000,
-  },
-  ping: {
-    model: COPILOT_MODEL,
-    fallback: "nvidia/nemotron-3-ultra-550b-a55b",
-    timeoutMs: 45_000,
-  },
+  extraction: { chain: [GEMINI_FLASH, GEMINI_FLASH_LITE], timeoutMs: 240_000 },
+  analysis: { chain: [GEMINI_FLASH, GEMINI_FLASH_LITE, NEMOTRON_FREE], timeoutMs: 120_000 },
+  copilot: { chain: [NEMOTRON_FREE, GEMINI_FLASH_LITE], timeoutMs: 120_000 },
+  followup: { chain: [NEMOTRON_FREE, GEMINI_FLASH_LITE], timeoutMs: 60_000 },
+  ping: { chain: [GEMINI_FLASH, NEMOTRON_FREE], timeoutMs: 45_000 },
 };
+
+export function assertFree(model: string) {
+  if (!model.startsWith("gemini:") && !(model.startsWith("openrouter:") && model.endsWith(":free"))) {
+    throw new Error(`Refusing to call ${model}: only Gemini free-tier and OpenRouter ":free" models are allowed.`);
+  }
+}
+
+export const displayModel = (m: string) => m.replace(/^(gemini|openrouter):/, "");

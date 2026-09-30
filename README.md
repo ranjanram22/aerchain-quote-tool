@@ -14,11 +14,12 @@ See `SPEC.md` for the full design, `DECISIONS.md` for why things are the way the
 
 ## Keys (environment variables)
 
-Three secrets, stored in `.env.local` on your Mac and in Vercel → Project → Settings → Environment Variables. Never commit them.
+Four secrets, stored in `.env.local` on your Mac and in Vercel → Project → Settings → Environment Variables. Never commit them.
 
 | Name | Where to find it |
 |---|---|
-| `OPENROUTER_API_KEY` | openrouter.ai → Keys |
+| `GEMINI_API_KEY` | aistudio.google.com → Get API key (free tier) |
+| `OPENROUTER_API_KEY` | openrouter.ai → Keys (only free `:free` models are used) |
 | `SUPABASE_URL` | Supabase → Project Settings → Data API → Project URL |
 | `SUPABASE_SERVICE_ROLE_KEY` | Supabase → Project Settings → API Keys → secret key (or legacy `service_role`) |
 

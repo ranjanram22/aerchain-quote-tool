@@ -1,0 +1,624 @@
+{
+ "vendor": "Om Sai Cartons",
+ "model": "anthropic/claude-opus-5.5",
+ "overall_confidence": 0.45,
+ "created_at": "2026-09-30T16:43:26.902577+00:00",
+ "extraction": {
+  "notes": [
+   "Scope of 'the 5-ply' is ambiguous. It was applied to all 5-ply RFx lines (9-16 plain boxes, 24 printed box, 27 pad). Printed line 24 and pad line 27 may not be meant.",
+   "Scope of 'the 3-ply' is ambiguous. It was applied to lines explicitly titled 3-ply (1-8, 23, 26). Mailers 20-22 and 25 and partitions 28-29 are also 3-ply in the spec but were treated as 'rest'. They may instead be covered by the 38 price.",
+   "'38 for the 3-ply' has no currency or unit written. INR per kg is assumed by parallel with '₹42/kg'.",
+   "Prices are per kg while most RFx lines are per piece. The supplier gave no weights per piece, so conversion is needed using the buyer's approximate weights.",
+   "'rest same as last year' gives no prices. The previous year's rates are needed for lines 17-22, 25, 28-30.",
+   "Freight is extra with no amount or basis stated, contrary to the RFx request to include freight.",
+   "GST, payment terms, validity, lead time and incoterm were not addressed.",
+   "The ISO 9001 certificate expired on 2026-08-31, before the reply date of 2026-09-29.",
+   "Printing capability and pricing for printed lines 23, 24 and 25 were not addressed."
+  ],
+  "references": [
+   {
+    "kind": "same_as_last_year",
+    "phrase": "rest same as last year",
+    "confidence": 0.45,
+    "provenance": {
+     "file": "email body",
+     "locator": "paragraph 2",
+     "snippet": "rest same as last year"
+    },
+    "adjustment_pct": null,
+    "applies_to_line_nos": [
+     17,
+     18,
+     19,
+     20,
+     21,
+     22,
+     25,
+     28,
+     29,
+     30
+    ]
+   }
+  ],
+  "attachments": [
+   {
+    "file": "ISO certificate.pdf",
+    "type": "certificate",
+    "summary": "ISO 9001:2015 certificate of approval for Om Sai Cartons, scope: manufacturing of corrugated boxes; expired 31 Aug 2026, before the reply date.",
+    "provenance": {
+     "file": "ISO certificate.pdf",
+     "locator": "page 1",
+     "snippet": "Certificate No.: ACS/QMS/21/3390 Date of issue: 01 September 2023 Valid until: 31 August 2026"
+    },
+    "certificate": {
+     "holder": "OM SAI CARTONS",
+     "issuer": "ACCURA CERTIFICATION SERVICES PVT LTD",
+     "cert_no": "ACS/QMS/21/3390",
+     "standard": "ISO 9001:2015",
+     "fact_type": "iso9001_cert",
+     "issued_on": "2023-09-01",
+     "valid_until": "2026-08-31"
+    }
+   }
+  ],
+  "line_quotes": [
+   {
+    "origin": "inferred",
+    "currency": "INR",
+    "deviation": [],
+    "basis_item": "kg",
+    "confidence": 0.55,
+    "provenance": {
+     "file": "email body",
+     "locator": "paragraph 2",
+     "snippet": "₹42/kg for the 5-ply"
+    },
+    "basis_count": null,
+    "price_basis": "per_kg",
+    "price_value": 42,
+    "rfx_line_no": 9,
+    "match_reason": "Group statement 'the 5-ply' applied to 5-ply RSC box 400x300x300 (all 5-ply RFx lines: 9-16, 24, 27)",
+    "offered_spec": {
+     "ply": 5
+    },
+    "pieces_per_pack": null,
+    "match_confidence": 0.6,
+    "vendor_line_text": "₹42/kg for the 5-ply",
+    "weight_per_piece_kg": null,
+    "price_unit_as_written": "/kg"
+   },
+   {
+    "origin": "inferred",
+    "currency": "INR",
+    "deviation": [],
+    "basis_item": "kg",
+    "confidence": 0.55,
+    "provenance": {
+     "file": "email body",
+     "locator": "paragraph 2",
+     "snippet": "₹42/kg for the 5-ply"
+    },
+    "basis_count": null,
+    "price_basis": "per_kg",
+    "price_value": 42,
+    "rfx_line_no": 10,
+    "match_reason": "Group statement 'the 5-ply' applied to 5-ply RSC box 450x350x300",
+    "offered_spec": {
+     "ply": 5
+    },
+    "pieces_per_pack": null,
+    "match_confidence": 0.6,
+    "vendor_line_text": "₹42/kg for the 5-ply",
+    "weight_per_piece_kg": null,
+    "price_unit_as_written": "/kg"
+   },
+   {
+    "origin": "inferred",
+    "currency": "INR",
+    "deviation": [],
+    "basis_item": "kg",
+    "confidence": 0.55,
+    "provenance": {
+     "file": "email body",
+     "locator": "paragraph 2",
+     "snippet": "₹42/kg for the 5-ply"
+    },
+    "basis_count": null,
+    "price_basis": "per_kg",
+    "price_value": 42,
+    "rfx_line_no": 11,
+    "match_reason": "Group statement 'the 5-ply' applied to 5-ply RSC box 500x400x300",
+    "offered_spec": {
+     "ply": 5
+    },
+    "pieces_per_pack": null,
+    "match_confidence": 0.6,
+    "vendor_line_text": "₹42/kg for the 5-ply",
+    "weight_per_piece_kg": null,
+    "price_unit_as_written": "/kg"
+   },
+   {
+    "origin": "inferred",
+    "currency": "INR",
+    "deviation": [],
+    "basis_item": "kg",
+    "confidence": 0.55,
+    "provenance": {
+     "file": "email body",
+     "locator": "paragraph 2",
+     "snippet": "₹42/kg for the 5-ply"
+    },
+    "basis_count": null,
+    "price_basis": "per_kg",
+    "price_value": 42,
+    "rfx_line_no": 12,
+    "match_reason": "Group statement 'the 5-ply' applied to 5-ply RSC box 500x300x250",
+    "offered_spec": {
+     "ply": 5
+    },
+    "pieces_per_pack": null,
+    "match_confidence": 0.6,
+    "vendor_line_text": "₹42/kg for the 5-ply",
+    "weight_per_piece_kg": null,
+    "price_unit_as_written": "/kg"
+   },
+   {
+    "origin": "inferred",
+    "currency": "INR",
+    "deviation": [],
+    "basis_item": "kg",
+    "confidence": 0.55,
+    "provenance": {
+     "file": "email body",
+     "locator": "paragraph 2",
+     "snippet": "₹42/kg for the 5-ply"
+    },
+    "basis_count": null,
+    "price_basis": "per_kg",
+    "price_value": 42,
+    "rfx_line_no": 13,
+    "match_reason": "Group statement 'the 5-ply' applied to 5-ply RSC box 600x400x400 (BF 22)",
+    "offered_spec": {
+     "ply": 5
+    },
+    "pieces_per_pack": null,
+    "match_confidence": 0.6,
+    "vendor_line_text": "₹42/kg for the 5-ply",
+    "weight_per_piece_kg": null,
+    "price_unit_as_written": "/kg"
+   },
+   {
+    "origin": "inferred",
+    "currency": "INR",
+    "deviation": [],
+    "basis_item": "kg",
+    "confidence": 0.55,
+    "provenance": {
+     "file": "email body",
+     "locator": "paragraph 2",
+     "snippet": "₹42/kg for the 5-ply"
+    },
+    "basis_count": null,
+    "price_basis": "per_kg",
+    "price_value": 42,
+    "rfx_line_no": 14,
+    "match_reason": "Group statement 'the 5-ply' applied to 5-ply RSC box 450x300x350",
+    "offered_spec": {
+     "ply": 5
+    },
+    "pieces_per_pack": null,
+    "match_confidence": 0.6,
+    "vendor_line_text": "₹42/kg for the 5-ply",
+    "weight_per_piece_kg": null,
+    "price_unit_as_written": "/kg"
+   },
+   {
+    "origin": "inferred",
+    "currency": "INR",
+    "deviation": [],
+    "basis_item": "kg",
+    "confidence": 0.55,
+    "provenance": {
+     "file": "email body",
+     "locator": "paragraph 2",
+     "snippet": "₹42/kg for the 5-ply"
+    },
+    "basis_count": null,
+    "price_basis": "per_kg",
+    "price_value": 42,
+    "rfx_line_no": 15,
+    "match_reason": "Group statement 'the 5-ply' applied to 5-ply RSC box 550x450x350 (BF 22)",
+    "offered_spec": {
+     "ply": 5
+    },
+    "pieces_per_pack": null,
+    "match_confidence": 0.6,
+    "vendor_line_text": "₹42/kg for the 5-ply",
+    "weight_per_piece_kg": null,
+    "price_unit_as_written": "/kg"
+   },
+   {
+    "origin": "inferred",
+    "currency": "INR",
+    "deviation": [],
+    "basis_item": "kg",
+    "confidence": 0.55,
+    "provenance": {
+     "file": "email body",
+     "locator": "paragraph 2",
+     "snippet": "₹42/kg for the 5-ply"
+    },
+    "basis_count": null,
+    "price_basis": "per_kg",
+    "price_value": 42,
+    "rfx_line_no": 16,
+    "match_reason": "Group statement 'the 5-ply' applied to 5-ply RSC box 600x500x450 (BF 22)",
+    "offered_spec": {
+     "ply": 5
+    },
+    "pieces_per_pack": null,
+    "match_confidence": 0.6,
+    "vendor_line_text": "₹42/kg for the 5-ply",
+    "weight_per_piece_kg": null,
+    "price_unit_as_written": "/kg"
+   },
+   {
+    "origin": "inferred",
+    "currency": "INR",
+    "deviation": [],
+    "basis_item": "kg",
+    "confidence": 0.4,
+    "provenance": {
+     "file": "email body",
+     "locator": "paragraph 2",
+     "snippet": "₹42/kg for the 5-ply"
+    },
+    "basis_count": null,
+    "price_basis": "per_kg",
+    "price_value": 42,
+    "rfx_line_no": 24,
+    "match_reason": "Group statement 'the 5-ply' applied to printed 5-ply RSC box 400x300x250 (2-colour flexo); unclear whether printed item is covered",
+    "offered_spec": {
+     "ply": 5
+    },
+    "pieces_per_pack": null,
+    "match_confidence": 0.45,
+    "vendor_line_text": "₹42/kg for the 5-ply",
+    "weight_per_piece_kg": null,
+    "price_unit_as_written": "/kg"
+   },
+   {
+    "origin": "inferred",
+    "currency": "INR",
+    "deviation": [],
+    "basis_item": "kg",
+    "confidence": 0.45,
+    "provenance": {
+     "file": "email body",
+     "locator": "paragraph 2",
+     "snippet": "₹42/kg for the 5-ply"
+    },
+    "basis_count": null,
+    "price_basis": "per_kg",
+    "price_value": 42,
+    "rfx_line_no": 27,
+    "match_reason": "Group statement 'the 5-ply' applied to 5-ply corrugated pad 1200x1000 (RFx unit kg); unclear whether pads are covered",
+    "offered_spec": {
+     "ply": 5
+    },
+    "pieces_per_pack": null,
+    "match_confidence": 0.5,
+    "vendor_line_text": "₹42/kg for the 5-ply",
+    "weight_per_piece_kg": null,
+    "price_unit_as_written": "/kg"
+   },
+   {
+    "origin": "inferred",
+    "currency": "INR",
+    "deviation": [],
+    "basis_item": "kg",
+    "confidence": 0.45,
+    "provenance": {
+     "file": "email body",
+     "locator": "paragraph 2",
+     "snippet": "38 for the 3-ply"
+    },
+    "basis_count": null,
+    "price_basis": "per_kg",
+    "price_value": 38,
+    "rfx_line_no": 1,
+    "match_reason": "Group statement 'the 3-ply' applied to 3-ply RSC box 250x200x150 (scope chosen: lines titled 3-ply: 1-8, 23, 26)",
+    "offered_spec": {
+     "ply": 3
+    },
+    "pieces_per_pack": null,
+    "match_confidence": 0.55,
+    "vendor_line_text": "38 for the 3-ply",
+    "weight_per_piece_kg": null,
+    "price_unit_as_written": "38 (no unit written; implied ₹/kg by parallel with '₹42/kg')"
+   },
+   {
+    "origin": "inferred",
+    "currency": "INR",
+    "deviation": [],
+    "basis_item": "kg",
+    "confidence": 0.45,
+    "provenance": {
+     "file": "email body",
+     "locator": "paragraph 2",
+     "snippet": "38 for the 3-ply"
+    },
+    "basis_count": null,
+    "price_basis": "per_kg",
+    "price_value": 38,
+    "rfx_line_no": 2,
+    "match_reason": "Group statement 'the 3-ply' applied to 3-ply RSC box 300x200x200",
+    "offered_spec": {
+     "ply": 3
+    },
+    "pieces_per_pack": null,
+    "match_confidence": 0.55,
+    "vendor_line_text": "38 for the 3-ply",
+    "weight_per_piece_kg": null,
+    "price_unit_as_written": "38 (no unit written; implied ₹/kg)"
+   },
+   {
+    "origin": "inferred",
+    "currency": "INR",
+    "deviation": [],
+    "basis_item": "kg",
+    "confidence": 0.45,
+    "provenance": {
+     "file": "email body",
+     "locator": "paragraph 2",
+     "snippet": "38 for the 3-ply"
+    },
+    "basis_count": null,
+    "price_basis": "per_kg",
+    "price_value": 38,
+    "rfx_line_no": 3,
+    "match_reason": "Group statement 'the 3-ply' applied to 3-ply RSC box 300x250x150",
+    "offered_spec": {
+     "ply": 3
+    },
+    "pieces_per_pack": null,
+    "match_confidence": 0.55,
+    "vendor_line_text": "38 for the 3-ply",
+    "weight_per_piece_kg": null,
+    "price_unit_as_written": "38 (no unit written; implied ₹/kg)"
+   },
+   {
+    "origin": "inferred",
+    "currency": "INR",
+    "deviation": [],
+    "basis_item": "kg",
+    "confidence": 0.45,
+    "provenance": {
+     "file": "email body",
+     "locator": "paragraph 2",
+     "snippet": "38 for the 3-ply"
+    },
+    "basis_count": null,
+    "price_basis": "per_kg",
+    "price_value": 38,
+    "rfx_line_no": 4,
+    "match_reason": "Group statement 'the 3-ply' applied to 3-ply RSC box 350x250x200 (C flute)",
+    "offered_spec": {
+     "ply": 3
+    },
+    "pieces_per_pack": null,
+    "match_confidence": 0.55,
+    "vendor_line_text": "38 for the 3-ply",
+    "weight_per_piece_kg": null,
+    "price_unit_as_written": "38 (no unit written; implied ₹/kg)"
+   },
+   {
+    "origin": "inferred",
+    "currency": "INR",
+    "deviation": [],
+    "basis_item": "kg",
+    "confidence": 0.45,
+    "provenance": {
+     "file": "email body",
+     "locator": "paragraph 2",
+     "snippet": "38 for the 3-ply"
+    },
+    "basis_count": null,
+    "price_basis": "per_kg",
+    "price_value": 38,
+    "rfx_line_no": 5,
+    "match_reason": "Group statement 'the 3-ply' applied to 3-ply RSC box 200x150x100",
+    "offered_spec": {
+     "ply": 3
+    },
+    "pieces_per_pack": null,
+    "match_confidence": 0.55,
+    "vendor_line_text": "38 for the 3-ply",
+    "weight_per_piece_kg": null,
+    "price_unit_as_written": "38 (no unit written; implied ₹/kg)"
+   },
+   {
+    "origin": "inferred",
+    "currency": "INR",
+    "deviation": [],
+    "basis_item": "kg",
+    "confidence": 0.45,
+    "provenance": {
+     "file": "email body",
+     "locator": "paragraph 2",
+     "snippet": "38 for the 3-ply"
+    },
+    "basis_count": null,
+    "price_basis": "per_kg",
+    "price_value": 38,
+    "rfx_line_no": 6,
+    "match_reason": "Group statement 'the 3-ply' applied to 3-ply RSC box 400x300x200 (C flute)",
+    "offered_spec": {
+     "ply": 3
+    },
+    "pieces_per_pack": null,
+    "match_confidence": 0.55,
+    "vendor_line_text": "38 for the 3-ply",
+    "weight_per_piece_kg": null,
+    "price_unit_as_written": "38 (no unit written; implied ₹/kg)"
+   },
+   {
+    "origin": "inferred",
+    "currency": "INR",
+    "deviation": [],
+    "basis_item": "kg",
+    "confidence": 0.45,
+    "provenance": {
+     "file": "email body",
+     "locator": "paragraph 2",
+     "snippet": "38 for the 3-ply"
+    },
+    "basis_count": null,
+    "price_basis": "per_kg",
+    "price_value": 38,
+    "rfx_line_no": 7,
+    "match_reason": "Group statement 'the 3-ply' applied to 3-ply RSC cube box 250x250x250",
+    "offered_spec": {
+     "ply": 3
+    },
+    "pieces_per_pack": null,
+    "match_confidence": 0.55,
+    "vendor_line_text": "38 for the 3-ply",
+    "weight_per_piece_kg": null,
+    "price_unit_as_written": "38 (no unit written; implied ₹/kg)"
+   },
+   {
+    "origin": "inferred",
+    "currency": "INR",
+    "deviation": [],
+    "basis_item": "kg",
+    "confidence": 0.45,
+    "provenance": {
+     "file": "email body",
+     "locator": "paragraph 2",
+     "snippet": "38 for the 3-ply"
+    },
+    "basis_count": null,
+    "price_basis": "per_kg",
+    "price_value": 38,
+    "rfx_line_no": 8,
+    "match_reason": "Group statement 'the 3-ply' applied to 3-ply RSC box 320x220x120",
+    "offered_spec": {
+     "ply": 3
+    },
+    "pieces_per_pack": null,
+    "match_confidence": 0.55,
+    "vendor_line_text": "38 for the 3-ply",
+    "weight_per_piece_kg": null,
+    "price_unit_as_written": "38 (no unit written; implied ₹/kg)"
+   },
+   {
+    "origin": "inferred",
+    "currency": "INR",
+    "deviation": [],
+    "basis_item": "kg",
+    "confidence": 0.35,
+    "provenance": {
+     "file": "email body",
+     "locator": "paragraph 2",
+     "snippet": "38 for the 3-ply"
+    },
+    "basis_count": null,
+    "price_basis": "per_kg",
+    "price_value": 38,
+    "rfx_line_no": 23,
+    "match_reason": "Group statement 'the 3-ply' applied to printed 3-ply RSC box 300x200x150 (1-colour flexo); unclear whether printed item is covered",
+    "offered_spec": {
+     "ply": 3
+    },
+    "pieces_per_pack": null,
+    "match_confidence": 0.4,
+    "vendor_line_text": "38 for the 3-ply",
+    "weight_per_piece_kg": null,
+    "price_unit_as_written": "38 (no unit written; implied ₹/kg)"
+   },
+   {
+    "origin": "inferred",
+    "currency": "INR",
+    "deviation": [],
+    "basis_item": "kg",
+    "confidence": 0.4,
+    "provenance": {
+     "file": "email body",
+     "locator": "paragraph 2",
+     "snippet": "38 for the 3-ply"
+    },
+    "basis_count": null,
+    "price_basis": "per_kg",
+    "price_value": 38,
+    "rfx_line_no": 26,
+    "match_reason": "Group statement 'the 3-ply' applied to 3-ply corrugated sheet 1000x800 (RFx unit kg); unclear whether sheets are covered",
+    "offered_spec": {
+     "ply": 3
+    },
+    "pieces_per_pack": null,
+    "match_confidence": 0.45,
+    "vendor_line_text": "38 for the 3-ply",
+    "weight_per_piece_kg": null,
+    "price_unit_as_written": "38 (no unit written; implied ₹/kg)"
+   }
+  ],
+  "image_quality": [
+   {
+    "file": "ISO certificate.pdf",
+    "issues": [],
+    "readable": "fully"
+   }
+  ],
+  "commercial_terms": {
+   "gst": null,
+   "other": [],
+   "freight": {
+    "note": "freight extra",
+    "basis": "extra_unknown",
+    "amount": null,
+    "currency": null,
+    "provenance": {
+     "file": "email body",
+     "locator": "paragraph 2",
+     "snippet": "rest same as last year, freight extra."
+    },
+    "shipments_per_year": null
+   },
+   "incoterm": null,
+   "validity": null,
+   "discounts": [],
+   "lead_time": null,
+   "payment_terms": null
+  },
+  "overall_confidence": 0.45,
+  "questionnaire_answers": [
+   {
+    "q_no": 1,
+    "confidence": 0.7,
+    "provenance": {
+     "file": "ISO certificate.pdf",
+     "locator": "page 1",
+     "snippet": "ISO 9001:2015 ... Certificate No.: ACS/QMS/21/3390 ... Valid until: 31 August 2026"
+    },
+    "value_bool": null,
+    "value_unit": null,
+    "answer_text": "No explicit answer; attached ISO 9001:2015 certificate (No. ACS/QMS/21/3390) valid until 31 August 2026, i.e. expired before the reply date (29 Sep 2026). Current validity not demonstrated.",
+    "value_number": null
+   },
+   {
+    "q_no": 5,
+    "confidence": 0.5,
+    "provenance": {
+     "file": "ISO certificate.pdf",
+     "locator": "page 1",
+     "snippet": "Gat No. 1187, Kharabwadi, Chakan, Tal. Khed, Pune 410501"
+    },
+    "value_bool": null,
+    "value_unit": "km",
+    "answer_text": "Plant address on certificate: Gat No. 1187, Kharabwadi, Chakan, Tal. Khed, Pune 410501 (signature: 'Om Sai Cartons, Chakan'). Distance in km not stated.",
+    "value_number": null
+   }
+  ]
+ }
+}

@@ -4,6 +4,7 @@ import { db, isSupabaseConfigured, STORAGE_BUCKET } from "@/lib/supabase";
 export async function GET() {
   const checks = {
     openrouterKey: Boolean(process.env.OPENROUTER_API_KEY),
+    geminiKey: Boolean(process.env.GEMINI_API_KEY),
     supabaseEnv: isSupabaseConfigured(),
     schema: false,
     bucket: false,

@@ -9,9 +9,11 @@
     "lint": "eslint",
     "seed:files": "tsx seed/generate/index.ts",
     "seed": "tsx --conditions=react-server --env-file=.env.local seed/seed.ts",
-    "extract": "tsx --conditions=react-server --env-file=.env.local seed/extract-one.ts"
+    "extract": "tsx --conditions=react-server --env-file=.env.local seed/extract-one.ts",
+    "check:gemini": "tsx --conditions=react-server --env-file=.env.local seed/check-gemini.ts"
   },
   "dependencies": {
+    "@google/genai": "^2.24.0",
     "@supabase/supabase-js": "^2.117.2",
     "exceljs": "^4.4.0",
     "heic-convert": "^2.1.0",

@@ -179,6 +179,26 @@ export function normalize(b: RfxBundle, opts: NormalizeOptions = {}): Comparison
       cells.push(base);
     }
 
+    // Whole-reply low confidence (e.g. a blurry or angled photo): keep every
+    // value, but flag them all ⚠ until the buyer confirms the reading.
+    if (resp && resp.processing_status === "done" && ext) {
+      const poorImg = ext.image_quality.filter((q) => q.readable === "partly" || q.readable === "no");
+      const low = (ext.overall_confidence ?? 1) < 0.7 || poorImg.length > 0;
+      const key = `lowext:${resp.id}`;
+      const r = res(key);
+      if (low && !(r && r.accept === true) && !dismissed(key)) {
+        const vc = cells.filter((c) => c.vendor_id === v.id && c.source?.kind === "quote" && c.unit_inr != null);
+        for (const c of vc) { if (!c.flags.includes("low_confidence")) c.flags.push("low_confidence"); c.open_item_keys.push(key); }
+        const why = [
+          (ext.overall_confidence ?? 1) < 0.7 ? `overall reading confidence ${Math.round((ext.overall_confidence ?? 0) * 100)}%` : null,
+          ...poorImg.map((q) => `${q.file} only ${q.readable} readable${q.issues.length ? ` (${q.issues.slice(0, 3).join(", ")})` : ""}`),
+        ].filter(Boolean).join("; ");
+        addItem({ key, kind: "confirm_interpretation", vendor_id: v.id, response_id: resp.id, rfx_line_id: null, quote_line_id: null,
+          message: `${vName}'s reply was read with low confidence (${why}). All ${vc.length} extracted prices are kept but flagged — compare them with the original and confirm, or correct individual values.`,
+          details: { subkind: "low_confidence_extraction", confidence: ext.overall_confidence, image_quality: ext.image_quality, line_nos: vc.map((c) => c.line_no), fingerprint: `lowext:${v.id}:${ext.overall_confidence}` } });
+      }
+    }
+
     // Missing lines → one open item per vendor
     if (resp && resp.processing_status === "done") {
       const missing = cells.filter((c) => c.vendor_id === v.id && c.state === "not_quoted").map((c) => c.line_no);
