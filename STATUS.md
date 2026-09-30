@@ -19,8 +19,18 @@ Repo: github.com/ranjanram22/aerchain-quote-tool (private)
 - Acceptance: Home lists the seed RFx; Admin tabs show vendors, products, last-year prices, FX. Verified locally (including an FX edit round trip) and on the live URL.
 - Vendor D photo taken by Ranjan (angled phone shot of the rate card on a laptop screen) → `seed/files/vendor-d/rate-card-photo.jpg`.
 
+## Phase 2: Extraction + normalization — DONE (2026-09-30)
+- `lib/extract/`: preprocess (Excel/CSV → cell grid, Word → numbered paragraphs, PDF/images → vision), generic prompt, zod schema, run with repair + escalation, persistence with provenance.
+- `lib/normalize.ts`: deterministic unit/FX/discount/freight/last-year/deviation/coverage/outlier/questionnaire logic; derives open items. `lib/rfx-data.ts`: bundle loader + open-item sync.
+- `lib/followup.ts` + `POST /api/rfx/[id]/followup`: structured gap list → LLM-drafted email (template fallback).
+- `POST /api/rfx/[id]/responses`: upload files/email text, extraction runs in the background (`after`).
+- `npm run seed` now runs the real pipeline on all 5 replies; `npm run extract -- <A-E>` re-runs one vendor; `seed/verify.ts` checks against generator ground truth.
+- Acceptance: A 30/30, B 30/30, C 30/30 (27 quoted + deviation + per-bundle ⚠), D 30/30 from the angled phone photo (line 18 per-kg ⚠), E: per-kg converted via RFx spec weights, "rest same as last year" → assumed from last-year contract, lines 29–30 ⚠, freight ⚠, expired ISO → fail. See TESTS.md.
+
 ## Next
-Phase 2: extraction + normalization pipeline, run on all 5 vendors.
+Phase 3: RFx workspace UI (Summary, Comparison grid + source drawer, questionnaire matrix, Responses with upload, Outbox, Activity, ⚠ inline inputs).
 
 ## Known issues
+- Vendor E's "the 3-ply / the 5-ply" was applied by the model to every 3-/5-ply line (incl. printed boxes and sheets); flagged as one ⚠ scope confirmation per group. Lines 23–24 need piece weights. This is intended behaviour for an ambiguous reply, not an extraction error.
+- Vendor D fails "all mandatory" until the buyer marks Q3 (in-house testing: card mentions burst & BCT, not ECT/reports) as pass or fail.
 - Vercel did not start a build on the initial import; an empty commit push triggered it. Pushes to `main` deploy normally now.

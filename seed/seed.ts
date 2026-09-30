@@ -8,6 +8,7 @@ import {
   VENDORS, LINES, QUESTIONS, RFX, RFX_DATE, LAST_YEAR, LAST_YEAR_CONTRACT, FX, lineSpec, lineDescription,
 } from "./data";
 import { buildInviteEmail } from "../lib/rfx-email";
+import { loadAndExtract } from "./responses";
 
 const url = process.env.SUPABASE_URL, key = process.env.SUPABASE_SERVICE_ROLE_KEY;
 if (!url || !key) throw new Error("Missing SUPABASE_URL / SUPABASE_SERVICE_ROLE_KEY in .env.local");
@@ -141,7 +142,15 @@ async function main() {
     "insert audit",
   );
   console.log("  5 invitations in Outbox");
-  console.log("Done. Vendor responses are loaded by the extraction pipeline (Phase 2).");
+  if (process.argv.includes("--no-extract")) {
+    console.log("Done (skipped extraction).");
+    return;
+  }
+  console.log("Running the extraction pipeline on each vendor's reply (a few minutes)…");
+  const ids = Object.fromEntries(VENDORS.map((v) => [v.key, vendorId(v.key)]));
+  const results = await loadAndExtract(rfx.id, ids, VENDORS.map((v) => v.key));
+  const failed = results.filter((r) => !r.ok).length;
+  console.log(failed ? `Done with ${failed} failed extraction(s). Re-run one with: npm run extract -- <A-E>` : "Done.");
 }
 
 main().catch((e) => {

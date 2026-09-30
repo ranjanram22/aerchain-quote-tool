@@ -8,11 +8,13 @@
     "start": "next start",
     "lint": "eslint",
     "seed:files": "tsx seed/generate/index.ts",
-    "seed": "tsx --env-file=.env.local seed/seed.ts"
+    "seed": "tsx --conditions=react-server --env-file=.env.local seed/seed.ts",
+    "extract": "tsx --conditions=react-server --env-file=.env.local seed/extract-one.ts"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.117.2",
     "exceljs": "^4.4.0",
+    "mammoth": "^1.13.0",
     "next": "16.3.7",
     "openai": "^7.25.0",
     "react": "19.2.8",

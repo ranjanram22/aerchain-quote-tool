@@ -94,3 +94,34 @@ Real email send/receive; vendor portal; authentication and roles (a VP uses the 
 - **What**: Vendor A states USD 850 per shipment and about 4 shipments per month. Annual freight = amount × shipments/year, converted to INR and spread across that vendor's quoted lines in proportion to line value (qty × unit price).
 - **Alternatives**: Allocate by volume or weight (needs data we don't have); per piece (ignores that big boxes fill trucks faster).
 - **Why**: Value-weighted allocation needs no invented facts, and the method is stated in the tooltip so a buyer can challenge it.
+
+## Extraction & normalization (Phase 2)
+
+### E1. JSON Schema in the prompt + zod validation, instead of provider "structured output" mode
+- **What**: The zod schema (`lib/extract/schema.ts`) is converted to JSON Schema and put in the system prompt; the reply is parsed and validated with zod. On failure: one repair round with the validation errors, then escalation to `EXTRACTION_HARD_MODEL`.
+- **Alternatives**: OpenRouter `response_format: json_schema`.
+- **Why**: Structured-output support varies by provider behind OpenRouter; prompt + validation works with any model and gives the same guarantee (nothing unvalidated is stored).
+
+### E2. Escalation to the stronger model
+- **What**: Re-run on Claude Opus when the first pass is invalid, overall confidence < 0.6, or a photo is reported only partly readable — and only if ≥ 4 minutes of the request budget remain. The better-confidence result wins; every attempt is stored in `extractions.attempts`.
+- **Why**: Opus costs ~2× Sonnet; most replies don't need it. In the seed run only the one-line incumbent email (ambiguous "the 5-ply") escalated.
+
+### E3. PDFs sent natively to the vision model; no local PDF text extraction
+- **What**: PDFs go to Claude as file parts; the model cites page and row in provenance. `pdf-parse` (SPEC fallback) is not used.
+- **Why**: Claude reads text and scanned PDFs natively, including tables; a second text path adds a dependency without improving provenance. Revisit if a PDF fails in Phase 6.
+
+### E4. Open items have stable keys; buyer answers carry over to re-extractions
+- **What**: Normalization derives each open item with a deterministic key (e.g. `ppp:<quote_line>`, `freight:<response>`) and a fingerprint of the underlying fact. `syncOpenItems` inserts new ones, auto-closes ones that no longer apply, and copies a previous buyer resolution when a new response version has the same fingerprint.
+- **Why**: SPEC §6: re-running keeps buyer confirmations where the underlying value is unchanged. Normalization reads resolutions from `open_items`, so there is one place where buyer input lives.
+
+### E5. Group statements become one confirmation, not one per line
+- **What**: When a vendor gives one price for a group ("₹42/kg for the 5-ply"), the model expands it to each plausible RFx line (origin `inferred`), and normalization groups all those lines into a single "confirm this scope" item.
+- **Why**: The scope is genuinely ambiguous (5-ply shippers only, or also the printed 5-ply box and 5-ply pads?). The buyer should decide once, seeing exactly which lines were included.
+
+### E6. Unclear answers to mandatory questions become ⚠ items; unclear ≠ pass
+- **What**: A mandatory question answered only partly (e.g. "in-house burst & BCT lab" when the question asks for burst, BCT and ECT with lot reports) is `unknown`, the vendor is not counted as "passes all mandatory", and a ⚠ item asks the buyer to mark it pass or fail.
+- **Why**: "Never guess silently." Treating a partial claim as a pass would overstate compliance; treating it as a fail would wrongly exclude the vendor.
+
+### E7. Certificates decide certificate questions
+- **What**: If a certificate for the question's topic is attached, its valid-until date against the RFx date decides pass/fail, whatever the vendor claims. A "yes" with no certificate is `unknown`.
+- **Why**: A buyer trusts documents over claims; this is exactly how the incumbent's expired ISO certificate is caught.
