@@ -11,8 +11,8 @@
 
 export type ModelTask = "extraction" | "copilot" | "analysis" | "followup" | "ping";
 
-export const GEMINI_FLASH = "gemini:gemini-flash-latest"; // replaced with the verified ID after check:gemini
-export const GEMINI_FLASH_LITE = "gemini:gemini-flash-lite-latest"; // replaced with the verified ID after check:gemini
+export const GEMINI_FLASH = "gemini:gemini-3.8-flash"; // verified via ListModels + ping, 2026-09-30
+export const GEMINI_FLASH_LITE = "gemini:gemini-3.5-flash-lite"; // verified via ListModels + ping, 2026-09-30
 export const NEMOTRON_FREE = "openrouter:nvidia/nemotron-3-ultra-550b-a55b:free";
 
 export interface ModelRoute {
