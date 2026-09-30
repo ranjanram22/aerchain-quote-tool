@@ -18,6 +18,8 @@ Unseen inputs and unrehearsed questions, with outcomes. Filled in during Phase 6
 | D | Phone photo of rate card (angled, rows drift) | Sonnet 5.5 | 30/30 | Per-kg 7-ply with printed weights converted; line 18 weight missing ⚠ |
 | E | One-line email + expired ISO PDF | Opus 5.5 (escalated) | 26/30 | Model applied "the 3-ply/5-ply" to printed boxes and sheets too (ambiguous; flagged for confirmation). Expired cert → Q1 fail. |
 
+Live upload test (Vercel): re-sent vendor C's .docx + ISO PDF to `POST /api/rfx/[id]/responses`; background extraction finished on Vercel, new version superseded v1, 30/30 match, old open items auto-closed and new ones created.
+
 Follow-up drafts (Nemotron free) for E and C: specific, used only the gap list, correct line numbers.
 
 ## Unseen inputs
