@@ -143,3 +143,11 @@ Real email send/receive; vendor portal; authentication and roles (a VP uses the 
 - **Last-year baseline.** The incumbent's price (the vendor with the most last-year records) where one exists, otherwise the lowest last-year price for that line.
 - **Discount what-ifs are evaluated on landed cost** (discounts don't change the quoted unit price). If the requested scenario equals today's state, the opposite is shown so the effect is visible.
 - **Cut per SPEC §9:** "Pin to Summary" is not built (first item on the cut list). Chat history is kept per browser (localStorage), not in the database.
+
+### C1. Co-pilot design (Phase 5)
+- **Drafts live in the database from the first click.** "New RFx" creates an `rfxs` row with status `draft`; every co-pilot tool call and every direct edit writes to it, so the right-hand draft is always the saved state (refresh-safe, no separate draft store). `/rfx/[id]` shows the co-pilot while the status is `draft` and the workspace afterwards.
+- **Same operations for the model and the buyer** (`lib/draft.ts`): set_header, add/update/remove line, set_questionnaire, set_terms, search_catalog. The model never writes to tables directly.
+- **Catalog first.** The co-pilot searches the catalog before creating a line and copies the product's spec + `product_id` when it matches; the draft marks those lines "✓ from catalog".
+- **No invented commercial facts.** The co-pilot may draft the questionnaire (the buyer reviews it) but must not record quantities, dates or terms the buyer did not state; suggestions go in the reply. Added after a test turn recorded a placeholder deadline.
+- **Model:** stays on free Nemotron (tool calling worked on every test turn; 16–120 s per turn). Latency is the main weakness; switching is one line in `lib/models.ts` if needed.
+- **Publish** writes `rfx_vendors`, one invitation per vendor to the Outbox (same template as the seed), sets status `sent` and the RFx date. "Simulated send" is stated in the dialog and the Outbox.

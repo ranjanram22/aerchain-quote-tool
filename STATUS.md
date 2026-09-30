@@ -43,8 +43,14 @@ Repo: github.com/ranjanram22/aerchain-quote-tool (private)
 - Acceptance (all answered correctly with traced numbers): cheapest per line among mandatory-compliant vendors; same with freight; who hasn't answered what; what changes if Shree Ganesh's discount doesn't apply.
 - Cut: pin-to-summary (SPEC §9 first cut).
 
+## Phase 5: Co-pilot + publish — DONE (2026-09-30)
+- Home "New RFx" → draft RFx in DB → split view: co-pilot chat (left) + live editable draft (right: header, lines with spec, questionnaire with mandatory toggles, terms, "still missing" banner).
+- Co-pilot tools: set_header, search_catalog, add/update/remove line, set_questionnaire, set_terms (`lib/copilot.ts`, `lib/draft.ts`); paste-a-list parses rows into lines.
+- Publish dialog: pick vendors → invitations in Outbox (simulated) → status Sent → workspace.
+- Acceptance: built a 5-line Nashik RFx by chat (3 items described + 2 pasted rows, all matched to catalog), 15-question questionnaire, terms; published to 3 vendors; pasted an email reply from one vendor → extracted 5/5 lines (per 100 converted, freight ₹3,200/trip × 60 trips/yr) and shown in the grid.
+
 ## Next
-Phase 5: co-pilot (chat → structured RFx draft), catalog use, paste-a-list, publish to outbox.
+Phase 6: hardening — unseen inputs, 15 unrehearsed questions, error states, demo data reset.
 
 ## Known issues
 - Vendor E's "the 3-ply / the 5-ply" was applied by the model to every 3-/5-ply line (incl. printed boxes and sheets); flagged as one ⚠ scope confirmation per group. Lines 23–24 need piece weights. This is intended behaviour for an ambiguous reply, not an extraction error.

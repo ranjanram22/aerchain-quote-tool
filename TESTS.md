@@ -34,6 +34,15 @@ Follow-up drafts (Nemotron free) for E and C: specific, used only the gap list, 
 
 All answers passed the number post-check (some after one regeneration).
 
+## Phase 5 end-to-end (2026-09-30)
+| Step | Result |
+|---|---|
+| "Packaging for Nashik warehouse: 5-ply 600x400x400 ~20000/yr, 3-ply 250x200x150 60000/yr, 12-cell partitions 15000 sets" | Header + 3 catalog-matched lines + 15-question questionnaire; also recorded a placeholder deadline → prompt tightened (no unstated terms) |
+| Pasted 2 tab-separated rows | 2 lines added, catalog-matched, qty/unit kept |
+| "Quotes due 20 Oct 2026, payment 45 days, DAP Nashik, freight included, GST extra, INR" | Terms updated |
+| Publish to 3 vendors | 3 invitations in Outbox, status Sent |
+| Pasted email reply (per 100, per set, each, per kg, freight per trip × trips/month) | 5/5 lines extracted and converted; freight ₹3,200 × 60/yr computed |
+
 ## Unseen inputs
 _(Phase 6)_
 

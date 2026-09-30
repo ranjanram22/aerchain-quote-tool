@@ -16,7 +16,7 @@ export default function Summary({ data, goTo }: { data: WorkspaceData; goTo: (ta
   const byVendor = [...cmp.vendors].sort((a, b) => a.total_unit_inr - b.total_unit_inr);
 
   const flags: { tone: string; text: string }[] = [];
-  for (const v of cmp.vendors) {
+  for (const v of cmp.vendors.filter((x) => x.replied)) {
     for (const f of v.mandatory_failures) flags.push({ tone: "rose", text: `${v.name}: fails mandatory ${f}` });
     for (const f of v.mandatory_unknown) flags.push({ tone: "amber", text: `${v.name}: mandatory unverified — ${f}` });
     if (v.replied && v.freight.status === "unknown") flags.push({ tone: "amber", text: `${v.name}: ${v.freight.text} — landed cost incomplete` });

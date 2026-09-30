@@ -101,12 +101,13 @@ export default function ComparisonGrid({ data, onOpenCell }: { data: WorkspaceDa
                     const isMin = min != null && counts(c) && v === min;
                     const hasOpen = c.open_item_keys.some((k) => openKeys.has(k));
                     const vendorName = vendors.find((x) => x.id === c.vendor_id)!.name;
+                    const awaiting = !cmp.vendors.find((x) => x.vendor_id === c.vendor_id)?.replied;
                     return (
                       <td key={c.vendor_id} className="border-b border-l border-slate-100 p-1">
                         <button onClick={() => onOpenCell(c)} className={`group relative w-full rounded px-1.5 py-1 text-left ring-1 ${m.cls} ${isMin ? "outline outline-2 outline-emerald-500" : ""} hover:brightness-95`}>
                           <div className="flex items-center justify-between gap-1">
                             <span className={`tabular-nums ${c.state === "not_quoted" ? "italic" : "font-medium"}`}>
-                              {c.state === "not_quoted" ? "Not quoted" : c.state === "needs_input" ? "Needs input" : v != null ? inr(v) : basis === "landed" ? "Freight ?" : "—"}
+                              {awaiting ? "Awaiting reply" : c.state === "not_quoted" ? "Not quoted" : c.state === "needs_input" ? "Needs input" : v != null ? inr(v) : basis === "landed" ? "Freight ?" : "—"}
                             </span>
                             <span className="flex items-center gap-0.5 text-[10px]">
                               {m.icon && <span title={m.label}>{m.icon}</span>}
