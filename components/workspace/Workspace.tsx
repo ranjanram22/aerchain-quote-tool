@@ -9,6 +9,7 @@ import ComparisonGrid from "./ComparisonGrid";
 import Questionnaire from "./Questionnaire";
 import Responses from "./Responses";
 import SourceDrawer from "./SourceDrawer";
+import Chat from "./Chat";
 import { dt } from "./format";
 
 const TABS = ["Summary", "Comparison", "Questionnaire & attachments", "Responses", "Outbox", "Activity"] as const;
@@ -94,9 +95,8 @@ export default function Workspace({ data }: { data: WorkspaceData }) {
             {tab === "Activity" && <Activity data={data} />}
           </div>
         </main>
-        <aside className="hidden min-w-[320px] flex-[35] flex-col border-l border-slate-200 bg-white lg:flex">
-          <div className="border-b border-slate-100 px-4 py-3 text-sm font-medium">Ask about this RFx</div>
-          <div className="flex flex-1 items-center justify-center p-6 text-center text-sm text-slate-500">The analysis chat arrives in Phase 4.</div>
+        <aside className="hidden min-w-[340px] flex-[35] flex-col border-l border-slate-200 bg-slate-50/50 lg:flex">
+          <Chat data={data} />
         </aside>
       </div>
       {cell && <SourceDrawer data={data} cell={cell} onClose={() => setCellKey(null)} />}

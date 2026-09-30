@@ -22,6 +22,18 @@ Live upload test (Vercel): re-sent vendor C's .docx + ISO PDF to `POST /api/rfx/
 
 Follow-up drafts (Nemotron free) for E and C: specific, used only the gap list, correct line numbers.
 
+## Phase 4 acceptance questions (2026-09-30)
+| Question | Nemotron free | Sonnet 5.5 (adopted) |
+|---|---|---|
+| Cheapest per line among vendors who pass all mandatory items | Correct tool; chose landed basis unasked; prose slip ("Mahalaxmi, Om Sai … mandatory-compliant"); 25–113 s | Correct (unit basis, ₹3.85 cr, 30/30, split A/C/B, −₹6.42 L vs best single, −0.46% vs last year, exclusions stated); 11 s |
+| Same but with freight | Correct (landed, ₹3.93 cr); 44 s | — (same tool, landed) |
+| Who hasn't answered what? | Correct, complete; 22 s | — |
+| What changes if Shree Ganesh's discount doesn't apply? | Said "no change" (true: not applied today) but missed the effect; 57–105 s | Correct: not applied today; confirming it would cut the award from ₹3.90 cr to ₹3.85 cr and shift lines to Shree Ganesh; 11 s |
+| Bar chart of like-for-like landed totals | — | Chart + table over 26 common lines; Om Sai excluded (freight unknown) with reason |
+| Cheapest on 7-ply and any catch | — | Transpac on unit price; flagged freight uplift, Om Sai expired ISO, Mahalaxmi per-kg gap, Deccan not quoting 17–18 |
+
+All answers passed the number post-check (some after one regeneration).
+
 ## Unseen inputs
 _(Phase 6)_
 

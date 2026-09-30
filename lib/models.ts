@@ -19,7 +19,8 @@ export interface ModelRoute {
 export const EXTRACTION_MODEL = "anthropic/claude-sonnet-5.5";
 export const EXTRACTION_HARD_MODEL = "anthropic/claude-opus-5.5";
 export const COPILOT_MODEL = "nvidia/nemotron-3-ultra-550b-a55b:free";
-export const ANALYSIS_MODEL = "nvidia/nemotron-3-ultra-550b-a55b:free";
+// Switched from the free Nemotron model after Phase 4 testing (see DECISIONS.md T7).
+export const ANALYSIS_MODEL = "anthropic/claude-sonnet-5.5";
 
 export const MODELS: Record<ModelTask, ModelRoute> = {
   extraction: {
@@ -40,7 +41,7 @@ export const MODELS: Record<ModelTask, ModelRoute> = {
   },
   analysis: {
     model: ANALYSIS_MODEL,
-    fallback: "nvidia/nemotron-3-ultra-550b-a55b",
+    fallback: "anthropic/claude-sonnet-5",
     timeoutMs: 120_000,
   },
   followup: {

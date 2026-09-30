@@ -129,3 +129,17 @@ Real email send/receive; vendor portal; authentication and roles (a VP uses the 
 ### P1. Ambiguous seed interpretations stay as buyer decisions (Ranjan, 2026-09-30)
 - **What**: (1) Om Sai's "the 3-ply / the 5-ply" scope stays a ⚠ confirmation with the model's broad reading (incl. printed boxes and pads) shown as a disclaimer. (2) Mahalaxmi's partial answer on in-house testing stays "unclear", so it is not counted as passing all mandatory items until the buyer decides.
 - **Why**: Both are realistic judgment calls a buyer must own; the demo shows the tool surfacing them instead of silently deciding.
+
+### T7. Analysis chat switched from free Nemotron to Claude Sonnet 5.5 (Phase 4)
+- **What**: `ANALYSIS_MODEL` = `anthropic/claude-sonnet-5.5` (fallback `anthropic/claude-sonnet-5`). Co-pilot and follow-up drafts stay on free Nemotron.
+- **Evidence** (same 4 acceptance questions, same tools): Nemotron free answered with correct tool calls and passed the number check, but took 22–113 s per answer (free-tier queueing; one fell back to the paid variant) and made factual slips in prose that the number check cannot catch (e.g. calling excluded vendors "mandatory-compliant"). Sonnet answered in ~11 s, stated basis/coverage/exclusions correctly, and on the discount what-if explained that the discount is not applied today and quantified the effect of confirming it.
+- **Cost**: ~10–20k input tokens per question ≈ ₹3–5 per answer. Acceptable for a buyer deciding a ₹4 crore award.
+- **Why**: SPEC §2 allows the switch if reliability is poor. Trust is graded; a wrong sentence next to a correct number still misleads.
+
+### A1. Analysis agent design (Phase 4)
+- **Tables come only from tools.** Each tool returns typed tables with ids; the model picks which to show (`show_tables`) and can only chart an existing table (`make_chart(table_id, columns)`). The model never passes rows or numbers into a table.
+- **Number post-check.** Every number in the answer text must match a number in that turn's tool outputs (allowing rounding and lakh/crore/₹ formatting; small integers such as line numbers, counts and years are exempt). On failure the answer is regenerated once; if it still fails, a red banner lists the untraceable figures.
+- **Split award method.** Exhaustive over vendor subsets (2^5 = 32 for this RFx); within a subset each line goes to its cheapest eligible vendor; share limits are then met by moving the lines with the smallest extra cost. The best solution covers the most lines, then costs least. This is exact for "max N vendors" and near-optimal with share limits, which is stated in the caveats.
+- **Last-year baseline.** The incumbent's price (the vendor with the most last-year records) where one exists, otherwise the lowest last-year price for that line.
+- **Discount what-ifs are evaluated on landed cost** (discounts don't change the quoted unit price). If the requested scenario equals today's state, the opposite is shown so the effect is visible.
+- **Cut per SPEC §9:** "Pin to Summary" is not built (first item on the cut list). Chat history is kept per browser (localStorage), not in the database.

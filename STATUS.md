@@ -35,8 +35,16 @@ Repo: github.com/ranjanram22/aerchain-quote-tool (private)
 - Responses: per vendor side-by-side original ↔ extracted lines, AI notes, attempts, commercial terms, gaps list with inline forms, LLM follow-up draft → Send (simulated) → Outbox; upload/paste newer reply with auto-refresh while reading; retry on error.
 - Acceptance: resolving a ⚠ (C line 29 bundle size = 100) recomputed the grid, totals and coverage immediately and was logged in Activity with the note.
 
+## Phase 4: Analysis chat — DONE (2026-09-30)
+- `lib/agent/tools.ts`: 12 deterministic tools (overview, comparison, vendor profile, open items, rank with like-for-like, cheapest per line with savings vs single vendor and last year, constrained split, compare to last year, what-if, query_rows DSL, make_chart, make_table).
+- `lib/agent/run.ts`: tool loop (max 8 calls), structured answer, number post-check with one regeneration, ⚠ refs; `POST /api/rfx/[id]/chat`; `POST /api/export` (.xlsx).
+- Chat panel: quick chips, text + tables (Download Excel) + recharts charts, ⚠ chips that open the inline resolve form, "How this was computed" (tools + params, included, excluded, caveats, model, number check).
+- ANALYSIS_MODEL switched to Claude Sonnet 5.5 after testing (DECISIONS T7).
+- Acceptance (all answered correctly with traced numbers): cheapest per line among mandatory-compliant vendors; same with freight; who hasn't answered what; what changes if Shree Ganesh's discount doesn't apply.
+- Cut: pin-to-summary (SPEC §9 first cut).
+
 ## Next
-Phase 4: analysis chat (agent + tools + structured answers).
+Phase 5: co-pilot (chat → structured RFx draft), catalog use, paste-a-list, publish to outbox.
 
 ## Known issues
 - Vendor E's "the 3-ply / the 5-ply" was applied by the model to every 3-/5-ply line (incl. printed boxes and sheets); flagged as one ⚠ scope confirmation per group. Lines 23–24 need piece weights. This is intended behaviour for an ambiguous reply, not an extraction error.
