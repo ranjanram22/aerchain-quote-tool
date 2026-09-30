@@ -1,6 +1,6 @@
 import "server-only";
 import { createHash } from "node:crypto";
-import type { ChatCompletionMessageParam } from "openai/resources/chat/completions";
+import type { ChatCompletionContentPart, ChatCompletionMessageParam } from "openai/resources/chat/completions";
 import { db, STORAGE_BUCKET } from "../supabase";
 import { chat, textOf, type StatusFn } from "../llm";
 import { MODELS, displayModel } from "../models";
@@ -8,9 +8,14 @@ import { syncOpenItems } from "../rfx-data";
 import { Extraction, type ExtractionT } from "./schema";
 import { EXTRACTION_SYSTEM, rfxBrief, type RfxContext } from "./prompt";
 import { toContentParts, kindOf, type InputFile } from "./preprocess";
+import { secondRead } from "./second-read";
 
 // Bump when the extraction contract changes so old cache entries are ignored.
-const CACHE_VERSION = "v1";
+const CACHE_VERSION = "v5"; // v5: photos transcribed row by row before extraction
+
+const TRANSCRIBE = `Transcribe every table in this photo exactly, one printed row per output line, in the order printed.
+Format each line as: row <printed row number or label> | <cell 1> | <cell 2> | ...  (use "—" for an empty cell).
+Copy numbers and units exactly as printed. Read each row straight across; never move a value to another row. Then copy any notes, headers and footers as plain lines. Output only the transcript.`;
 
 function parseJson(text: string): unknown {
   let t = text.trim();
@@ -93,7 +98,7 @@ async function writeCache(key: string, v: { data: ExtractionT; model: string }) 
 
 export interface RunResult { ok: boolean; model?: string; lines?: number; confidence?: number; error?: string; cached?: boolean; attempts: Attempt[] }
 
-export async function runExtraction(responseId: string, opts: { deadlineMs?: number; noCache?: boolean } = {}): Promise<RunResult> {
+export async function runExtraction(responseId: string, opts: { deadlineMs?: number; noCache?: boolean; models?: string[] } = {}): Promise<RunResult> {
   const s = db();
   const attempts: Attempt[] = [];
   const { data: resp, error: rErr } = await s.from("responses").select("*").eq("id", responseId).single();
@@ -131,19 +136,44 @@ export async function runExtraction(responseId: string, opts: { deadlineMs?: num
     const cached = !!result;
     if (result) attempts.push({ model: result.model, ok: true, latency_ms: 0, overall_confidence: result.data.overall_confidence, cached: true });
     else {
+      // Photos/scans: transcribe row by row first (a simpler task that keeps
+      // each value on its own printed row), then extract from photo + transcript.
+      const extra: ChatCompletionContentPart[] = [];
+      if (parts.some((p) => p.type === "image_url")) {
+        onStatus("Transcribing the photo row by row…");
+        try {
+          const tr = await chat("extraction", {
+            messages: [{ role: "user", content: [...parts.filter((p) => p.type === "image_url"), { type: "text", text: TRANSCRIBE }] }],
+            max_tokens: 16000, temperature: 0,
+          }, { onStatus });
+          const t = textOf(tr).trim();
+          if (t) extra.push({ type: "text", text: `=== ROW-BY-ROW TRANSCRIPT OF THE PHOTO (made first; use it to keep each value on its printed row, and cite 'photo, printed row N') ===\n${t}` });
+          attempts.push({ model: tr.model, ok: true, latency_ms: tr.latencyMs, error: "transcription" });
+        } catch (e) {
+          attempts.push({ model: "transcription", ok: false, latency_ms: 0, error: e instanceof Error ? e.message.slice(0, 200) : String(e) });
+        }
+      }
       const messages: ChatCompletionMessageParam[] = [
         { role: "system", content: EXTRACTION_SYSTEM },
-        { role: "user", content: [{ type: "text", text: brief }, ...parts, { type: "text", text: "Now return the JSON object." }] },
+        { role: "user", content: [{ type: "text", text: brief }, ...parts, ...extra, { type: "text", text: "Now return the JSON object." }] },
       ];
       // Walk the free-model chain until one returns a valid reading. Low
       // confidence does NOT trigger a re-run: values are kept and flagged ⚠.
-      for (const model of MODELS.extraction.chain) {
+      for (const model of opts.models ?? MODELS.extraction.chain) {
         if (opts.deadlineMs && opts.deadlineMs - Date.now() < 60_000) break;
         result = await callModel(model, messages, attempts, onStatus);
         if (result) break;
         onStatus(`Could not get a valid reading from ${displayModel(model)}; trying the backup model…`);
       }
       if (!result) throw new Error("The AI could not produce a valid reading of this response. " + (attempts.at(-1)?.error ?? ""));
+      // Independent second read of every reply: disagreements and lines the
+      // first read missed become ⚠ items (values kept, never dropped).
+      {
+        const t0 = Date.now();
+        const isPhoto = parts.some((p) => p.type === "image_url");
+        const chk = await secondRead(result.data, parts, lines, isPhoto, onStatus);
+        attempts.push({ model: chk.model ?? "second-read", ok: true, latency_ms: Date.now() - t0, error: chk.disagreements.length || chk.recovered.length ? `second read: ${chk.disagreements.length} disagreement(s), ${chk.recovered.length} missed line(s) recovered` : undefined });
+      }
       await writeCache(key, result);
     }
 
@@ -213,7 +243,10 @@ async function persist(
     pieces_per_pack: l.pieces_per_pack,
     weight_per_piece_kg: l.weight_per_piece_kg,
     offered_spec: l.offered_spec,
-    deviation: l.deviation.length ? l.deviation : null,
+    // A deviation is "verified" only if the offered value is visible in the
+    // quoted source text; unverified claims are confirmed by the buyer instead
+    // of silently excluding the line.
+    deviation: l.deviation.length ? l.deviation.map((d) => ({ ...d, verified: appearsIn(d.offered, `${l.provenance.snippet} ${l.vendor_line_text}`) })) : null,
     provenance: withFileId(l.provenance),
     confidence: l.confidence,
     value_origin: l.origin,
@@ -281,6 +314,15 @@ async function persist(
     target: `response:${responseId}`,
     new_value: { model, lines: x.line_quotes.length, overall_confidence: x.overall_confidence, attempts: attempts.length, cached: attempts.some((a) => a.cached) },
   });
+}
+
+function appearsIn(value: string, text: string): boolean {
+  const norm = (t: string) => t.toLowerCase().replace(/\s+/g, " ");
+  const v = norm(value).trim();
+  if (!v) return false;
+  const hay = norm(text);
+  if (v.length <= 2) return new RegExp(`(^|[^a-z0-9])${v.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}([^a-z0-9]|$)`).test(hay);
+  return hay.includes(v) || hay.replace(/\s/g, "").includes(v.replace(/\s/g, ""));
 }
 
 // Creates a response, uploads files to storage. Used by seed and the upload API.

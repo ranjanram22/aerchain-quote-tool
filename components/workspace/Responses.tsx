@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import type { WorkspaceData } from "@/lib/workspace-data";
-import { sendFollowup, addVendorToRfx } from "@/app/actions/rfx";
+import { sendFollowup, addVendorToRfx, mapQuoteLine } from "@/app/actions/rfx";
 import OpenItemForm, { kindLabel } from "./OpenItemForm";
 import { dt, inr, pct, STATE_META } from "./format";
 
@@ -48,6 +48,20 @@ function Upload({ rfxId, vendorId, label }: { rfxId: string; vendorId: string; l
       </div>
       <p className="text-[11px] text-slate-500">Reading takes 1–3 minutes. A newer reply supersedes the previous one; your confirmations carry over where the value is unchanged.</p>
     </div>
+  );
+}
+
+function MapLine({ rfxId, quoteLineId, lines }: { rfxId: string; quoteLineId: string; lines: { line_no: number; description: string }[] }) {
+  const [n, setN] = useState("");
+  const [pending, start] = useTransition();
+  return (
+    <span className="flex items-center gap-1">
+      <select value={n} onChange={(e) => setN(e.target.value)} className="max-w-[110px] rounded border border-amber-300 px-1 py-0.5 text-[10px]">
+        <option value="">⚠ map to…</option>
+        {lines.map((l) => <option key={l.line_no} value={l.line_no}>{l.line_no}. {l.description.split(",")[0]}</option>)}
+      </select>
+      <button disabled={!n || pending} onClick={() => start(async () => { await mapQuoteLine(rfxId, quoteLineId, Number(n)); })} className="text-[10px] text-indigo-700 disabled:opacity-40">Map</button>
+    </span>
   );
 }
 
@@ -205,7 +219,7 @@ export default function Responses({ data }: { data: WorkspaceData }) {
                           const m = c ? STATE_META[c.state] : null;
                           return (
                             <tr key={q.id} className="border-t border-slate-100 align-top">
-                              <td className="px-2 py-1">{q.line_no ?? "—"}</td>
+                              <td className="px-2 py-1">{q.line_no ?? (q.price_value != null ? <MapLine rfxId={bundle.rfx.id} quoteLineId={q.id} lines={bundle.lines} /> : "—")}</td>
                               <td className="px-2 py-1" title={q.provenance?.snippet}>{q.vendor_line_text}<div className="text-slate-400">{q.provenance?.locator}</div></td>
                               <td className="px-2 py-1 whitespace-nowrap">{q.price_currency} {q.price_value} <span className="text-slate-500">{q.price_unit_as_written}</span></td>
                               <td className="px-2 py-1 whitespace-nowrap">{c?.unit_inr != null ? inr(c.unit_inr) : "—"} {m && <span className={`ml-1 rounded px-1 ring-1 ${m.cls}`}>{m.icon || m.label}</span>}</td>

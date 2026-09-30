@@ -12,6 +12,9 @@
 export type ModelTask = "extraction" | "copilot" | "analysis" | "followup" | "ping";
 
 export const GEMINI_FLASH = "gemini:gemini-3.8-flash"; // verified via ListModels + ping, 2026-09-30
+// Newest Flash (3.8) returned 503 "high demand" on most calls on 2026-09-30;
+// 3.6 Flash answered reliably, so it sits between 3.8 and Flash-Lite.
+export const GEMINI_FLASH_STABLE = "gemini:gemini-3.6-flash"; // verified via ListModels + ping, 2026-09-30
 export const GEMINI_FLASH_LITE = "gemini:gemini-3.5-flash-lite"; // verified via ListModels + ping, 2026-09-30
 export const NEMOTRON_FREE = "openrouter:nvidia/nemotron-3-ultra-550b-a55b:free";
 
@@ -21,8 +24,8 @@ export interface ModelRoute {
 }
 
 export const MODELS: Record<ModelTask, ModelRoute> = {
-  extraction: { chain: [GEMINI_FLASH, GEMINI_FLASH_LITE], timeoutMs: 240_000 },
-  analysis: { chain: [GEMINI_FLASH, GEMINI_FLASH_LITE, NEMOTRON_FREE], timeoutMs: 120_000 },
+  extraction: { chain: [GEMINI_FLASH, GEMINI_FLASH_STABLE, GEMINI_FLASH_LITE], timeoutMs: 240_000 },
+  analysis: { chain: [GEMINI_FLASH, GEMINI_FLASH_STABLE, GEMINI_FLASH_LITE, NEMOTRON_FREE], timeoutMs: 120_000 },
   copilot: { chain: [NEMOTRON_FREE, GEMINI_FLASH_LITE], timeoutMs: 120_000 },
   followup: { chain: [NEMOTRON_FREE, GEMINI_FLASH_LITE], timeoutMs: 60_000 },
   ping: { chain: [GEMINI_FLASH, NEMOTRON_FREE], timeoutMs: 45_000 },

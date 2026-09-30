@@ -151,3 +151,20 @@ Real email send/receive; vendor portal; authentication and roles (a VP uses the 
 - **No invented commercial facts.** The co-pilot may draft the questionnaire (the buyer reviews it) but must not record quantities, dates or terms the buyer did not state; suggestions go in the reply. Added after a test turn recorded a placeholder deadline.
 - **Model:** stays on free Nemotron (tool calling worked on every test turn; 16–120 s per turn). Latency is the main weakness; switching is one line in `lib/models.ts` if needed.
 - **Publish** writes `rfx_vendors`, one invitation per vendor to the Outbox (same template as the seed), sets status `sent` and the RFx date. "Simulated send" is stated in the dialog and the Outbox.
+
+### T8. Fully free models: Gemini (native SDK) + OpenRouter ":free" only (2026-09-30, Ranjan's call)
+- **What**: All Claude usage removed. Chains in `lib/models.ts`: extraction gemini-3.8-flash → gemini-3.6-flash → gemini-3.5-flash-lite; analysis the same + nemotron free; co-pilot and follow-ups nemotron free → gemini-3.5-flash-lite. `assertFree` refuses any other model. IDs verified with the project's ListModels call and pings (`npm run check:gemini`).
+- **Why Gemini native SDK**: it takes PDFs and images inline and supports tool calling; an adapter (`lib/gemini.ts`) keeps the rest of the code on the OpenAI-style message format and preserves Gemini's function-call "thought signatures".
+- **Why 3.6 Flash in the chain**: 3.8 Flash (the newest) answered 503 "high demand" and then 429 "over quota"; 3.6 answered pings reliably, so it sits between 3.8 and Flash-Lite. In practice most reads still land on Flash-Lite.
+- **Rate limits**: per model up to 3 tries with back-off (honouring short retry hints), switch immediately on long retry hints or repeated overload, 3-minute cool-down for a model that just hit a limit, chat capped at 6 tool calls per question, and status lines streamed to the UI ("AI busy, retrying in 6s…", "Switching to backup model…").
+- **Cache**: extraction results are stored in Supabase Storage keyed by SHA-256 of (cache version, prompt, RFx brief, email text, each file's name + content hash, model chain). Reseeding and retries of identical inputs never call a model.
+- **Cost of going free (see TESTS.md)**: clean inputs (Excel, PDF, Word) are as good as Sonnet; the angled photo and the ambiguous one-line email are worse. Mitigations below keep every error visible.
+
+### E8. Safeguards added for weaker free models
+- **Low-confidence replies keep values and get ⚠.** If a reply's overall confidence is < 0.7 or a photo is only partly readable, every extracted price from it is flagged under one "Low-confidence reading — confirm" item; nothing is dropped or re-guessed.
+- **Photos are transcribed row by row first**, then extracted from photo + transcript (took Flash-Lite from 16–17/30 to 29/30 on the angled photo).
+- **Independent second read of every reply** (look each RFx item up by size, report what is on that row). Disagreements lower that value's confidence (⚠, both readings shown in the source drawer); lines the first read missed but the second found are added at 30% confidence with ⚠ — never silently used or dropped. Model self-reported confidence is not trusted on photos (95% on a fully shifted read).
+- **Deviation claims must be visible in the source text.** Otherwise they become "Possible spec difference — confirm" and do not exclude the line (Flash-Lite invented "B vs C flute" deviations on two vendors).
+- **Unmatched priced items** become an "Unmatched item" ⚠ with a map-to-line control in Responses.
+- **Lump sum + stated shipment frequency** is read as per-shipment freight (code rule, stated in the freight explanation).
+- **Honest trade-off**: Flash-Lite's analysis prose has occasional wording slips (4 in 10 answers) that the number check cannot catch; numbers remain fully traced.

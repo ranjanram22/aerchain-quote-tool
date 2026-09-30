@@ -19,7 +19,7 @@ async function main() {
   const { data: rfx } = await db.from("rfxs").select("id").eq("title", "Corrugated Packaging — Chakan Plant FY27 Annual Contract").single();
   const { bundle, cmp } = await loadComparison(rfx!.id);
   const out: string[] = [];
-  const summary: string[] = ["| Vendor | Input | Gemini model | Line fields agreeing with Sonnet | Commercial / questionnaire / cert fields agreeing | Ground truth (Sonnet → Gemini) | Verdict |", "|---|---|---|---|---|---|---|"];
+  const summary: string[] = ["| Vendor | Input | Gemini model | Line fields agreeing with Sonnet | Commercial / questionnaire / cert fields agreeing | Ground truth (Sonnet → Gemini) | Wrong & not ⚠-flagged | Verdict |", "|---|---|---|---|---|---|---|---|"];
   const inputs: Record<string, string> = { A: "xlsx, USD", B: "letterhead PDF, per 100", C: "docx paragraphs", D: "angled phone photo", E: "one-line email + expired ISO" };
 
   for (const v of VENDORS) {
@@ -64,14 +64,22 @@ async function main() {
     const refs = (x: ExtractionT) => x.references.map((r) => `${r.kind}:${[...r.applies_to_line_nos].sort((m, n) => m - n).join("-")}`).sort().join("|");
     cmpF("references", refs(s), refs(g));
     // ground truth on normalized values
-    let gt = 0; const gtBad: string[] = [];
+    let gt = 0; const gtBad: string[] = []; let silent = 0;
+    const openKeys = new Set(bundle.openItems.filter((i) => i.status === "open").map((i) => i.key));
     for (const l of LINES) {
       const c = cmp.cells.find((x) => x.vendor_id === vendor.id && x.line_no === l.line_no)!;
       const e = expected(v.key, l.line_no), got = c.state === "needs_input" ? "needs_input" : c.unit_inr;
-      if (e === got || (typeof e === "number" && typeof got === "number" && Math.abs(e - got) / e < 0.005)) gt++; else gtBad.push(`L${l.line_no} expected ${typeof e === "number" ? e.toFixed(2) : e} got ${typeof got === "number" ? got.toFixed(2) : got} [${c.state}]`);
+      if (e === got || (typeof e === "number" && typeof got === "number" && Math.abs(e - got) / e < 0.005)) gt++;
+      else {
+        const flagged = c.state === "needs_input" || c.state === "not_quoted" || c.open_item_keys.some((k) => openKeys.has(k));
+        if (!flagged) silent++;
+        gtBad.push(`L${l.line_no} expected ${typeof e === "number" ? e.toFixed(2) : e} got ${typeof got === "number" ? got.toFixed(2) : got} [${c.state}${flagged ? ", ⚠ flagged" : ", NOT FLAGGED"}]`);
+      }
     }
+    const vs = cmp.vendors.find((x) => x.vendor_id === vendor.id)!;
+    out.push(`\n(${v.key} landed: ${vs.total_landed_inr != null ? "₹" + (vs.total_landed_inr / 1e7).toFixed(3) + " cr" : "incomplete"}; freight: ${vs.freight.text.slice(0, 140)})`);
     const worse = gt < SONNET_GT[v.key];
-    summary.push(`| ${v.key} ${v.name} | ${inputs[v.key]} | ${ext!.model} (conf ${ext!.overall_confidence}) | ${agree}/${total} | ${cAgree}/${cTotal} | ${SONNET_GT[v.key]}/30 → ${gt}/30 | ${worse ? "**Worse**" : gt > SONNET_GT[v.key] ? "Better" : "Same"} |`);
+    summary.push(`| ${v.key} ${v.name} | ${inputs[v.key]} | ${ext!.model} (conf ${ext!.overall_confidence}) | ${agree}/${total} | ${cAgree}/${cTotal} | ${SONNET_GT[v.key]}/30 → ${gt}/30 | ${silent} | ${worse ? "**Worse**" : gt > SONNET_GT[v.key] ? "Better" : "Same"} |`);
     out.push(`\n#### ${v.key} ${v.name}\nGround-truth misses (Gemini): ${gtBad.length ? gtBad.join("; ") : "none"}\n\nDifferences vs Sonnet (${diffs.length}):\n${diffs.slice(0, 40).map((d) => `- ${d}`).join("\n") || "- none"}${diffs.length > 40 ? `\n- … ${diffs.length - 40} more` : ""}`);
   }
 

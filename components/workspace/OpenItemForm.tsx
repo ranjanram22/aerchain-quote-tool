@@ -27,6 +27,8 @@ export function kindLabel(item: OpenItemRow) {
   if (sub === "reference_unresolved") return "Price needed";
   if (sub === "questionnaire") return "Unclear mandatory answer";
   if (sub === "low_confidence_extraction") return "Low-confidence reading";
+  if (sub === "unmatched_item") return "Unmatched item";
+  if (sub === "possible_deviation") return "Possible spec difference";
   return KIND_LABEL[item.kind] ?? item.kind;
 }
 
@@ -110,6 +112,13 @@ export default function OpenItemForm({ rfxId, item, onDone }: { rfxId: string; i
       <div className="flex gap-2">
         <Btn disabled={pending} onClick={() => resolve({ apply: true })}>We will meet the condition — apply</Btn>
         <Btn tone="ghost" disabled={pending} onClick={() => resolve({ apply: false })}>Don&apos;t apply</Btn>
+      </div>
+    );
+  else if (sub === "possible_deviation")
+    control = (
+      <div className="flex gap-2">
+        <Btn disabled={pending} onClick={() => resolve({ accept: true })}>Yes, it is a deviation (exclude)</Btn>
+        <Btn tone="ghost" disabled={pending} onClick={dismiss}>No — same spec</Btn>
       </div>
     );
   else if (sub === "deviation")

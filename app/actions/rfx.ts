@@ -83,3 +83,16 @@ export async function addVendorToRfx(rfxId: string, vendorId: string): Promise<R
   refresh();
   return { ok: true };
 }
+
+// Buyer maps a priced item the reader could not match to an RFx line.
+export async function mapQuoteLine(rfxId: string, quoteLineId: string, lineNo: number): Promise<Result> {
+  const { data: line } = await db().from("rfx_lines").select("id").eq("rfx_id", rfxId).eq("line_no", lineNo).single();
+  if (!line) return { ok: false, error: "Line not found" };
+  const { data: old } = await db().from("quote_lines").select("matched_rfx_line_id,line_no,vendor_line_text").eq("id", quoteLineId).single();
+  const { error } = await db().from("quote_lines").update({ matched_rfx_line_id: line.id, line_no: lineNo, match_confidence: 1, match_reason: "Mapped by buyer" }).eq("id", quoteLineId);
+  if (error) return { ok: false, error: error.message };
+  await audit(rfxId, "item_mapped", `quote_line:${quoteLineId}`, old, { line_no: lineNo }, null);
+  await syncOpenItems(rfxId);
+  refresh();
+  return { ok: true };
+}

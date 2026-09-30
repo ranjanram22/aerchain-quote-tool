@@ -49,10 +49,18 @@ Repo: github.com/ranjanram22/aerchain-quote-tool (private)
 - Publish dialog: pick vendors → invitations in Outbox (simulated) → status Sent → workspace.
 - Acceptance: built a 5-line Nashik RFx by chat (3 items described + 2 pasted rows, all matched to catalog), 15-question questionnaire, terms; published to 3 vendors; pasted an email reply from one vendor → extracted 5/5 lines (per 100 converted, freight ₹3,200/trip × 60 trips/yr) and shown in the grid.
 
+## Phase 6: Hardening + switch to free models — DONE (2026-09-30)
+- Unseen inputs (CSV per 1000, scanned PDF per dozen, WhatsApp text, iPhone HEIC) handled; results in TESTS.md.
+- HEIC support, "part of this reply couldn't be read" banner, add a vendor to a published RFx, map unmatched items to lines.
+- Fully free models (Gemini native SDK + OpenRouter :free); model chains, back-off, cool-down, streamed "busy / switching" status; extraction cache by file hash.
+- Safeguards for weaker models: photo transcription, second read of every reply, verified deviations, whole-reply low-confidence ⚠.
+- Gemini vs Sonnet eval and all 15 unrehearsed questions in TESTS.md; decisions T8/E8.
+- Demo data reset with the free pipeline (16 open ⚠ items).
+
 ## Next
-Phase 6: hardening — unseen inputs, 15 unrehearsed questions, error states, demo data reset.
+- Optional: demo script for the interview; README polish.
 
 ## Known issues
-- Vendor E's "the 3-ply / the 5-ply" was applied by the model to every 3-/5-ply line (incl. printed boxes and sheets); flagged as one ⚠ scope confirmation per group. Lines 23–24 need piece weights. This is intended behaviour for an ambiguous reply, not an extraction error.
-- Vendor D fails "all mandatory" until the buyer marks Q3 (in-house testing: card mentions burst & BCT, not ECT/reports) as pass or fail.
+- Free models (mostly gemini-3.5-flash-lite in practice): the angled photo and the one-line incumbent email read less reliably than with Sonnet and vary between runs; errors are ⚠-flagged, never silent (TESTS.md). With the current seed read, Om Sai is no longer the headline-cheapest vendor and Mahalaxmi counts as mandatory-compliant.
+- Flash models on the free tier are often busy/over quota; answers then come from Flash-Lite (slower, less careful prose).
 - Vercel did not start a build on the initial import; an empty commit push triggered it. Pushes to `main` deploy normally now.

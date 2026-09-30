@@ -26,7 +26,7 @@ export function seedReply(key: string) {
   return { emailText, files };
 }
 
-export async function loadAndExtract(rfxId: string, vendorIds: Record<string, string>, keys: string[]) {
+export async function loadAndExtract(rfxId: string, vendorIds: Record<string, string>, keys: string[], opts: { models?: string[]; noCache?: boolean } = {}) {
   // One vendor at a time: free-tier models have low requests-per-minute limits.
   const results = [];
   for (const k of keys) {
@@ -34,7 +34,7 @@ export async function loadAndExtract(rfxId: string, vendorIds: Record<string, st
       const t0 = Date.now();
       const { emailText, files } = seedReply(k);
       const responseId = await createResponse({ rfxId, vendorId: vendorIds[k], emailText, files, receivedAt: RECEIVED[k] });
-      const r = await runExtraction(responseId);
+      const r = await runExtraction(responseId, opts);
       const name = VENDORS.find((v) => v.key === k)!.name;
       const secs = ((Date.now() - t0) / 1000).toFixed(0);
       if (r.ok) console.log(`  ${k} ${name}: ${r.lines} line quotes, confidence ${r.confidence}, model ${r.model}${r.cached ? " (from cache — no model call)" : ""}, ${secs}s`);

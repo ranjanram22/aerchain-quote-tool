@@ -61,7 +61,7 @@ export interface QuoteLineRow {
   pieces_per_pack: number | null;
   weight_per_piece_kg: number | null;
   offered_spec: Record<string, unknown> | null;
-  deviation: { field: string; requested: string; offered: string; note: string }[] | null;
+  deviation: { field: string; requested: string; offered: string; note: string; verified?: boolean }[] | null;
   provenance: Prov;
   confidence: number | null;
   value_origin: "stated" | "inferred" | "assumed" | "buyer_input";

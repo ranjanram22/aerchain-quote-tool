@@ -199,6 +199,17 @@ export function normalize(b: RfxBundle, opts: NormalizeOptions = {}): Comparison
       }
     }
 
+    // Priced items the reader could not map to any RFx line: never dropped silently.
+    if (resp && resp.processing_status === "done") {
+      for (const q of qls.filter((x) => !x.matched_rfx_line_id && x.price_value != null)) {
+        const key = `unmatched:${q.id}`;
+        if (dismissed(key) || res(key)) continue;
+        addItem({ key, kind: "confirm_interpretation", vendor_id: v.id, response_id: resp.id, rfx_line_id: null, quote_line_id: q.id,
+          message: `${vName} priced an item that was not matched to any RFx line: "${q.vendor_line_text ?? "?"}" at ${cur((q.price_currency ?? "INR").toUpperCase(), Number(q.price_value))} ${q.price_unit_as_written ?? ""}. Map it to the right line (edit the value's line in Responses) or dismiss if it is not part of this RFx.`,
+          details: { subkind: "unmatched_item", vendor_line_text: q.vendor_line_text, price: q.price_value, snippet: q.provenance?.snippet, fingerprint: `unmatched:${v.id}:${q.vendor_line_text}:${q.price_value}` } });
+      }
+    }
+
     // Missing lines → one open item per vendor
     if (resp && resp.processing_status === "done") {
       const missing = cells.filter((c) => c.vendor_id === v.id && c.state === "not_quoted").map((c) => c.line_no);
@@ -308,8 +319,20 @@ export function normalize(b: RfxBundle, opts: NormalizeOptions = {}): Comparison
     cell.unit_inr = round4(price);
     if (steps.length === 1) steps.push(`= ${inr(price)}/${unitWord(u)} (no conversion needed)`);
 
-    // Deviation
-    const dev = (q.deviation ?? []).filter(Boolean);
+    // Deviation (only claims whose offered value is visible in the source text
+    // count; unverified claims become a "possible deviation" to confirm)
+    const allDev = (q.deviation ?? []).filter(Boolean);
+    const checkKey = `devcheck:${q.id}`;
+    const checkRes = res(checkKey);
+    const unverified = allDev.filter((d) => d.verified === false);
+    const dev = allDev.filter((d) => d.verified !== false || (checkRes && checkRes.accept === true));
+    if (unverified.length && !checkRes && !dismissed(checkKey)) {
+      cell.flags.push("possible_deviation");
+      cell.open_item_keys.push(checkKey);
+      addItem({ key: checkKey, kind: "confirm_interpretation", vendor_id: cell.vendor_id, response_id: q.response_id, rfx_line_id: line.id, quote_line_id: q.id,
+        message: `The reader thinks ${vName}'s line ${line.line_no} may differ from the RFx spec (${unverified.map((d) => `${d.field}: ${d.offered} vs ${d.requested}`).join("; ")}), but that value is not visible in the quoted text. Confirm it is a real deviation, or dismiss.`,
+        details: { subkind: "possible_deviation", line_no: line.line_no, deviation: unverified, fingerprint: `devcheck:${cell.vendor_id}:${line.line_no}:${JSON.stringify(unverified)}` } });
+    }
     const devKey = `dev:${q.id}`;
     const devRes = res(devKey);
     if (dev.length && !(devRes && devRes.accept === true)) {
@@ -497,6 +520,15 @@ export function normalize(b: RfxBundle, opts: NormalizeOptions = {}): Comparison
     } else if (f?.basis === "percent" && f.amount != null) {
       summary.freight.status = "computed"; summary.freight.uplift_pct = f.amount; summary.freight.annual_inr = valueBase * f.amount / 100; fText = `${f.amount}% of value`;
       perUnit = (c) => c.net_inr! * f.amount! / 100;
+    } else if (f?.basis === "lump_sum" && f.amount != null && f.shipments_per_year && valueBase > 0) {
+      // A "lump sum" with a stated shipment frequency is a per-shipment charge.
+      const rate = toInrRate(f.currency);
+      if (rate != null) {
+        const annual = f.amount * f.shipments_per_year * rate, pct = (annual / valueBase) * 100;
+        summary.freight.status = "computed"; summary.freight.annual_inr = annual; summary.freight.uplift_pct = pct;
+        fText = `${cur(f.currency, f.amount)} per shipment × ${fmt(f.shipments_per_year, 0)} shipments/yr${rate !== 1 ? ` × ${fmt(rate, 4)}` : ""} = ${inr(annual)}/yr, allocated pro-rata to line value (+${fmt(pct, 2)}%) — read as per shipment because a shipment frequency is stated`;
+        perUnit = (c) => c.net_inr! * pct / 100;
+      }
     } else if (f?.basis === "lump_sum" && f.amount != null && valueBase > 0) {
       const rate = toInrRate(f.currency);
       if (rate != null) {

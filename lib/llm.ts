@@ -70,6 +70,11 @@ async function attempt(task: ModelTask, model: string, params: ChatParams, timeo
 
 const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
 
+// Cool-down: a model that just hit a rate limit / overload is skipped for a
+// few minutes (per server instance) so each request doesn't re-discover it.
+const coolUntil = new Map<string, number>();
+const COOL_MS = 3 * 60_000;
+
 function friendly(err: unknown): Error {
   const s = statusOf(err);
   const m = (err instanceof Error ? err.message : String(err)).toLowerCase();
@@ -88,22 +93,29 @@ export async function chat(
   const chain = opts.models ?? MODELS[task].chain;
   const timeoutMs = opts.timeoutMs ?? MODELS[task].timeoutMs;
   let last: unknown;
-  for (let i = 0; i < chain.length; i++) {
-    const model = chain[i];
+  const now = Date.now();
+  // Skip cooling models unless every model in the chain is cooling.
+  const usable = chain.filter((m) => (coolUntil.get(m) ?? 0) <= now);
+  const order = usable.length ? usable : chain;
+  for (let i = 0; i < order.length; i++) {
+    const model = order[i];
     for (let tryNo = 0; tryNo < 3; tryNo++) {
       try {
         return await attempt(task, model, params, timeoutMs);
       } catch (err) {
         last = err;
         if (!isRetryable(err)) break; // e.g. bad request → try the next model
+        if (isRateLimit(err) || statusOf(err) === 503) coolUntil.set(model, Date.now() + COOL_MS);
         const hinted = geminiRetryDelay(err);
-        if (tryNo === 2 || (hinted != null && hinted > 20)) break; // long wait requested → switch model now
-        const wait = Math.min(20, hinted ?? [2, 6][tryNo]) * 1000;
+        const overloaded = statusOf(err) === 503 || /high demand|overloaded|UNAVAILABLE/i.test(err instanceof Error ? err.message : "");
+        // Long requested wait, or provider-side overload after one retry → switch model now.
+        if (tryNo === 2 || (hinted != null && hinted > 20) || (overloaded && tryNo >= 1)) break;
+        const wait = Math.max(1, Math.min(20, hinted ?? [2, 6][tryNo])) * 1000;
         opts.onStatus?.(`${isRateLimit(err) ? "AI busy (rate limit)" : "AI not responding"} on ${displayModel(model)} — retrying in ${Math.round(wait / 1000)}s…`);
         await sleep(wait);
       }
     }
-    if (i + 1 < chain.length) opts.onStatus?.(`Switching to backup model ${displayModel(chain[i + 1])}…`);
+    if (i + 1 < order.length) opts.onStatus?.(`Switching to backup model ${displayModel(order[i + 1])}…`);
   }
   throw friendly(last);
 }

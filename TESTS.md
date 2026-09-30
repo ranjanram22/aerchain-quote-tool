@@ -60,6 +60,61 @@ All answers passed the number post-check (some after one regeneration).
 | 3 | Is Transpac's dollar pricing a risk? What if their prices go up 5%? | vendor_profile, what_if(+5%) | FX exposure identified (USD freight, INR invoicing clause); +5% → award +₹2.94 L, Transpac 5→2 lines; flagged lead time/payment/validity gaps ✓ |
 | 4 | Which lines have only one compliant quote? | get_comparison(mandatory), overview | None; lines 11, 17, 18, 29, 30 have only two (reasons per line) ✓ |
 | 5 | Average price per category as a chart | query_rows(group_by category, avg_price), make_chart | Bar chart + table; basis and "no compliance filter" stated ✓ |
-| 6–15 | (Deccan line 11; single-vendor coverage; Shree Ganesh with discount; valid ISO; rank by lead time; Om Sai assumptions; printed boxes; photo confidence; ≤50% share split; weather in Pune) | — | **Not run: OpenRouter key hit its total spending limit (403 "Key limit exceeded").** To re-run once the limit is raised. |
+| 6 | What is Deccan's price on line 11 and why is it excluded? | get_comparison(line 11, incl. deviations), vendor_profile, make_table | ₹39.06/unit; excluded for GSM 150/…/150 vs 180/…/180. Correct ✓ |
+| 7 | Can any single vendor supply everything? Which is cheapest? | overview, rank_vendors ×2, make_table | Shree Ganesh and Transpac cover 30/30; Shree Ganesh cheapest full-coverage compliant (₹3.99 cr landed); noted Deccan's lower total covers only 25/30. Numbers ✓; prose slip: opens with "No" then names two vendors that can |
+| 8 | Total spend if all to Shree Ganesh with the early-payment discount | overview, rank_vendors, what_if(apply discount) | ₹3,89,61,966 with discount vs ₹3,99,60,980 without, 30/30 ✓ |
+| 9 | Which vendors have valid ISO certificates? | overview, vendor_profile ×5 | Four valid with cert numbers and expiry; Om Sai's expired 2026-08-31 ✓ |
+| 10 | Rank vendors by lead time | overview, vendor_profile ×5 | Correct order (5–7, 7, 10, 12–15 days, Om Sai not stated). Slip: said only two vendors meet ≤10 days (Deccan's 10 days also meets it) |
+| 11 | Show me all the assumptions the system made for Om Sai | vendor_profile | Identified "rest same as last year" applied to last-year prices and freight unknown; wording muddled ("assumptions … due to unknown freight") |
+| 12 | Cheapest option for printed boxes? | get_comparison(Printed box), overview, vendor_profile ×3, make_table | Per-line winners correct (Transpac L25 unit price; Mahalaxmi L23/L24). Slip: "freight included (except Om Sai)" — Transpac's freight is extra |
+| 13 | How confident are we in Mahalaxmi's prices given it was a phone photo? | vendor_profile, list_open_items | Listed the per-kg weight gaps, the second-read disagreement on line 19 and the unverified flute claims — exactly the ⚠ items ✓ |
+| 14 | Split award, no vendor above 50%, mandatory-compliant only | award_split(max_share 50, mandatory) | 4-vendor split, max share 46.58%, ₹3.85 cr, 30/30 ✓ |
+| 15 | What is the weather in Pune today? | overview (unneeded) | Declined politely, redirected to the RFx ✓ |
+
+Questions 1–5 ran on Claude Sonnet (before the switch to free models); 6–15 ran on Gemini (gemini-3.5-flash-lite after the Flash models were busy/over quota — see the streamed status). All 15 passed the number post-check. Flash-Lite's prose is less careful than Sonnet's (4 wording slips in 10 answers), never in the numbers.
 
 Found during this run: a provider limit error was shown raw to the user → now mapped to a plain message ("The AI service's credit limit has been reached… existing data stays available").
+
+
+## Free-model switch: Gemini vs stored Sonnet results (2026-09-30)
+
+Method: `seed/eval/compare.ts` compares each vendor's current extraction field by field with the Sonnet extraction saved in `seed/eval/baseline-sonnet/` (per RFx line: quoted?, price, currency, basis, basis count, pieces per pack, weight, deviation; plus freight, discounts, 12 questionnaire answers, certificates, "same as last year" references), and scores the normalized ₹/unit per line against the generator's ground truth. "Wrong & not ⚠-flagged" = ground-truth misses that the buyer would not see flagged — the trust metric.
+
+In practice almost every read ran on **gemini-3.5-flash-lite**: gemini-3.8-flash answered 503 "high demand" and then 429 "exceeded your current quota"; gemini-3.6-flash was mostly 503 for large requests (it succeeded twice: Deccan and Om Sai in one run each).
+
+### Final run (with the fixes below)
+
+| Vendor | Input | Gemini model | Line fields agreeing with Sonnet | Commercial / questionnaire / cert fields agreeing | Ground truth (Sonnet → Gemini) | Wrong & not ⚠-flagged | Verdict |
+|---|---|---|---|---|---|---|---|
+| A Transpac Global Packaging (India) Pvt Ltd | xlsx, USD | gemini:gemini-3.5-flash-lite (conf 1) | 240/240 | 43/44 | 30/30 → 30/30 | 0 | Same |
+| B Shree Ganesh Corrugators | letterhead PDF, per 100 | gemini:gemini-3.5-flash-lite (conf 1) | 240/240 | 44/44 | 30/30 → 30/30 | 0 | Same |
+| C Deccan Board & Boxes Pvt Ltd | docx paragraphs | gemini:gemini-3.5-flash-lite (conf 1) | 219/219 | 44/44 | 30/30 → 30/30 | 0 | Same |
+| D Mahalaxmi Packaging Works | angled phone photo | gemini:gemini-3.5-flash-lite (conf 0.98) | 236/240 | 29/32 | 30/30 → 29/30 | 0 | **Worse** |
+| E Om Sai Cartons | one-line email + expired ISO | gemini:gemini-3.5-flash-lite (conf 0.75) | 18/37 | 19/22 | 26/30 → 13/30 | 0 | **Worse** |
+
+(A landed: ₹4.277 cr; freight: USD 850.00 per shipment × 48 shipments/yr × 88.4000 = ₹36,06,720.00/yr, allocated pro-rata to line value (+9.21%))
+
+Unseen samples (vs the Sonnet run of the same files):
+
+| Vendor | Lines (Sonnet) | Lines matching Sonnet value/state | Differences |
+|---|---|---|---|
+| Sahyadri Corrupack | — | not run | |
+| Kolhapur Kraft Boxes | — | not run | |
+| Sai Packaging | — | not run | |
+(Unseen samples above are from the run before the last two fixes; the Sahyadri line-13 miss in the first Gemini run was an unmatched item — now surfaced as an "Unmatched item ⚠"; the 7600/set on line 28 in the later run is flagged by the 3×-median price check.)
+
+### Which vendors got worse
+- **D Mahalaxmi (angled phone photo) — worse and unstable.** Single-pass Flash-Lite shifted values one row down from line 17 onward in 2 of 4 runs (16–17/30) while reporting 95% confidence. Fixes: (1) photos are transcribed row by row before extraction → 29/30; (2) an independent second read looks up each item by printed size and flags every disagreement ⚠; (3) spec-deviation claims not visible in the source text become "possible deviation — confirm" instead of excluding the line. Remaining miss: line 17 weight not read → ⚠ needs input (not a wrong number). Flash-Lite also read the card's "in-house burst & BCT lab" as a yes to the mandatory testing question (Sonnet: unclear), so Mahalaxmi now counts as compliant.
+- **E Om Sai (one-line email) — worse.** Across runs Flash-Lite/3.6 Flash read "₹42/kg for the 5-ply, 38 for the 3-ply, rest same as last year" three different ways (13/30, 2/30, 21/30 vs Sonnet 26/30); in the final run it applied ₹42/kg only to the 5-ply pad and treated everything else, including the 3-ply boxes, as "same as last year". Every affected line is shown as assumed/⚠ with the vendor's phrase. Consequence for the demo story: Om Sai is no longer the headline-cheapest vendor.
+- **A, B, C — same as Sonnet (30/30).** Earlier Flash-Lite runs invented "B flute vs C flute" deviations on B and D and labelled A's per-shipment freight a lump sum; fixed by the deviation check and by reading a lump sum with a stated shipment frequency as per shipment.
+- **Silent errors: 0** in the final run for every vendor.
+
+### First Flash-Lite run (before fixes), for reference
+
+| Vendor | Input | Gemini model | Line fields agreeing with Sonnet | Commercial / questionnaire / cert fields agreeing | Ground truth (Sonnet → Gemini) | Verdict |
+|---|---|---|---|---|---|---|
+| A Transpac Global Packaging (India) Pvt Ltd | xlsx, USD | gemini:gemini-3.5-flash-lite (conf 1) | 240/240 | 43/44 | 30/30 → 30/30 | Same |
+| B Shree Ganesh Corrugators | letterhead PDF, per 100 | gemini:gemini-3.5-flash-lite (conf 0.99) | 238/240 | 40/44 | 30/30 → 30/30 | Same |
+| C Deccan Board & Boxes Pvt Ltd | docx paragraphs | gemini:gemini-3.5-flash-lite (conf 0.98) | 219/219 | 44/44 | 30/30 → 30/30 | Same |
+| D Mahalaxmi Packaging Works | angled phone photo | gemini:gemini-3.5-flash-lite (conf 0.95) | 235/240 | 27/30 | 30/30 → 29/30 | **Worse** |
+| E Om Sai Cartons | one-line email + expired ISO | gemini:gemini-3.5-flash-lite (conf 0.75) | 138/142 | 17/20 | 26/30 → 30/30 | Better |
