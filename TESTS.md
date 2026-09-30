@@ -52,5 +52,14 @@ All answers passed the number post-check (some after one regeneration).
 | Vendor D rate card photo re-sent as iPhone **HEIC** | Mahalaxmi | Converted (heic-convert) and read: 29/30 identical to the JPEG run | Pass. Note: a newer reply supersedes the old one entirely, so the ISO certificate from the earlier reply no longer counts until it is re-sent |
 
 
-## Unrehearsed questions
-_(Phase 6)_
+## Unrehearsed questions (2026-09-30, live site, clean seed data, Sonnet 5.5)
+| # | Question | Tools chosen | Outcome |
+|---|---|---|---|
+| 1 | If I can only work with two suppliers, who should they be and what does it cost me on a landed basis? | overview, award_split(max 2, landed) ×2 (all vs mandatory), open items | Recommended Shree Ganesh + Deccan ₹3.94 cr, 30/30; noted the cheaper Shree Ganesh + Mahalaxmi pair (₹3.92 cr) is blocked by Mahalaxmi's unclear mandatory answer. Numbers traced ✓ |
+| 2 | How much would we save by switching away from Om Sai compared to last year? | overview, compare_to_last_year, award_cheapest_per_line(exclude Om Sai) | ₹2.96 L (0.78%) on the 28 lines with a last-year price; stated coverage and that Om Sai fails mandatory ✓ |
+| 3 | Is Transpac's dollar pricing a risk? What if their prices go up 5%? | vendor_profile, what_if(+5%) | FX exposure identified (USD freight, INR invoicing clause); +5% → award +₹2.94 L, Transpac 5→2 lines; flagged lead time/payment/validity gaps ✓ |
+| 4 | Which lines have only one compliant quote? | get_comparison(mandatory), overview | None; lines 11, 17, 18, 29, 30 have only two (reasons per line) ✓ |
+| 5 | Average price per category as a chart | query_rows(group_by category, avg_price), make_chart | Bar chart + table; basis and "no compliance filter" stated ✓ |
+| 6–15 | (Deccan line 11; single-vendor coverage; Shree Ganesh with discount; valid ISO; rank by lead time; Om Sai assumptions; printed boxes; photo confidence; ≤50% share split; weather in Pune) | — | **Not run: OpenRouter key hit its total spending limit (403 "Key limit exceeded").** To re-run once the limit is raised. |
+
+Found during this run: a provider limit error was shown raw to the user → now mapped to a plain message ("The AI service's credit limit has been reached… existing data stays available").

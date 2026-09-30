@@ -98,10 +98,36 @@ async function attempt(task: ModelTask, model: string, params: ChatParams, timeo
 
 const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
 
+// Turn provider errors into messages a buyer can act on.
+function friendly(err: unknown): Error {
+  if (err instanceof OpenAI.APIError) {
+    const s = err.status ?? 0;
+    const m = (err.message ?? "").toLowerCase();
+    if (s === 402 || (s === 403 && m.includes("limit")) || m.includes("credit"))
+      return new Error("The AI service's credit limit has been reached, so nothing new can be read or answered right now. The administrator needs to raise the OpenRouter key limit or add credits; existing data stays available.");
+    if (s === 401) return new Error("The AI service rejected the API key. The administrator needs to check OPENROUTER_API_KEY.");
+    if (s === 429) return new Error("The AI service is busy (rate limit). Please try again in a minute.");
+  }
+  if (err instanceof OpenAI.APIConnectionError) return new Error("The AI service took too long to answer or could not be reached. Please try again.");
+  return err instanceof Error ? err : new Error(String(err));
+}
+
 export async function chat(
   task: ModelTask,
   params: ChatParams,
   opts: { model?: string; timeoutMs?: number } = {},
+): Promise<ChatResult> {
+  try {
+    return await chatInner(task, params, opts);
+  } catch (e) {
+    throw friendly(e);
+  }
+}
+
+async function chatInner(
+  task: ModelTask,
+  params: ChatParams,
+  opts: { model?: string; timeoutMs?: number },
 ): Promise<ChatResult> {
   const route = MODELS[task];
   const primary = opts.model ?? route.model;

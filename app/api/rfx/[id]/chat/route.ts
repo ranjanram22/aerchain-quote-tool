@@ -11,6 +11,6 @@ export async function POST(req: Request, ctx: RouteContext<"/api/rfx/[id]/chat">
     return Response.json(await answerQuestion(id, question.trim(), history ?? []));
   } catch (e) {
     const msg = e instanceof Error ? e.message : String(e);
-    return Response.json({ error: /timeout|timed out/i.test(msg) ? "The AI took too long to answer. Please try again." : `Something went wrong: ${msg.slice(0, 200)}` }, { status: 500 });
+    return Response.json({ error: /timeout|timed out/i.test(msg) ? "The AI took too long to answer. Please try again." : msg.startsWith("The AI") ? msg : `Something went wrong: ${msg.slice(0, 200)}` }, { status: 500 });
   }
 }
