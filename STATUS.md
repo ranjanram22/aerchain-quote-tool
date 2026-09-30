@@ -27,8 +27,16 @@ Repo: github.com/ranjanram22/aerchain-quote-tool (private)
 - `npm run seed` now runs the real pipeline on all 5 replies; `npm run extract -- <A-E>` re-runs one vendor; `seed/verify.ts` checks against generator ground truth.
 - Acceptance: A 30/30, B 30/30, C 30/30 (27 quoted + deviation + per-bundle ⚠), D 30/30 from the angled phone photo (line 18 per-kg ⚠), E: per-kg converted via RFx spec weights, "rest same as last year" → assumed from last-year contract, lines 29–30 ⚠, freight ⚠, expired ISO → fail. See TESTS.md.
 
+## Phase 3: Workspace UI — DONE (2026-09-30)
+- `/rfx/[id]`: header with ⚠ count, tabs Summary · Comparison · Questionnaire & attachments · Responses · Outbox · Activity, right-hand chat panel (placeholder until Phase 4).
+- Summary: facts, vendor headline table (coverage, unit & landed totals, freight, mandatory status, ⚠), key flags, all open items with inline forms.
+- Comparison: 30 × 5 grid, 7 cell states with icon + colour + legend, hover explanation, row minimum, unit vs landed toggle, include-deviations toggle, category filter, column totals with coverage.
+- Source drawer: file, location, verbatim snippet, as-written value, match reason, confidence, model, every computation step, open items with forms (and resolved history), edit extracted value (logged), original file (image / PDF / Word & Excel HTML preview).
+- Responses: per vendor side-by-side original ↔ extracted lines, AI notes, attempts, commercial terms, gaps list with inline forms, LLM follow-up draft → Send (simulated) → Outbox; upload/paste newer reply with auto-refresh while reading; retry on error.
+- Acceptance: resolving a ⚠ (C line 29 bundle size = 100) recomputed the grid, totals and coverage immediately and was logged in Activity with the note.
+
 ## Next
-Phase 3: RFx workspace UI (Summary, Comparison grid + source drawer, questionnaire matrix, Responses with upload, Outbox, Activity, ⚠ inline inputs).
+Phase 4: analysis chat (agent + tools + structured answers).
 
 ## Known issues
 - Vendor E's "the 3-ply / the 5-ply" was applied by the model to every 3-/5-ply line (incl. printed boxes and sheets); flagged as one ⚠ scope confirmation per group. Lines 23–24 need piece weights. This is intended behaviour for an ambiguous reply, not an extraction error.

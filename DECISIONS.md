@@ -125,3 +125,7 @@ Real email send/receive; vendor portal; authentication and roles (a VP uses the 
 ### E7. Certificates decide certificate questions
 - **What**: If a certificate for the question's topic is attached, its valid-until date against the RFx date decides pass/fail, whatever the vendor claims. A "yes" with no certificate is `unknown`.
 - **Why**: A buyer trusts documents over claims; this is exactly how the incumbent's expired ISO certificate is caught.
+
+### P1. Ambiguous seed interpretations stay as buyer decisions (Ranjan, 2026-09-30)
+- **What**: (1) Om Sai's "the 3-ply / the 5-ply" scope stays a ⚠ confirmation with the model's broad reading (incl. printed boxes and pads) shown as a disclaimer. (2) Mahalaxmi's partial answer on in-house testing stays "unclear", so it is not counted as passing all mandatory items until the buyer decides.
+- **Why**: Both are realistic judgment calls a buyer must own; the demo shows the tool surfacing them instead of silently deciding.
