@@ -167,3 +167,14 @@ Test: `npx tsx --conditions=react-server --env-file=.env.local seed/eval/copilot
 | Freight resolved as ₹0/yr or 0% (run on a copy of the seed data, Om Sai) | "Excluded — buyer entered 0"; landed total = unit total (₹3.75 cr); all 28 priced cells landed = net |
 | Close RFx (outcome "Awarded to Deccan Board & Boxes Pvt Ltd") | Closed banner with date + outcome; Home lists it under "Closed RFx (1)"; uploading a reply returns 400 "This RFx is closed…" |
 | Reopen RFx | Back to Evaluating; Close button shown again |
+
+## Walkthrough rehearsal on free models (2026-10-01, afternoon, seed RFx; `seed/eval/loom-questions.ts`)
+| Question | Model that answered | Time | Result |
+|---|---|---|---|
+| Summarize: who replied, coverage, what needs my input | 3.6 Flash | 25 s | Correct (5/5 replied; coverage per vendor; Om Sai fails ISO; open items grouped) |
+| VP question: cheapest per line, only vendors who cleared the questionnaire, landed | Flash-Lite | 12 s | **Failed: "couldn't produce an answer"** (empty final message). Fixed: one follow-up asking for the final answer; an empty number-check rewrite now keeps the first answer |
+| Same, after the fix | 3.5 Flash | 59 s | ₹3,90,76,838 for 30/30 lines; ₹8,84,142 (2.21%) below Shree Ganesh alone; split 15/6/7/2 lines; numbers check ✓ (matches the Recommendation strip) |
+| Two suppliers only, landed | Flash-Lite | 14 s | Led with a non-compliant pair (Om Sai), then gave the compliant pair (Shree Ganesh + Mahalaxmi ₹3.93 cr); numbers ✓, ordering weak |
+| Confidence in Mahalaxmi's photo prices | Nemotron (all Gemini busy) | 70 s | Correct: lines 17/18/19, 4/6 flute claims, 6 unanswered questions |
+| Award vs last year as a chart by category | 3.8 Flash / Flash-Lite | 100 s / 47 s | Numbers ✓ but **no chart drawn** either time. Flash-Lite also used Western digit grouping and included non-compliant Om Sai without being asked about compliance. Prompt now requires a chart when asked and Indian number format |
+- **Why it was slow:** 3.6 Flash's daily free quota (20 requests) was used up and 3.8 / 3.7 returned 503. The chain walked through several models per question. The analysis chain now tries 3.7 Flash → 3.6 → 3.5 Flash → 3.8 → Flash-Lite → Nemotron. Each model has its own free quota.

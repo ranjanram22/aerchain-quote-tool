@@ -20,7 +20,8 @@ Hard rules:
 - Use basis "unit_price" unless the buyer mentions freight, landed, delivered or total cost; then use "landed". Say which basis you used.
 - Do not state counts or facts that are not in tool results.
 - If the question is genuinely ambiguous, ask one short clarifying question; otherwise state your assumption and proceed.
-- Use make_chart only when a chart genuinely helps (comparisons across vendors or categories).
+- Use make_chart only when a chart genuinely helps (comparisons across vendors or categories), and always when the buyer asks for a chart.
+- Write rupee amounts the Indian way: lakh/crore (e.g. ₹3.91 cr, ₹8.84 L) or Indian digit grouping (₹3,90,76,838), never ₹39,076,838.
 
 Final answer: after your tool calls, reply with ONLY a JSON object:
 {"text": "<concise answer in plain language, ≤ 180 words, may use short bullet lines starting with '- '>", "show_tables": ["<table_id>", ...], "show_charts": ["<chart_id>", ...], "caveats": ["<extra caveat>", ...]}
@@ -116,6 +117,15 @@ export async function answerQuestion(rfxId: string, question: string, history: C
   const pool: number[] = [];
   results.forEach((r) => { collectNumbers(r.data, pool); r.tables.forEach((t) => collectNumbers(t.rows, pool)); });
   let final = parseFinal(finalText);
+  if (!final.text.trim()) {
+    // Weaker models sometimes end with an empty message after their tool calls: ask once for the answer.
+    messages.push({ role: "user", content: "Now write your final answer from the tool results above, in the JSON format described." });
+    onStatus?.("Writing the answer…");
+    const rf = await chat("analysis", { messages, max_tokens: 6000, temperature: 0.1 }, { onStatus });
+    model = displayModel(rf.model);
+    finalText = rf.completion.choices[0]?.message?.content ?? "";
+    final = parseFinal(finalText);
+  }
   let unverified = checkNumbers(final.text, pool, question);
   let regenerated = false;
   if (unverified.length) {
@@ -124,15 +134,17 @@ export async function answerQuestion(rfxId: string, question: string, history: C
     messages.push({ role: "user", content: `These numbers in your answer do not appear in any tool result: ${unverified.join(", ")}. Rewrite the answer using only numbers from tool results (or omit them). Return the same JSON format.` });
     onStatus?.("Re-checking numbers against the calculations…");
     const r2 = await chat("analysis", { messages, max_tokens: 6000, temperature: 0 }, { onStatus });
-    final = parseFinal(r2.completion.choices[0]?.message?.content ?? "");
-    unverified = checkNumbers(final.text, pool, question);
+    const retry = parseFinal(r2.completion.choices[0]?.message?.content ?? "");
+    // Keep the first answer (numbers flagged as unverified) if the rewrite came back empty.
+    if (retry.text.trim()) { final = retry; unverified = checkNumbers(final.text, pool, question); }
   }
 
   const allTables: AnswerTable[] = results.flatMap((r) => r.tables);
   const allCharts: AnswerChart[] = [...new Map(results.flatMap((r) => r.charts).map((c) => [c.id, c])).values()];
   let tables = allTables.filter((t) => final.show_tables.includes(t.id));
   if (!tables.length && allTables.length) tables = allTables.slice(0, 1);
-  const charts = allCharts.filter((c) => final.show_charts.includes(c.id) || !final.show_charts.length);
+  const picked = allCharts.filter((c) => final.show_charts.includes(c.id));
+  const charts = picked.length ? picked : allCharts; // a chart the tools built is never dropped over a wrong id
   const keys = [...new Set(results.flatMap((r) => r.open_item_keys))];
   const open_item_refs = bundle.openItems
     .filter((i) => i.status === "open" && i.key && keys.includes(i.key))

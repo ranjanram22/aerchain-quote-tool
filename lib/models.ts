@@ -32,7 +32,9 @@ export interface ModelRoute {
 
 export const MODELS: Record<ModelTask, ModelRoute> = {
   extraction: { chain: [GEMINI_FLASH, GEMINI_FLASH_STABLE, GEMINI_FLASH_LITE], timeoutMs: 240_000 },
-  analysis: { chain: [GEMINI_FLASH, GEMINI_FLASH_STABLE, GEMINI_FLASH_LITE, NEMOTRON_FREE], timeoutMs: 120_000 },
+  // Each Gemini model has its own free quota, so the chain tries the Flash
+  // models that usually answer first; 3.8 (most often busy) after them.
+  analysis: { chain: [GEMINI_FLASH_37, GEMINI_FLASH_STABLE, GEMINI_FLASH_35, GEMINI_FLASH, GEMINI_FLASH_LITE, NEMOTRON_FREE], timeoutMs: 120_000 },
   // Co-pilot: Gemini only (its history is stored in Gemini's native format with
   // thought signatures). Flash-Lite at minimal thinking for speed; Flash as the
   // fallback at its lowest level. DECISIONS T9/T10.
