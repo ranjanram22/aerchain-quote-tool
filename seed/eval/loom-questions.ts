@@ -15,7 +15,7 @@ const QUESTIONS = [
 
 (async () => {
   const only = process.argv.find((a) => a.startsWith("--only="))?.slice(7).split(",").map(Number);
-  let id = process.argv.slice(2).find((a) => !a.startsWith("--"));
+  let id: string = process.argv.slice(2).find((a) => !a.startsWith("--")) ?? "";
   if (!id) id = (await db().from("rfxs").select("id").ilike("title", "%FY27%").limit(1).single()).data!.id;
   for (const [i, q] of QUESTIONS.entries()) {
     if (only && !only.includes(i + 1)) continue;
