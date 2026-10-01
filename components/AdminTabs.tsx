@@ -4,6 +4,7 @@ import { useState, useTransition } from "react";
 import { saveVendor, deleteVendor, addProduct, saveFx, type ActionResult } from "@/app/actions/admin";
 import type { Vendor, Product, LastYear, Fx } from "@/lib/home-data";
 import SystemCheck from "./SystemCheck";
+import ResetDemo from "./ResetDemo";
 
 const TABS = ["Vendors", "Products catalog", "Last-year prices", "FX rates", "System"] as const;
 type Tab = (typeof TABS)[number];
@@ -277,7 +278,7 @@ export default function AdminTabs(props: { vendors: Vendor[]; products: Product[
         {tab === "Products catalog" && <Products products={props.products} />}
         {tab === "Last-year prices" && <LastYearPrices rows={props.lastYear} />}
         {tab === "FX rates" && <FxRates rows={props.fx} />}
-        {tab === "System" && <div className="max-w-sm"><SystemCheck /></div>}
+        {tab === "System" && <div className="grid max-w-3xl gap-4 md:grid-cols-2"><SystemCheck /><ResetDemo /></div>}
       </div>
     </section>
   );
