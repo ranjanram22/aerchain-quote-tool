@@ -5,6 +5,7 @@ import SystemCheck from "@/components/SystemCheck";
 import { isSupabaseConfigured } from "@/lib/supabase";
 import { loadHome } from "@/lib/home-data";
 import { createDraft } from "@/app/actions/draft";
+import { logout } from "@/app/actions/auth";
 
 const STATUS: Record<string, { label: string; cls: string }> = {
   draft: { label: "Draft", cls: "bg-slate-100 text-slate-700" },
@@ -35,6 +36,7 @@ export default async function Home() {
         </div>
         <div className="flex items-center gap-4">
           <span className="text-sm text-slate-600">Ranjan (Buyer)</span>
+          <form action={logout}><button className="text-xs text-slate-500 hover:underline">Sign out</button></form>
           <form action={createDraft}>
             <button className="rounded-md bg-indigo-600 px-4 py-2 text-sm font-medium text-white hover:bg-indigo-700">New RFx</button>
           </form>

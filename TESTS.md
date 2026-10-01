@@ -147,3 +147,14 @@ Test: `npx tsx --conditions=react-server --env-file=.env.local seed/eval/copilot
 
 - Browser check (local): the reply streams in as it is written, and the saved chat reappears after a page reload.
 - That check found a bug, now fixed: a catalog line sent without a description was skipped while the reply claimed it was added. Now the catalog name fills in the description, a skipped line is reported back to the model as a failure, and the prompt says to claim only what the tool result lists.
+
+## Login, RFx requirements, publish, grid hover, recommendation (2026-10-01, local)
+| Check | Result |
+|---|---|
+| Open `/` without signing in | 307 to `/login`; `/api/health` returns 401 |
+| Wrong password, then right password | "Wrong username or password." (username kept), then lands on Home; Sign out shown |
+| New RFx: "Need 3-ply RSC boxes 250x200x150, 50,000 a year" | Line added from catalog; co-pilot asks only for the response deadline; banner "Required before publishing: response deadline"; Publish disabled |
+| "Quotes due 2026-10-20", then Publish → Select all | Publish enabled; Select all ticks 5/5 vendors (test draft deleted, nothing published) |
+| Comparison grid hover on rows 1 and 6 | Explanation floats over neighbouring cells (below the cell; above it near the screen bottom) |
+| Recommendation on the seed RFx | Top bidder Deccan Board & Boxes, ₹3.45 cr/yr landed, 0.5% below Mahalaxmi on 25 common lines; split ₹3.91 cr for 30/30 lines, ₹8.84 L below Shree Ganesh alone, +1.0% vs last year; before awarding: 3 open ⚠ on Deccan; Om Sai excluded (mandatory) |
+| `seed/eval/copilot-conversation.ts` re-run after the prompt change | PASS, 9 tool calls, 8.3 s average (turn 6 forced onto 3.7 Flash: 34 s) |

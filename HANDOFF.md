@@ -17,6 +17,8 @@ You're continuing work on the Aerchain take-home prototype ("Quote Desk") in `/U
 - Ranjan is a PM, not a developer. Do the technical work yourself, give numbered copy-paste steps when he must act, and keep explanations short.
 - Never type API keys or passwords into websites for him. Put the value on his clipboard and open the page, so he pastes it himself.
 
+**Login:** the whole app is behind a demo login (username `aerchain`, password `qwerty`; `lib/auth.ts`, `proxy.ts`). Local scripts call `lib/` directly and are not affected.
+
 **Infrastructure you'll need:**
 - **Secrets** live in `.env.local`: `OPENROUTER_API_KEY`, `SUPABASE_URL`, `SUPABASE_SERVICE_ROLE_KEY`, `GEMINI_API_KEY`. The same four are set in Vercel. Never print them.
 - **Supabase** project ref `idffloxbrmtlmljcvnma` (Mumbai); Vercel functions are pinned to `bom1`.

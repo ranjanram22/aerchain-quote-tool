@@ -68,6 +68,8 @@ Repo: github.com/ranjanram22/aerchain-quote-tool (private)
   - One `update_draft` tool, and replies stream into the chat.
   - About 27 s per turn before, about 6 s per turn after.
 
+- Login gate (aerchain / qwerty), RFx needs only line items + response deadline, Select all when publishing, comparison hover no longer hidden, Recommendation strip on top of the evaluation workspace (F2).
+
 ## Next
 - Ranjan to test live upload (photo) on Vercel within the 5-minute limit.
 - Optional: demo script, split freight rates, test-report facts, questionnaire overrides, plain-language activity log, README polish.

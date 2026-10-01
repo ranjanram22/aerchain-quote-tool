@@ -200,3 +200,22 @@ Real email send/receive; vendor portal; authentication and roles (a VP uses the 
   - **Streaming**: the assistant's text streams to the chat as it is generated, and a retry discards a failed attempt's partial text.
 - **Result**: average seconds per co-pilot turn on the same scripted 10-turn conversation went from **26.8 s before** to **8.9 s after**. The 8.9 s includes one turn deliberately forced onto the busy free Flash models (37 s). The 9 normal turns averaged **5.7 s**.
 - **Trade-off**: Flash-Lite at minimal thinking sometimes drafts the questionnaire before the buyer asks (allowed by the prompt). Once, the Flash fallback recorded a freight term the buyer had only implied (DAP). Both are visible in the draft and editable.
+
+### F2. Login gate, lighter RFx requirements, select-all publish, grid hover, recommendation strip (2026-10-01, Ranjan's requests)
+- **Login**:
+  - Every page, API route and server action sits behind one hardcoded account (username `aerchain`, password `qwerty`, in `lib/auth.ts`), checked in `proxy.ts`. The Next.js 16 proxy replaces middleware.
+  - The session cookie (httpOnly, 7 days) holds an HMAC of the username keyed by `AUTH_SECRET`, falling back to the Supabase service key, so it can't be forged.
+  - Unauthenticated pages redirect to `/login?next=…`; API calls get 401. Sign out is on Home.
+  - Deliberately demo-grade, as asked: no user table and no password hashing. The password is in the repo, which is private.
+- **New RFx: only line items and the response deadline are required.**
+  - The "Still missing" banner now lists only those two, and Publish (button and server) is blocked until both are set. All other fields are labelled optional.
+  - The co-pilot no longer asks for or suggests optional terms, and drafts a questionnaire only on request.
+  - GST: when no GST treatment is set, the invitation says prices are taken as GST-inclusive. Location, scope and questionnaire sections are left out of the invitation when empty.
+- **Publish dialog**: a "Select all" checkbox (with a partly-selected state).
+- **Comparison grid hover**:
+  - The explanation was positioned inside the scrolling table. The hovered cell's `brightness` filter created its own stacking context, so later rows painted over it, and the scroll box clipped it.
+  - It is now one floating box (`position: fixed`) placed below the cell, or above it near the bottom of the screen. It hides on scroll.
+- **Recommendation strip** (top of the evaluation workspace, on every tab; `lib/insight.ts`):
+  - Up to 3 lines: the top bidder (like-for-like on the lines all eligible vendors priced), the cheapest-per-line split versus the best single vendor and last year, and what to check before awarding (open ⚠ items and assumed prices on the top bidder, excluded vendors, missing replies).
+  - Deterministic: built from the same `rank_vendors` / `award_cheapest_per_line` tools as the chat, on landed cost when freight is known for the eligible vendors, otherwise on unit price (stated in the strip). It refreshes when ⚠ items are resolved.
+  - Not LLM-written: no wait, no rate limits, and every number is computed by code (SPEC §4).

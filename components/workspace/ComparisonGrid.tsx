@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useMemo, useState, type ReactNode } from "react";
 import type { WorkspaceData } from "@/lib/workspace-data";
 import type { Cell } from "@/lib/normalize";
 import { inr, inrShort, STATE_META } from "./format";
@@ -22,6 +22,15 @@ export default function ComparisonGrid({ data, onOpenCell }: { data: WorkspaceDa
   const [basis, setBasis] = useState<Basis>("unit");
   const [includeDev, setIncludeDev] = useState(false);
   const [cat, setCat] = useState<string>("All");
+  // Hover explanation, rendered position:fixed so the scrolling grid and
+  // neighbouring cells can never cover or clip it.
+  const [tip, setTip] = useState<{ left: number; top?: number; bottom?: number; body: ReactNode } | null>(null);
+  const showTip = (el: HTMLElement, body: ReactNode) => {
+    const r = el.getBoundingClientRect();
+    const W = 288, gap = 6;
+    const left = Math.max(8, Math.min(r.left, window.innerWidth - W - 8));
+    setTip(r.bottom + 180 > window.innerHeight ? { left, bottom: window.innerHeight - r.top + gap, body } : { left, top: r.bottom + gap, body });
+  };
   const cats = useMemo(() => ["All", ...Array.from(new Set(bundle.lines.map((l) => l.category ?? "Other")))], [bundle.lines]);
   const lines = bundle.lines.filter((l) => cat === "All" || (l.category ?? "Other") === cat);
   const vendors = bundle.vendors;
@@ -66,7 +75,7 @@ export default function ComparisonGrid({ data, onOpenCell }: { data: WorkspaceDa
         <span className="rounded bg-amber-100 px-1.5 py-0.5 text-amber-900" title="Open question on this value">⚠ open item</span>
       </div>
 
-      <div className="overflow-auto rounded-lg border border-slate-200 bg-white" style={{ maxHeight: "calc(100vh - 290px)" }}>
+      <div onScroll={() => setTip(null)} className="overflow-auto rounded-lg border border-slate-200 bg-white" style={{ maxHeight: "calc(100vh - 290px)" }}>
         <table className="w-full border-separate border-spacing-0 text-xs">
           <thead className="sticky top-0 z-10 bg-slate-50">
             <tr>
@@ -104,7 +113,10 @@ export default function ComparisonGrid({ data, onOpenCell }: { data: WorkspaceDa
                     const awaiting = !cmp.vendors.find((x) => x.vendor_id === c.vendor_id)?.replied;
                     return (
                       <td key={c.vendor_id} className="border-b border-l border-slate-100 p-1">
-                        <button onClick={() => onOpenCell(c)} className={`group relative w-full rounded px-1.5 py-1 text-left ring-1 ${m.cls} ${isMin ? "outline outline-2 outline-emerald-500" : ""} hover:brightness-95`}>
+                        <button onClick={() => { setTip(null); onOpenCell(c); }}
+                          onMouseEnter={(e) => showTip(e.currentTarget, <><b>{m.label}</b> — {hoverText(c, vendorName)}{c.landed_steps.length > 0 && basis === "landed" && <><br />{c.landed_steps.join(" → ")}</>}</>)}
+                          onMouseLeave={() => setTip(null)}
+                          className={`w-full rounded px-1.5 py-1 text-left ring-1 ${m.cls} ${isMin ? "outline outline-2 outline-emerald-500" : ""} hover:brightness-95`}>
                           <div className="flex items-center justify-between gap-1">
                             <span className={`tabular-nums ${c.state === "not_quoted" ? "italic" : "font-medium"}`}>
                               {awaiting ? "Awaiting reply" : c.state === "not_quoted" ? "Not quoted" : c.state === "needs_input" ? "Needs input" : v != null ? inr(v) : basis === "landed" ? "Freight ?" : "—"}
@@ -117,10 +129,6 @@ export default function ComparisonGrid({ data, onOpenCell }: { data: WorkspaceDa
                           {basis === "landed" && c.state !== "not_quoted" && c.state !== "needs_input" && c.flags.includes("conditional_discount") && (
                             <div className="text-[10px] text-slate-500">discount pending</div>
                           )}
-                          <span className="pointer-events-none absolute left-0 top-full z-30 mt-1 hidden w-72 rounded-md bg-slate-900 p-2 text-[11px] font-normal leading-snug text-white shadow-lg group-hover:block">
-                            <b>{m.label}</b> — {hoverText(c, vendorName)}
-                            {c.landed_steps.length > 0 && basis === "landed" && <><br />{c.landed_steps.join(" → ")}</>}
-                          </span>
                         </button>
                       </td>
                     );
@@ -145,6 +153,11 @@ export default function ComparisonGrid({ data, onOpenCell }: { data: WorkspaceDa
           </tfoot>
         </table>
       </div>
+      {tip && (
+        <div role="tooltip" style={{ left: tip.left, top: tip.top, bottom: tip.bottom }} className="pointer-events-none fixed z-50 w-72 rounded-md bg-slate-900 p-2 text-[11px] font-normal leading-snug text-white shadow-lg">
+          {tip.body}
+        </div>
+      )}
       <p className="text-[11px] text-slate-500">
         Totals with different coverage are not comparable. Deviations are {includeDev ? "included" : "excluded"}. Conditional discounts are only applied once you confirm them. Unconfirmed interpretations (⚠) are included and flagged.
       </p>

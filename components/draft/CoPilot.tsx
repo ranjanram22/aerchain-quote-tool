@@ -88,10 +88,9 @@ export default function CoPilot({ rfx, lines, questions, vendors, chat }: DraftP
 
   const qList = questions.map((q) => ({ text: String(q.text), code: String(q.code ?? ""), ...(q.requirement as Record<string, unknown>) })) as { text: string; code: string; mandatory?: boolean; type?: string; value?: number; unit?: string; evidence?: string }[];
   const setQs = (next: typeof qList) => act(() => saveQuestions(rfx.id, next.map((q) => ({ text: q.text, code: q.code, mandatory: !!q.mandatory, type: (q.type as "boolean") ?? "text", value: q.value ?? null, unit: q.unit ?? null, evidence: q.evidence ?? null }))));
-  const missing = [
-    rfx.title === "Untitled RFx" && "title", !rfx.location && "delivery location", !lines.length && "line items",
-    lines.some((l) => l.annual_qty == null) && "quantities on some lines", !questions.length && "questionnaire", !terms.response_deadline && "response deadline",
-  ].filter(Boolean) as string[];
+  // Only line items and the response deadline are required to publish; everything else is optional.
+  const missing = [!lines.length && "line items", !String(terms.response_deadline ?? "").trim() && "response deadline"].filter(Boolean) as string[];
+  const allPicked = vendors.length > 0 && picked.length === vendors.length;
 
   return (
     <div className="flex h-screen flex-col">
@@ -102,7 +101,7 @@ export default function CoPilot({ rfx, lines, questions, vendors, chat }: DraftP
         </div>
         <div className="flex items-center gap-3">
           <button onClick={() => { if (confirm("Delete this draft?")) start(async () => { await deleteDraft(rfx.id); }); }} className="text-xs text-rose-600 hover:underline">Delete draft</button>
-          <button onClick={() => setPublishing(true)} disabled={!lines.length} className="rounded-md bg-indigo-600 px-4 py-2 text-sm font-medium text-white disabled:opacity-40">Publish to vendors…</button>
+          <button onClick={() => setPublishing(true)} disabled={missing.length > 0} title={missing.length ? `Required: ${missing.join(", ")}` : undefined} className="rounded-md bg-indigo-600 px-4 py-2 text-sm font-medium text-white disabled:opacity-40">Publish to vendors…</button>
         </div>
       </header>
 
@@ -144,7 +143,7 @@ export default function CoPilot({ rfx, lines, questions, vendors, chat }: DraftP
         {/* Live draft */}
         <section className="min-w-0 flex-1 overflow-y-auto p-5">
           {err && <div className="mb-3 rounded border border-rose-200 bg-rose-50 px-3 py-2 text-xs text-rose-800">{err}</div>}
-          {missing.length > 0 && <div className="mb-3 rounded border border-amber-200 bg-amber-50 px-3 py-2 text-xs text-amber-900">Still missing: {missing.join(", ")}</div>}
+          {missing.length > 0 && <div className="mb-3 rounded border border-amber-200 bg-amber-50 px-3 py-2 text-xs text-amber-900">Required before publishing: {missing.join(", ")}. Everything else is optional.</div>}
           <div className={`space-y-5 ${pending ? "opacity-70" : ""}`}>
             <section className="grid gap-3 rounded-lg border border-slate-200 bg-white p-4 md:grid-cols-2">
               <Field label="Title" value={rfx.title} onSave={(v) => act(() => saveHeader(rfx.id, { title: v }))} />
@@ -201,9 +200,9 @@ export default function CoPilot({ rfx, lines, questions, vendors, chat }: DraftP
             </section>
 
             <section className="grid gap-3 rounded-lg border border-slate-200 bg-white p-4 md:grid-cols-2">
-              <h3 className="text-sm font-medium md:col-span-2">Terms</h3>
+              <h3 className="text-sm font-medium md:col-span-2">Terms <span className="text-xs font-normal text-slate-500">· only the response deadline is required; prices are taken as GST-inclusive unless set</span></h3>
               {TERM_FIELDS.map(([k, label]) => (
-                <Field key={k} label={label} value={terms[k] == null ? "" : String(terms[k])} onSave={(v) => act(() => saveTerms(rfx.id, { [k]: k === "validity_required_days" ? Number(v) || v : v }))} />
+                <Field key={k} label={k === "response_deadline" ? `${label} * (required, YYYY-MM-DD)` : `${label} (optional)`} value={terms[k] == null ? "" : String(terms[k])} onSave={(v) => act(() => saveTerms(rfx.id, { [k]: k === "validity_required_days" ? Number(v) || v : v }))} />
               ))}
             </section>
           </div>
@@ -215,6 +214,10 @@ export default function CoPilot({ rfx, lines, questions, vendors, chat }: DraftP
           <div className="w-full max-w-lg rounded-lg bg-white p-5 shadow-xl" onClick={(e) => e.stopPropagation()}>
             <h3 className="mb-1 font-semibold">Publish to vendors</h3>
             <p className="mb-3 text-xs text-slate-500">Each selected vendor gets an invitation email in the Outbox (subject, RFx summary, line items, questionnaire, and “reply in any format”). <b>Simulated send</b> — nothing leaves this app.</p>
+            <label className="mb-1 flex items-center gap-2 border-b border-slate-100 px-2 pb-2 text-sm font-medium">
+              <input type="checkbox" checked={allPicked} ref={(el) => { if (el) el.indeterminate = picked.length > 0 && !allPicked; }} onChange={(e) => setPicked(e.target.checked ? vendors.map((v) => v.id) : [])} />
+              Select all <span className="text-xs font-normal text-slate-500">({picked.length}/{vendors.length} selected)</span>
+            </label>
             <div className="mb-3 max-h-64 space-y-1 overflow-y-auto">
               {vendors.map((v) => (
                 <label key={v.id} className="flex items-center gap-2 rounded px-2 py-1 text-sm hover:bg-slate-50">
@@ -223,10 +226,10 @@ export default function CoPilot({ rfx, lines, questions, vendors, chat }: DraftP
                 </label>
               ))}
             </div>
-            {missing.length > 0 && <p className="mb-2 text-xs text-amber-700">Heads-up — still missing: {missing.join(", ")}.</p>}
+            {missing.length > 0 && <p className="mb-2 text-xs text-amber-700">Required before publishing: {missing.join(", ")}.</p>}
             <div className="flex items-center justify-end gap-2">
               <button onClick={() => setPublishing(false)} className="text-sm text-slate-500">Cancel</button>
-              <button disabled={!picked.length || pending} onClick={() => act(async () => { const r = await publishDraft(rfx.id, picked); if (r.ok) setPublishing(false); return r; })}
+              <button disabled={!picked.length || pending || missing.length > 0} onClick={() => act(async () => { const r = await publishDraft(rfx.id, picked); if (r.ok) setPublishing(false); return r; })}
                 className="rounded-md bg-indigo-600 px-4 py-2 text-sm text-white disabled:opacity-40">{pending ? "Publishing…" : `Publish to ${picked.length} vendor(s)`}</button>
             </div>
           </div>

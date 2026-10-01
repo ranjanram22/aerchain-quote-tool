@@ -1,4 +1,5 @@
 import "server-only";
+import { buildInsight, type Insight } from "./insight";
 import { db, STORAGE_BUCKET } from "./supabase";
 import { loadComparison } from "./rfx-data";
 import type { RfxBundle } from "./types";
@@ -19,6 +20,7 @@ export interface WorkspaceData {
   history: ResponseHistory[];
   vendorEmails: Record<string, string | null>;
   otherVendors: { id: string; name: string }[];
+  insight: Insight;
 }
 
 export async function loadWorkspace(rfxId: string): Promise<WorkspaceData> {
@@ -52,5 +54,6 @@ export async function loadWorkspace(rfxId: string): Promise<WorkspaceData> {
     history: (history.data ?? []) as ResponseHistory[],
     vendorEmails: Object.fromEntries((vendors ?? []).map((v) => [v.id, v.email])),
     otherVendors: (all ?? []).filter((v) => !invited.has(v.id)),
+    insight: buildInsight(bundle, cmp),
   };
 }

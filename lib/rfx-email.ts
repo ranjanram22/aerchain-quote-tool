@@ -24,23 +24,19 @@ export function buildInviteEmail(i: InviteInput): { subject: string; body: strin
     t.payment_terms && `Payment terms: ${t.payment_terms}`,
     t.delivery_terms && `Delivery: ${t.delivery_terms}`,
     t.freight_expectation && `Freight: ${t.freight_expectation}`,
-    t.gst_treatment && `GST: ${t.gst_treatment}`,
+    `GST: ${t.gst_treatment || "prices are taken as inclusive of GST unless you state otherwise"}`,
     t.currency && `Currency: ${t.currency}`,
   ].filter(Boolean);
 
   const body = `Dear ${i.vendor.contact_name ?? i.vendor.name},
 
 You are invited to quote for: ${i.rfx.title}
-Delivery location: ${i.rfx.location ?? "—"}
-
-Scope: ${i.rfx.scope ?? "—"}
+${[i.rfx.location && `Delivery location: ${i.rfx.location}`, i.rfx.scope && `Scope: ${i.rfx.scope}`].filter(Boolean).join("\n\n")}
 
 LINE ITEMS
 ${lines}
 
-QUESTIONNAIRE
-${qs}
-
+${qs ? `QUESTIONNAIRE\n${qs}\n` : ""}
 TERMS
 ${termLines.join("\n")}
 

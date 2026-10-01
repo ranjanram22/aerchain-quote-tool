@@ -180,6 +180,7 @@ export async function publish(rfxId: string, vendorIds: string[], buyerName: str
   const d = await loadDraft(rfxId);
   if (d.rfx.status !== "draft") throw new Error("Already published.");
   if (!d.lines.length) throw new Error("Add at least one line item before publishing.");
+  if (!String(d.rfx.terms?.response_deadline ?? "").trim()) throw new Error("Set the response deadline before publishing.");
   if (!vendorIds.length) throw new Error("Choose at least one vendor.");
   const vendors = (await must(db().from("vendors").select("id,name,contact_name,email").in("id", vendorIds))) as { id: string; name: string; contact_name: string | null; email: string | null }[];
   const now = new Date().toISOString();

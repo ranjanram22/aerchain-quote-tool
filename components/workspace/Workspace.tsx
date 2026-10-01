@@ -81,6 +81,16 @@ export default function Workspace({ data }: { data: WorkspaceData }) {
       </header>
       <div className="flex min-h-0 flex-1">
         <main className="flex min-w-0 flex-[65] flex-col">
+          <section className="border-b border-indigo-100 bg-indigo-50/60 px-5 py-2.5 text-[13px] leading-snug text-slate-800">
+            <div className="mb-0.5 flex items-center gap-2 text-[11px] font-semibold uppercase tracking-wide text-indigo-800">
+              Recommendation
+              <span className="font-normal normal-case tracking-normal text-slate-500">{data.insight.note ? `${data.insight.note} · ` : ""}computed, not AI-written</span>
+            </div>
+            {data.insight.lines.map((l, i) => {
+              const at = data.insight.top && i === 0 ? l.indexOf(data.insight.top) : -1;
+              return <p key={i} className={l.startsWith("Before awarding") ? "text-amber-900" : undefined}>{at >= 0 ? <>{l.slice(0, at)}<b>{data.insight.top}</b>{l.slice(at + data.insight.top!.length)}</> : l}</p>;
+            })}
+          </section>
           <nav className="flex gap-1 border-b border-slate-200 bg-white px-4">
             {TABS.map((t) => (
               <button key={t} onClick={() => setTab(t)} className={`-mb-px border-b-2 px-3 py-2.5 text-sm ${tab === t ? "border-indigo-600 font-medium text-indigo-700" : "border-transparent text-slate-500 hover:text-slate-800"}`}>{t}</button>
