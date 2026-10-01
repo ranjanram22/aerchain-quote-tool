@@ -65,6 +65,82 @@ function MapLine({ rfxId, quoteLineId, lines }: { rfxId: string; quoteLineId: st
   );
 }
 
+type VersionData = {
+  response: { id: string; version: number; received_at: string; raw_email_text: string | null; superseded_by: string | null; processing_status: string };
+  files: { id: string; filename: string; kind: string; url: string | null }[];
+  lines: { line_no: number | null; vendor_line_text: string | null; price_value: number | null; price_currency: string | null; price_unit_as_written: string | null; value_origin: string }[];
+  extraction: { model: string; overall_confidence: number | null; created_at: string } | null;
+  terms: { freight: { note?: string } | null; payment_terms: { text?: string } | null } | null;
+};
+
+// Earlier replies from the same vendor: kept, viewable, and compared with the current one.
+function History({ data, vendorId }: { data: WorkspaceData; vendorId: string }) {
+  const versions = data.history.filter((h) => h.vendor_id === vendorId).sort((a, b) => b.version - a.version);
+  const current = data.bundle.responses.find((r) => r.vendor_id === vendorId);
+  const [openId, setOpenId] = useState<string | null>(null);
+  const [v, setV] = useState<VersionData | null>(null);
+  const [loading, setLoading] = useState(false);
+  if (versions.length < 2) return null;
+  const show = async (id: string) => {
+    if (openId === id) { setOpenId(null); return; }
+    setOpenId(id); setV(null); setLoading(true);
+    try { setV(await (await fetch(`/api/responses/${id}/version`)).json()); } finally { setLoading(false); }
+  };
+  const cur = current ? data.bundle.quoteLines.filter((q) => q.response_id === current.id) : [];
+  const fmtP = (x: { price_value: number | null; price_currency: string | null; price_unit_as_written: string | null } | undefined) => (x && x.price_value != null ? `${x.price_currency ?? ""} ${x.price_value} ${x.price_unit_as_written ?? ""}`.trim() : "—");
+  return (
+    <details className="rounded-md border border-slate-200 text-xs">
+      <summary className="cursor-pointer px-3 py-2 font-medium text-slate-700">Version history ({versions.length} replies — newest is used; older ones are kept)</summary>
+      <ul className="divide-y divide-slate-100">
+        {versions.map((h) => (
+          <li key={h.id} className="px-3 py-2">
+            <div className="flex items-center justify-between gap-2">
+              <span>
+                <b>Version {h.version}</b> · received {dt(h.received_at)} · {h.id === current?.id ? <span className="text-emerald-700">current</span> : <span className="text-slate-500">superseded</span>}
+                {h.processing_status !== "done" && <span className="text-amber-700"> · {h.processing_status}</span>}
+              </span>
+              {h.id !== current?.id && <button onClick={() => show(h.id)} className="text-indigo-700 hover:underline">{openId === h.id ? "Hide" : "View & compare"}</button>}
+            </div>
+            {openId === h.id && (
+              <div className="mt-2 space-y-2 rounded bg-slate-50 p-2">
+                {loading && <div className="text-slate-500">Loading…</div>}
+                {v && (
+                  <>
+                    <div className="text-slate-600">
+                      Files: {v.files.length ? v.files.map((f, i) => <span key={f.id}>{i ? ", " : ""}{f.url ? <a className="text-indigo-700 underline" href={f.url} target="_blank" rel="noreferrer">{f.filename}</a> : f.filename}</span>) : "none"}
+                      {v.response.raw_email_text && " · email text"}
+                      {v.extraction && <> · read by {v.extraction.model} ({pct(v.extraction.overall_confidence)})</>}
+                    </div>
+                    {v.terms?.freight?.note && <div className="text-slate-600">Freight then: “{v.terms.freight.note}”</div>}
+                    <table className="w-full text-[11px]">
+                      <thead className="text-left text-slate-500"><tr><th className="px-1 py-0.5 font-medium">RFx</th><th className="px-1 py-0.5 font-medium">This version</th><th className="px-1 py-0.5 font-medium">Current version</th><th className="px-1 py-0.5 font-medium" /></tr></thead>
+                      <tbody>
+                        {[...new Set([...v.lines.map((l) => l.line_no), ...cur.map((q) => q.line_no)].filter((n): n is number => n != null))].sort((a, b) => a - b).map((n) => {
+                          const old = v.lines.find((l) => l.line_no === n);
+                          const now = cur.find((q) => q.line_no === n);
+                          const changed = fmtP(old) !== fmtP(now);
+                          const has = (x: typeof old | typeof now) => !!x && x.price_value != null;
+                          return (
+                            <tr key={n} className={`border-t border-slate-200 ${changed ? "bg-amber-50" : ""}`}>
+                              <td className="px-1 py-0.5">{n}</td><td className="px-1 py-0.5">{fmtP(old)}</td><td className="px-1 py-0.5">{fmtP(now)}</td>
+                              <td className="px-1 py-0.5 text-amber-700">{changed ? (has(old) && has(now) ? "changed" : has(old) ? "dropped" : "new") : ""}</td>
+                            </tr>
+                          );
+                        })}
+                      </tbody>
+                    </table>
+                    <p className="text-[10px] text-slate-500">Values as written by the vendor (before conversion). Only the current version feeds the comparison; your earlier confirmations carry over where the value is unchanged.</p>
+                  </>
+                )}
+              </div>
+            )}
+          </li>
+        ))}
+      </ul>
+    </details>
+  );
+}
+
 function Followup({ data, vendorId }: { data: WorkspaceData; vendorId: string }) {
   const [draft, setDraft] = useState<{ subject: string; body: string } | null>(null);
   const [loading, setLoading] = useState(false);
@@ -147,8 +223,8 @@ export default function Responses({ data }: { data: WorkspaceData }) {
               <div>
                 <h3 className="font-medium">{v.name}</h3>
                 <div className="text-xs text-slate-500">
-                  {!resp ? "Not replied" : `Received ${dt(resp.received_at)} · version ${resp.version}${versions.length > 1 ? ` (${versions.length - 1} earlier kept in history)` : ""}`}
-                  {resp && ` · ${summary.coverage_label}`}
+                  {!resp ? "Not replied" : `Received ${dt(resp.received_at)} · version ${resp.version}`}
+                  {resp && ` · ${summary.coverage_label}`}{versions.length > 1 && <span className="text-slate-400"> · see Version history below</span>}
                 </div>
               </div>
               <Upload rfxId={bundle.rfx.id} vendorId={v.id} label={resp ? "Upload a newer reply" : "Add response"} />
@@ -256,6 +332,7 @@ export default function Responses({ data }: { data: WorkspaceData }) {
                       ))}
                     </ul>
                   )}
+                  <History data={data} vendorId={v.id} />
                   <Followup data={data} vendorId={v.id} />
                 </div>
               </div>

@@ -226,6 +226,30 @@ async function persist(
   if (eErr) throw new Error(`save extraction: ${eErr.message}`);
 
   const lineId = (n: number | null) => (n == null ? null : (lines.find((l) => l.line_no === n)?.id ?? null));
+  // Numbers must be copied, never computed: a price that does not appear in
+  // its own quoted text is kept but flagged ⚠; a weight that does not appear is
+  // not the vendor's (falls back to the RFx spec weight, labelled as such).
+  for (const l of x.line_quotes) {
+    const text = `${l.provenance.snippet} ${l.vendor_line_text} ${l.price_unit_as_written}`;
+    if (l.price_value != null && !numberIn(l.price_value, text)) {
+      // If the unit text (e.g. "₹36/kg") or else the snippet holds exactly one
+      // number, that is the price as written: copy it (never compute), keep ⚠.
+      const only = (t: string) => { const n = numbersOf(t); return n.length === 1 ? n[0] : null; };
+      const written = only(l.price_unit_as_written) ?? only(l.provenance.snippet);
+      const was = l.price_value;
+      l.confidence = Math.min(l.confidence, 0.3);
+      if (written != null) {
+        l.price_value = written;
+        l.match_reason = `${l.match_reason} | ⚠ The reader returned ${was}, which is not in the quoted text; replaced with the figure as written (${written}). Check against the original.`;
+      } else {
+        l.match_reason = `${l.match_reason} | ⚠ The price ${was} does not appear in the quoted text ("${l.provenance.snippet.slice(0, 80)}") — the reader may have converted or computed it. Check against the original.`;
+      }
+    }
+    if (l.weight_per_piece_kg != null && !numberIn(l.weight_per_piece_kg, text) && !numberIn(l.weight_per_piece_kg * 1000, text)) {
+      x.notes.push(`Line ${l.rfx_line_no}: a weight of ${l.weight_per_piece_kg} kg was not in the vendor's text, so it was not treated as stated by the vendor.`);
+      l.weight_per_piece_kg = null;
+    }
+  }
   const qlRows = x.line_quotes.map((l) => ({
     response_id: responseId,
     extraction_id: ext.id,
@@ -314,6 +338,15 @@ async function persist(
     target: `response:${responseId}`,
     new_value: { model, lines: x.line_quotes.length, overall_confidence: x.overall_confidence, attempts: attempts.length, cached: attempts.some((a) => a.cached) },
   });
+}
+
+function numbersOf(text: string): number[] {
+  return [...new Set((text.replace(/(\d),(?=\d)/g, "$1").match(/\d+(?:\.\d+)?/g) ?? []).map(Number))];
+}
+
+function numberIn(n: number, text: string): boolean {
+  const nums = numbersOf(text);
+  return nums.some((x) => Math.abs(x - n) <= Math.max(1e-6, Math.abs(n) * 1e-4));
 }
 
 function appearsIn(value: string, text: string): boolean {

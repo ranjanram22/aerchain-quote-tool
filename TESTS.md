@@ -118,3 +118,13 @@ Unseen samples (vs the Sonnet run of the same files):
 | C Deccan Board & Boxes Pvt Ltd | docx paragraphs | gemini:gemini-3.5-flash-lite (conf 0.98) | 219/219 | 44/44 | 30/30 → 30/30 | Same |
 | D Mahalaxmi Packaging Works | angled phone photo | gemini:gemini-3.5-flash-lite (conf 0.95) | 235/240 | 27/30 | 30/30 → 29/30 | **Worse** |
 | E Om Sai Cartons | one-line email + expired ISO | gemini:gemini-3.5-flash-lite (conf 0.75) | 138/142 | 17/20 | 26/30 → 30/30 | Better |
+
+
+## Post-phase checks (2026-10-01)
+| Test | Result |
+|---|---|
+| Reset demo via `/api/admin/reset` (local) | 53 s, all 5 replies from cache (no AI calls); wrong confirmation → 400 |
+| what_if freight (tool, no AI): Om Sai ₹15 L/yr; Transpac included; Transpac USD 600 × 48 | Totals ₹3.908 cr → ₹3.886 / ₹3.841 / ₹3.902 cr; 3 / 14 / 2 lines change hands |
+| Chat: "If Transpac agreed to include freight, how would the cheapest-per-line landed award change among compliant vendors?" | Chose what_if(freight included, mandatory, landed); −₹6.71 L; Transpac 2 → 14 lines; numbers traced ✓ |
+| Version history: Om Sai sent a revised email (₹40/kg 5-ply, ₹36/kg 3-ply, freight ₹1.5 L/yr) | v1 and v2 listed; v1 view shows files, values and per-line changed/new/dropped vs v2 |
+| Same revised email exposed a model computing prices ("7.56" for "₹36/kg") → shown as ₹1.59/pc | Fixed by E9: now ₹36/kg × 0.21 kg (RFx spec weight) = ₹7.56/pc with ⚠ |

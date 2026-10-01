@@ -168,3 +168,12 @@ Real email send/receive; vendor portal; authentication and roles (a VP uses the 
 - **Unmatched priced items** become an "Unmatched item" ⚠ with a map-to-line control in Responses.
 - **Lump sum + stated shipment frequency** is read as per-shipment freight (code rule, stated in the freight explanation).
 - **Honest trade-off**: Flash-Lite's analysis prose has occasional wording slips (4 in 10 answers) that the number check cannot catch; numbers remain fully traced.
+
+### E9. Numbers must be copied from the source text (found via version-history testing, 2026-10-01)
+- **What**: After every extraction, each price and weight must literally appear in its own quoted text (snippet, item text or unit text). A price that does not appear is the reader's own arithmetic: if the unit text or snippet holds exactly one number (e.g. "₹36/kg"), that written figure replaces it; otherwise the value is kept. Either way the line drops to 30% confidence (⚠). A weight that does not appear is removed from the vendor's side, so the RFx spec weight is used and labelled as such.
+- **Why**: On a revised one-line email, Flash-Lite returned "7.56" for "₹36/kg" (it had multiplied by the box weight itself) while keeping the per-kg unit, so the code converted twice and showed ₹1.59/pc; it also claimed the weight was "stated by vendor". The LLM must read, not compute (SPEC §4).
+
+### F1. Reset demo data button; version history; freight what-ifs (2026-10-01)
+- **Reset**: Admin → System → "Reset demo data" (type RESET). Same code as `npm run seed` (`lib/demo-reset.ts`), streamed progress, replies served from the extraction cache (~1 min, no AI calls). Wipes everything, including RFx created during a demo — deliberate, it is a demo reset.
+- **Version history**: every earlier reply from a vendor stays viewable in Responses (files, values as written, model) with a line-by-line "changed / new / dropped" comparison against the current version. Only the newest version feeds the comparison.
+- **Freight what-if**: the chat's what_if tool accepts freight changes (included, ₹/year, % of value, ₹/unit, amount per shipment × shipments/year with FX); evaluated on landed cost.

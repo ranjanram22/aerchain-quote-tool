@@ -57,8 +57,16 @@ Repo: github.com/ranjanram22/aerchain-quote-tool (private)
 - Gemini vs Sonnet eval and all 15 unrehearsed questions in TESTS.md; decisions T8/E8.
 - Demo data reset with the free pipeline (16 open ⚠ items).
 
+## Post-phase additions (2026-10-01)
+- Admin → System → Reset demo data (typed confirmation, cache-backed, ~1 min).
+- Chat what-if for freight changes.
+- Responses → Version history with compare-to-current.
+- Guard: extracted prices/weights must appear in the source text (E9).
+
 ## Next
-- Optional: demo script for the interview; README polish.
+- Ranjan to test live upload (photo) on Vercel within the 5-minute limit.
+- Optional: demo script, split freight rates, test-report facts, questionnaire overrides, plain-language activity log, README polish.
+- Decide at the end: keep free models or move photo reading back to a paid model.
 
 ## Known issues
 - Free models (mostly gemini-3.5-flash-lite in practice): the angled photo and the one-line incumbent email read less reliably than with Sonnet and vary between runs; errors are ⚠-flagged, never silent (TESTS.md). With the current seed read, Om Sai is no longer the headline-cheapest vendor and Mahalaxmi counts as mandatory-compliant.
