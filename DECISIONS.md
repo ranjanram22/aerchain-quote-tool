@@ -219,3 +219,14 @@ Real email send/receive; vendor portal; authentication and roles (a VP uses the 
   - Up to 3 lines: the top bidder (like-for-like on the lines all eligible vendors priced), the cheapest-per-line split versus the best single vendor and last year, and what to check before awarding (open ⚠ items and assumed prices on the top bidder, excluded vendors, missing replies).
   - Deterministic: built from the same `rank_vendors` / `award_cheapest_per_line` tools as the chat, on landed cost when freight is known for the eligible vendors, otherwise on unit price (stated in the strip). It refreshes when ⚠ items are resolved.
   - Not LLM-written: no wait, no rate limits, and every number is computed by code (SPEC §4).
+
+### F3. Close RFx, visible upload button, freight 0, "Compliant vendors only" (2026-10-01, Ranjan's requests)
+- **Close / reopen an RFx**:
+  - New status `closed` (migration 004: status check updated, plus `closed_at`, `closed_note`, `status_before_close`).
+  - The "Close RFx…" button in the workspace header asks for an optional outcome (Awarded to <vendor> / Split award / Not awarded) and an optional note.
+  - A closed RFx moves to a collapsible "Closed RFx" section on Home showing its outcome. Its workspace shows a "Closed" banner and stays fully viewable. It no longer accepts replies or late vendors: the upload API and the action refuse, and the buttons are hidden.
+  - "Reopen RFx" restores the previous status. Both actions are written to the Activity log. Drafts are deleted, not closed.
+- **Upload button**: Tailwind's base reset made the native file-picker button render as plain text. The native input is now hidden behind a real "📎 Choose files…" button, which lists the chosen file names. The toggle is a filled "⬆ Add response / Upload a newer reply" button.
+- **Freight 0**: the freight ⚠ form now accepts 0 (₹/year or %), meaning "leave freight out" for that vendor. Normalization shows it as "Excluded — buyer entered 0 (landed cost = price without freight)". The Summary shows "freight excluded", and landed cost equals the unit price. Other number fields still require a positive value.
+- **"Compliant vendors only"** replaces "Include deviations" in the comparison grid. When ticked, it hides vendors that do not pass every mandatory question: failed, unverified, or no reply. This is the same `mandatory_pass` test the chat and the recommendation use. A note lists who is hidden and why. Spec deviations stay excluded from totals and the row minimum. To count one, accept it in its ⚠ item, which was already possible.
+  - **Why not keep both checkboxes**: Ranjan asked for a replacement. Accepting deviations line by line covers the old toggle's purpose.

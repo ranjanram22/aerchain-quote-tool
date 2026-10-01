@@ -20,7 +20,10 @@ function hoverText(c: Cell, vendorName: string): string {
 export default function ComparisonGrid({ data, onOpenCell }: { data: WorkspaceData; onOpenCell: (c: Cell) => void }) {
   const { bundle, cmp } = data;
   const [basis, setBasis] = useState<Basis>("unit");
-  const [includeDev, setIncludeDev] = useState(false);
+  // "Compliant vendors only": hide vendors that do not pass every mandatory
+  // question (failed, unverified or no reply). Deviations are always excluded
+  // from totals and the row minimum (accept one in its ⚠ item to count it).
+  const [compliantOnly, setCompliantOnly] = useState(false);
   const [cat, setCat] = useState<string>("All");
   // Hover explanation, rendered position:fixed so the scrolling grid and
   // neighbouring cells can never cover or clip it.
@@ -33,10 +36,15 @@ export default function ComparisonGrid({ data, onOpenCell }: { data: WorkspaceDa
   };
   const cats = useMemo(() => ["All", ...Array.from(new Set(bundle.lines.map((l) => l.category ?? "Other")))], [bundle.lines]);
   const lines = bundle.lines.filter((l) => cat === "All" || (l.category ?? "Other") === cat);
-  const vendors = bundle.vendors;
+  const summaryOf = (id: string) => cmp.vendors.find((x) => x.vendor_id === id)!;
+  const vendors = compliantOnly ? bundle.vendors.filter((v) => summaryOf(v.id).mandatory_pass) : bundle.vendors;
+  const hidden = bundle.vendors.filter((v) => !vendors.includes(v)).map((v) => {
+    const s = summaryOf(v.id);
+    return `${v.name} (${!s.replied ? "no reply" : s.mandatory_failures.length ? `fails ${s.mandatory_failures.join(", ")}` : `unverified: ${s.mandatory_unknown.join(", ")}`})`;
+  });
   const cellOf = (lineId: string, vendorId: string) => cmp.cells.find((c) => c.line_id === lineId && c.vendor_id === vendorId)!;
   const value = (c: Cell) => (basis === "unit" ? c.unit_inr : c.landed_inr);
-  const counts = (c: Cell) => value(c) != null && c.state !== "needs_input" && (includeDev || c.state !== "deviation");
+  const counts = (c: Cell) => value(c) != null && c.state !== "needs_input" && c.state !== "deviation";
   const openKeys = new Set(bundle.openItems.filter((i) => i.status === "open").map((i) => i.key));
 
   const totals = vendors.map((v) => {
@@ -44,7 +52,7 @@ export default function ComparisonGrid({ data, onOpenCell }: { data: WorkspaceDa
     for (const l of lines) {
       const c = cellOf(l.id, v.id);
       if (counts(c)) { total += value(c)! * Number(l.annual_qty ?? 0); n++; }
-      else if (basis === "landed" && c.unit_inr != null && c.state !== "needs_input" && (includeDev || c.state !== "deviation")) incomplete++;
+      else if (basis === "landed" && c.unit_inr != null && c.state !== "needs_input" && c.state !== "deviation") incomplete++;
     }
     return { vendor: v, total, n, incomplete };
   });
@@ -59,8 +67,8 @@ export default function ComparisonGrid({ data, onOpenCell }: { data: WorkspaceDa
             </button>
           ))}
         </div>
-        <label className="flex items-center gap-1.5 text-xs text-slate-700">
-          <input type="checkbox" checked={includeDev} onChange={(e) => setIncludeDev(e.target.checked)} /> Include deviations
+        <label className="flex items-center gap-1.5 text-xs text-slate-700" title="Show only vendors that pass every mandatory questionnaire item. Vendors that fail one, are unverified, or have not replied are hidden.">
+          <input type="checkbox" checked={compliantOnly} onChange={(e) => setCompliantOnly(e.target.checked)} /> Compliant vendors only
         </label>
         <select value={cat} onChange={(e) => setCat(e.target.value)} className="rounded border border-slate-300 bg-white px-2 py-1 text-xs">
           {cats.map((c) => <option key={c}>{c}</option>)}
@@ -159,7 +167,8 @@ export default function ComparisonGrid({ data, onOpenCell }: { data: WorkspaceDa
         </div>
       )}
       <p className="text-[11px] text-slate-500">
-        Totals with different coverage are not comparable. Deviations are {includeDev ? "included" : "excluded"}. Conditional discounts are only applied once you confirm them. Unconfirmed interpretations (⚠) are included and flagged.
+        {hidden.length > 0 && <><b>Hidden (not passing every mandatory question):</b> {hidden.join("; ")}. </>}
+        Totals with different coverage are not comparable. Spec deviations are excluded (accept one in its ⚠ item to count it). Conditional discounts are only applied once you confirm them. Unconfirmed interpretations (⚠) are included and flagged.
       </p>
     </div>
   );

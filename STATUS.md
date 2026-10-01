@@ -69,6 +69,7 @@ Repo: github.com/ranjanram22/aerchain-quote-tool (private)
   - About 27 s per turn before, about 6 s per turn after.
 
 - Login gate (aerchain / qwerty), RFx needs only line items + response deadline, Select all when publishing, comparison hover no longer hidden, Recommendation strip on top of the evaluation workspace (F2).
+- Close/reopen RFx with outcome, visible upload button, freight 0 = excluded, "Compliant vendors only" grid filter (F3).
 
 ## Next
 - Ranjan to test live upload (photo) on Vercel within the 5-minute limit.

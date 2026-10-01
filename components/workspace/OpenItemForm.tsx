@@ -55,9 +55,10 @@ export default function OpenItemForm({ rfxId, item, onDone }: { rfxId: string; i
     });
   const resolve = (resolution: Record<string, unknown>) => run(() => resolveOpenItem(rfxId, item.id, resolution, note || null));
   const dismiss = () => run(() => dismissOpenItem(rfxId, item.id, note || null));
-  const num = () => {
+  // allowZero: freight only — 0 means "leave freight out" for this vendor.
+  const num = (allowZero = false) => {
     const n = Number(val.replace(/,/g, ""));
-    if (!val || !Number.isFinite(n) || n <= 0) { setErr("Enter a positive number."); return null; }
+    if (!val.trim() || !Number.isFinite(n) || n < 0 || (n === 0 && !allowZero)) { setErr(allowZero ? "Enter 0 or a positive number." : "Enter a positive number."); return null; }
     return n;
   };
 
@@ -66,7 +67,7 @@ export default function OpenItemForm({ rfxId, item, onDone }: { rfxId: string; i
     return (
       <div className="text-xs text-slate-500">
         {item.status === "resolved" ? "Resolved" : "Dismissed"} by {item.resolved_by} · {dt(item.resolved_at)}
-        {r.value != null && <> · value {String(r.value)}</>}
+        {r.value != null && <> · {item.kind === "freight_amount" && Number(r.value) === 0 ? "freight excluded (0)" : <>value {String(r.value)}</>}</>}
         {r.price_inr != null && <> · ₹{String(r.price_inr)}</>}
         {r.mode != null && <> · {String(r.mode)}</>}
         {r.apply != null && <> · {r.apply ? "apply" : "do not apply"}</>}
@@ -104,7 +105,8 @@ export default function OpenItemForm({ rfxId, item, onDone }: { rfxId: string; i
         {mode !== "included" && (
           <input value={val} onChange={(e) => setVal(e.target.value)} inputMode="decimal" placeholder={mode === "percent" ? "e.g. 4" : "e.g. 1500000"} className="w-32 rounded border border-slate-300 px-2 py-1 text-xs" />
         )}
-        <Btn disabled={pending} onClick={() => { if (mode === "included") resolve({ mode }); else { const n = num(); if (n) resolve({ mode, value: n }); } }}>Save</Btn>
+        <Btn disabled={pending} onClick={() => { if (mode === "included") resolve({ mode }); else { const n = num(true); if (n != null) resolve({ mode, value: n }); } }}>Save</Btn>
+        {mode !== "included" && <span className="text-[11px] text-slate-500">Enter 0 to leave freight out of this vendor&apos;s landed cost.</span>}
       </div>
     );
   else if (sub === "conditional_discount")

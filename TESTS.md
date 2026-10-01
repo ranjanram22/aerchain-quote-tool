@@ -158,3 +158,12 @@ Test: `npx tsx --conditions=react-server --env-file=.env.local seed/eval/copilot
 | Comparison grid hover on rows 1 and 6 | Explanation floats over neighbouring cells (below the cell; above it near the screen bottom) |
 | Recommendation on the seed RFx | Top bidder Deccan Board & Boxes, ₹3.45 cr/yr landed, 0.5% below Mahalaxmi on 25 common lines; split ₹3.91 cr for 30/30 lines, ₹8.84 L below Shree Ganesh alone, +1.0% vs last year; before awarding: 3 open ⚠ on Deccan; Om Sai excluded (mandatory) |
 | `seed/eval/copilot-conversation.ts` re-run after the prompt change | PASS, 9 tool calls, 8.3 s average (turn 6 forced onto 3.7 Flash: 34 s) |
+
+## Close RFx, upload button, freight 0, compliant-only grid (2026-10-01, local)
+| Check | Result |
+|---|---|
+| Comparison → tick "Compliant vendors only" on the seed RFx | Om Sai hidden; note "fails Q1 iso9001: Certificate expired 2026-08-31"; 4 vendor columns remain |
+| Responses → "⬆ Upload a newer reply" | Panel shows a visible "📎 Choose files…" button and the accepted formats |
+| Freight resolved as ₹0/yr or 0% (run on a copy of the seed data, Om Sai) | "Excluded — buyer entered 0"; landed total = unit total (₹3.75 cr); all 28 priced cells landed = net |
+| Close RFx (outcome "Awarded to Deccan Board & Boxes Pvt Ltd") | Closed banner with date + outcome; Home lists it under "Closed RFx (1)"; uploading a reply returns 400 "This RFx is closed…" |
+| Reopen RFx | Back to Evaluating; Close button shown again |

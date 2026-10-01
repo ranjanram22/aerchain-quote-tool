@@ -65,9 +65,12 @@ create table if not exists rfxs (
   scope text,
   terms jsonb not null default '{}',
   status text not null default 'draft'
-    check (status in ('draft','sent','collecting','evaluating')),
+    check (status in ('draft','sent','collecting','evaluating','closed')),
   rfx_date date not null default current_date,
-  created_at timestamptz not null default now()
+  created_at timestamptz not null default now(),
+  closed_at timestamptz,
+  closed_note text,
+  status_before_close text
 );
 
 create table if not exists rfx_lines (

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useTransition } from "react";
 import Link from "next/link";
 import type { WorkspaceData } from "@/lib/workspace-data";
 import type { Cell } from "@/lib/normalize";
@@ -10,7 +10,45 @@ import Questionnaire from "./Questionnaire";
 import Responses from "./Responses";
 import SourceDrawer from "./SourceDrawer";
 import Chat from "./Chat";
-import { dt } from "./format";
+import { dt, d8 } from "./format";
+import { closeRfx, reopenRfx } from "@/app/actions/rfx";
+
+// Close the RFx once a decision is taken: optional outcome + note.
+function CloseDialog({ data, onClose }: { data: WorkspaceData; onClose: () => void }) {
+  const [outcome, setOutcome] = useState("");
+  const [note, setNote] = useState("");
+  const [err, setErr] = useState<string | null>(null);
+  const [pending, start] = useTransition();
+  const submit = () => start(async () => {
+    const text = [outcome, note.trim()].filter(Boolean).join(". ");
+    const r = await closeRfx(data.bundle.rfx.id, text || null);
+    if (!r.ok) setErr(r.error); else onClose();
+  });
+  return (
+    <div className="fixed inset-0 z-40 flex items-center justify-center bg-slate-900/30" onClick={onClose}>
+      <div className="w-full max-w-md rounded-lg bg-white p-5 shadow-xl" onClick={(e) => e.stopPropagation()}>
+        <h3 className="mb-1 font-semibold">Close this RFx</h3>
+        <p className="mb-3 text-xs text-slate-500">Use this once a decision is taken. The RFx moves to “Closed” on Home, stops accepting replies, and keeps all its data. You can reopen it later.</p>
+        <label className="mb-2 block text-xs text-slate-600">Outcome (optional)
+          <select value={outcome} onChange={(e) => setOutcome(e.target.value)} className="mt-1 w-full rounded border border-slate-300 px-2 py-1.5 text-sm">
+            <option value="">—</option>
+            {data.bundle.vendors.map((v) => <option key={v.id} value={`Awarded to ${v.name}`}>Awarded to {v.name}</option>)}
+            <option value="Split award">Split award</option>
+            <option value="Not awarded / cancelled">Not awarded / cancelled</option>
+          </select>
+        </label>
+        <label className="mb-3 block text-xs text-slate-600">Note (optional)
+          <textarea value={note} onChange={(e) => setNote(e.target.value)} rows={2} placeholder="e.g. Approved by plant head on 5 Oct" className="mt-1 w-full rounded border border-slate-300 px-2 py-1.5 text-sm" />
+        </label>
+        {err && <p className="mb-2 text-xs text-rose-600">{err}</p>}
+        <div className="flex justify-end gap-2">
+          <button onClick={onClose} className="text-sm text-slate-500">Cancel</button>
+          <button disabled={pending} onClick={submit} className="rounded-md bg-slate-800 px-4 py-2 text-sm text-white disabled:opacity-50">{pending ? "Closing…" : "Close RFx"}</button>
+        </div>
+      </div>
+    </div>
+  );
+}
 
 const TABS = ["Summary", "Comparison", "Questionnaire & attachments", "Responses", "Outbox", "Activity"] as const;
 
@@ -65,6 +103,9 @@ export default function Workspace({ data }: { data: WorkspaceData }) {
   const cell: Cell | undefined = cellKey ? data.cmp.cells.find((c) => c.line_id === cellKey.line && c.vendor_id === cellKey.vendor) : undefined;
   const open = data.bundle.openItems.filter((i) => i.status === "open").length;
   const replied = data.bundle.responses.length;
+  const closed = data.bundle.rfx.status === "closed";
+  const [closing, setClosing] = useState(false);
+  const [reopening, startReopen] = useTransition();
 
   return (
     <div className="flex h-screen flex-col">
@@ -76,9 +117,17 @@ export default function Workspace({ data }: { data: WorkspaceData }) {
         <div className="flex items-center gap-4 text-xs text-slate-600">
           <span>{replied}/{data.bundle.vendors.length} replied</span>
           <button onClick={() => setTab("Summary")} className="rounded-full bg-amber-100 px-2 py-0.5 text-amber-900">⚠ {open} open</button>
+          {closed
+            ? <button disabled={reopening} onClick={() => startReopen(async () => { await reopenRfx(data.bundle.rfx.id); })} className="rounded border border-slate-300 px-2.5 py-1 text-slate-700 hover:bg-slate-50 disabled:opacity-50">{reopening ? "Reopening…" : "Reopen RFx"}</button>
+            : <button onClick={() => setClosing(true)} className="rounded border border-slate-300 px-2.5 py-1 text-slate-700 hover:bg-slate-50">Close RFx…</button>}
           <span>Ranjan (Buyer)</span>
         </div>
       </header>
+      {closed && (
+        <div className="border-b border-slate-300 bg-slate-100 px-5 py-2 text-sm text-slate-700">
+          <b>Closed</b> on {d8(data.bundle.rfx.closed_at)}{data.bundle.rfx.closed_note ? ` — ${data.bundle.rfx.closed_note}` : ""}. Read-only for new replies; everything stays viewable.
+        </div>
+      )}
       <div className="flex min-h-0 flex-1">
         <main className="flex min-w-0 flex-[65] flex-col">
           <section className="border-b border-indigo-100 bg-indigo-50/60 px-5 py-2.5 text-[13px] leading-snug text-slate-800">
@@ -109,6 +158,7 @@ export default function Workspace({ data }: { data: WorkspaceData }) {
           <Chat data={data} />
         </aside>
       </div>
+      {closing && <CloseDialog data={data} onClose={() => setClosing(false)} />}
       {cell && <SourceDrawer data={data} cell={cell} onClose={() => setCellKey(null)} />}
     </div>
   );

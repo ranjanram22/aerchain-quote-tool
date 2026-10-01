@@ -1,3 +1,4 @@
+import { db } from "@/lib/supabase";
 import { after } from "next/server";
 import { createResponse, runExtraction } from "@/lib/extract/run";
 
@@ -13,6 +14,8 @@ export async function POST(req: Request, ctx: RouteContext<"/api/rfx/[id]/respon
   const emailText = String(form.get("email_text") ?? "").trim() || null;
   const files = form.getAll("files").filter((f): f is File => typeof f !== "string" && f.size > 0);
   if (!vendorId) return Response.json({ error: "Choose the vendor this reply is from." }, { status: 400 });
+  const { data: rfx } = await db().from("rfxs").select("status").eq("id", id).single();
+  if (rfx?.status === "closed") return Response.json({ error: "This RFx is closed. Reopen it to add replies." }, { status: 400 });
   if (!emailText && !files.length) return Response.json({ error: "Add at least one file or paste the email text." }, { status: 400 });
   const tooBig = files.find((f) => f.size > 20 * 1024 * 1024);
   if (tooBig) return Response.json({ error: `${tooBig.name} is larger than 20 MB.` }, { status: 400 });

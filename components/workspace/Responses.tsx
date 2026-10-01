@@ -16,6 +16,7 @@ function Upload({ rfxId, vendorId, label }: { rfxId: string; vendorId: string; l
   const [err, setErr] = useState<string | null>(null);
   const fileRef = useRef<HTMLInputElement>(null);
   const [text, setText] = useState("");
+  const [picked, setPicked] = useState<string[]>([]);
   const submit = async () => {
     const fd = new FormData();
     fd.set("vendor_id", vendorId);
@@ -27,7 +28,7 @@ function Upload({ rfxId, vendorId, label }: { rfxId: string; vendorId: string; l
       const r = await fetch(`/api/rfx/${rfxId}/responses`, { method: "POST", body: fd });
       const j = await r.json();
       if (!r.ok) throw new Error(j.error ?? "Upload failed");
-      setOpen(false); setText("");
+      setOpen(false); setText(""); setPicked([]);
       router.refresh();
     } catch (e) {
       setErr(e instanceof Error ? e.message : String(e));
@@ -35,11 +36,16 @@ function Upload({ rfxId, vendorId, label }: { rfxId: string; vendorId: string; l
       setBusy(false);
     }
   };
-  if (!open) return <button onClick={() => setOpen(true)} className="rounded border border-slate-300 bg-white px-3 py-1.5 text-xs hover:bg-slate-50">{label}</button>;
+  if (!open) return <button onClick={() => setOpen(true)} className="rounded-md bg-indigo-600 px-3 py-1.5 text-xs font-medium text-white shadow-sm hover:bg-indigo-700">⬆ {label}</button>;
   return (
     <div className="space-y-2 rounded-md border border-indigo-200 bg-indigo-50/40 p-3">
       <div className="text-xs font-medium">Add what the vendor sent — any format. Files and email text are read together.</div>
-      <input ref={fileRef} type="file" multiple accept={ACCEPT} className="block text-xs" />
+      {/* Native file input is hidden (Tailwind's reset makes its button invisible); a real button opens it. */}
+      <input ref={fileRef} type="file" multiple accept={ACCEPT} className="hidden" onChange={(e) => setPicked(Array.from(e.target.files ?? []).map((f) => f.name))} />
+      <div className="flex flex-wrap items-center gap-2">
+        <button type="button" onClick={() => fileRef.current?.click()} className="rounded-md border border-indigo-300 bg-white px-3 py-1.5 text-xs font-medium text-indigo-700 shadow-sm hover:bg-indigo-50">📎 Choose files…</button>
+        <span className="text-[11px] text-slate-600">{picked.length ? picked.join(", ") : "Excel, CSV, PDF, Word, photo (JPG/PNG/HEIC), text — several at once is fine"}</span>
+      </div>
       <textarea value={text} onChange={(e) => setText(e.target.value)} rows={4} placeholder="Paste the email body (optional)" className="w-full rounded border border-slate-300 p-2 text-xs" />
       <div className="flex items-center gap-2">
         <button disabled={busy} onClick={submit} className="rounded bg-indigo-600 px-3 py-1.5 text-xs text-white disabled:opacity-50">{busy ? "Uploading…" : "Upload & read"}</button>
@@ -192,10 +198,11 @@ export default function Responses({ data }: { data: WorkspaceData }) {
   const [focus, setFocus] = useState<Record<string, string>>({});
   const [late, setLate] = useState("");
   const [addPending, startAdd] = useTransition();
+  const closed = bundle.rfx.status === "closed";
 
   return (
     <div className="space-y-6">
-      {data.otherVendors.length > 0 && (
+      {!closed && data.otherVendors.length > 0 && (
         <div className="flex flex-wrap items-center gap-2 rounded-lg border border-dashed border-slate-300 bg-white px-4 py-2 text-xs text-slate-600">
           Reply from a vendor not on the invite list?
           <select value={late} onChange={(e) => setLate(e.target.value)} className="rounded border border-slate-300 px-2 py-1">
@@ -227,7 +234,7 @@ export default function Responses({ data }: { data: WorkspaceData }) {
                   {resp && ` · ${summary.coverage_label}`}{versions.length > 1 && <span className="text-slate-400"> · see Version history below</span>}
                 </div>
               </div>
-              <Upload rfxId={bundle.rfx.id} vendorId={v.id} label={resp ? "Upload a newer reply" : "Add response"} />
+              {closed ? <span className="text-xs text-slate-400">RFx closed — reopen to add replies</span> : <Upload rfxId={bundle.rfx.id} vendorId={v.id} label={resp ? "Upload a newer reply" : "Add response"} />}
             </header>
 
             {resp && (resp.processing_status === "pending" || resp.processing_status === "processing") && (

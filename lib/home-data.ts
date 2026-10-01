@@ -17,12 +17,13 @@ export interface LastYear {
 export interface Fx { currency: string; rate_to_inr: number; as_of: string; source_note: string | null }
 export interface RfxSummary {
   id: string; title: string; category: string | null; status: string; created_at: string;
+  closed_at: string | null; closed_note: string | null;
   invited: number; replied: number; openItems: number;
 }
 
 export async function loadHome() {
   const [rfxs, vendors, products, lastYear, fx, invites, responses, openItems] = await Promise.all([
-    db().from("rfxs").select("id,title,category,status,created_at").order("created_at", { ascending: false }),
+    db().from("rfxs").select("id,title,category,status,created_at,closed_at,closed_note").order("created_at", { ascending: false }),
     db().from("vendors").select("*").order("name"),
     db().from("products").select("*").order("name"),
     db().from("last_year_prices").select("*, vendors(name)").order("line_key"),

@@ -77,6 +77,8 @@ export async function sendFollowup(rfxId: string, vendorId: string, toEmail: str
 
 // A reply arrived from a vendor who was not on the original invite list.
 export async function addVendorToRfx(rfxId: string, vendorId: string): Promise<Result> {
+  const { data: rfx } = await db().from("rfxs").select("status").eq("id", rfxId).single();
+  if (rfx?.status === "closed") return { ok: false, error: "This RFx is closed. Reopen it to add vendors." };
   const { error } = await db().from("rfx_vendors").insert({ rfx_id: rfxId, vendor_id: vendorId, status: "invited" });
   if (error) return { ok: false, error: error.message };
   await audit(rfxId, "vendor_added_to_rfx", `vendor:${vendorId}`, null, null, "Added after publishing (no invitation email)");
@@ -93,6 +95,32 @@ export async function mapQuoteLine(rfxId: string, quoteLineId: string, lineNo: n
   if (error) return { ok: false, error: error.message };
   await audit(rfxId, "item_mapped", `quote_line:${quoteLineId}`, old, { line_no: lineNo }, null);
   await syncOpenItems(rfxId);
+  refresh();
+  return { ok: true };
+}
+
+// Close an RFx once the buyer has decided (awarded, cancelled…). It leaves the
+// active list and stops accepting replies; reopening restores the old status.
+export async function closeRfx(rfxId: string, note: string | null): Promise<Result> {
+  const { data: rfx } = await db().from("rfxs").select("status").eq("id", rfxId).single();
+  if (!rfx) return { ok: false, error: "RFx not found" };
+  if (rfx.status === "draft") return { ok: false, error: "Drafts can be deleted instead of closed." };
+  if (rfx.status === "closed") return { ok: true };
+  const { error } = await db().from("rfxs").update({ status: "closed", status_before_close: rfx.status, closed_at: new Date().toISOString(), closed_note: note?.trim() || null }).eq("id", rfxId);
+  if (error) return { ok: false, error: error.message };
+  await audit(rfxId, "rfx_closed", "rfx", { status: rfx.status }, { status: "closed" }, note?.trim() || null);
+  refresh();
+  return { ok: true };
+}
+
+export async function reopenRfx(rfxId: string): Promise<Result> {
+  const { data: rfx } = await db().from("rfxs").select("status,status_before_close").eq("id", rfxId).single();
+  if (!rfx) return { ok: false, error: "RFx not found" };
+  if (rfx.status !== "closed") return { ok: true };
+  const back = rfx.status_before_close ?? "evaluating";
+  const { error } = await db().from("rfxs").update({ status: back, closed_at: null, closed_note: null, status_before_close: null }).eq("id", rfxId);
+  if (error) return { ok: false, error: error.message };
+  await audit(rfxId, "rfx_reopened", "rfx", { status: "closed" }, { status: back }, null);
   refresh();
   return { ok: true };
 }

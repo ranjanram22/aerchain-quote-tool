@@ -186,7 +186,7 @@ export interface OpenItemRow {
 }
 
 export interface RfxBundle {
-  rfx: { id: string; title: string; category: string | null; location: string | null; scope: string | null; terms: Record<string, unknown>; status: string; rfx_date: string; created_at: string };
+  rfx: { id: string; title: string; category: string | null; location: string | null; scope: string | null; terms: Record<string, unknown>; status: string; rfx_date: string; created_at: string; closed_at?: string | null; closed_note?: string | null };
   lines: RfxLine[];
   questions: Question[];
   vendors: VendorRow[]; // invited vendors

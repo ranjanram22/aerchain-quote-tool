@@ -12,7 +12,44 @@ const STATUS: Record<string, { label: string; cls: string }> = {
   sent: { label: "Sent", cls: "bg-sky-100 text-sky-800" },
   collecting: { label: "Collecting responses", cls: "bg-amber-100 text-amber-800" },
   evaluating: { label: "Evaluating", cls: "bg-emerald-100 text-emerald-800" },
+  closed: { label: "Closed", cls: "bg-slate-200 text-slate-600" },
 };
+
+type Rfx = Awaited<ReturnType<typeof loadHome>>["rfxs"][number];
+function RfxTable({ rows }: { rows: Rfx[] }) {
+  return (
+    <table className="w-full text-sm">
+      <thead className="text-left text-xs text-slate-500">
+        <tr>
+          <th className="px-4 py-2 font-medium">Title</th>
+          <th className="px-4 py-2 font-medium">Category</th>
+          <th className="px-4 py-2 font-medium">Created</th>
+          <th className="px-4 py-2 font-medium">Status</th>
+          <th className="px-4 py-2 font-medium">Responses</th>
+          <th className="px-4 py-2 font-medium">Open ⚠ items</th>
+        </tr>
+      </thead>
+      <tbody>
+        {rows.map((r) => (
+          <tr key={r.id} className="border-t border-slate-100 hover:bg-slate-50">
+            <td className="px-4 py-3 font-medium">
+              <Link href={`/rfx/${r.id}`} className="text-indigo-700 hover:underline">{r.title}</Link>
+              {r.status === "closed" && r.closed_note && <div className="text-xs font-normal text-slate-500">{r.closed_note}</div>}
+            </td>
+            <td className="px-4 py-3">{r.category ?? "—"}</td>
+            <td className="px-4 py-3">{new Date(r.created_at).toLocaleDateString("en-IN", { day: "2-digit", month: "short", year: "numeric" })}</td>
+            <td className="px-4 py-3">
+              <span className={`rounded-full px-2 py-0.5 text-xs ${STATUS[r.status]?.cls ?? ""}`}>{STATUS[r.status]?.label ?? r.status}</span>
+              {r.status === "closed" && r.closed_at && <div className="mt-0.5 text-[11px] text-slate-500">{new Date(r.closed_at).toLocaleDateString("en-IN", { day: "2-digit", month: "short", year: "numeric" })}</div>}
+            </td>
+            <td className="px-4 py-3 tabular-nums">{r.replied}/{r.invited}</td>
+            <td className="px-4 py-3 tabular-nums">{r.openItems > 0 ? <span className="text-amber-700">⚠ {r.openItems}</span> : "0"}</td>
+          </tr>
+        ))}
+      </tbody>
+    </table>
+  );
+}
 
 export default async function Home() {
   await connection();
@@ -26,6 +63,9 @@ export default async function Home() {
       error = e instanceof Error ? e.message : "Could not load data.";
     }
   }
+
+  const active = data?.rfxs.filter((r) => r.status !== "closed") ?? [];
+  const closedRfx = data?.rfxs.filter((r) => r.status === "closed") ?? [];
 
   return (
     <div className="mx-auto w-full max-w-7xl px-6 py-8">
@@ -52,39 +92,16 @@ export default async function Home() {
         <div className="space-y-6">
           <section className="rounded-lg border border-slate-200 bg-white">
             <div className="border-b border-slate-100 px-4 py-3 font-medium">RFx list</div>
-            {data.rfxs.length === 0 ? (
-              <p className="px-4 py-6 text-sm text-slate-500">No RFx yet.</p>
-            ) : (
-              <table className="w-full text-sm">
-                <thead className="text-left text-xs text-slate-500">
-                  <tr>
-                    <th className="px-4 py-2 font-medium">Title</th>
-                    <th className="px-4 py-2 font-medium">Category</th>
-                    <th className="px-4 py-2 font-medium">Created</th>
-                    <th className="px-4 py-2 font-medium">Status</th>
-                    <th className="px-4 py-2 font-medium">Responses</th>
-                    <th className="px-4 py-2 font-medium">Open ⚠ items</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {data.rfxs.map((r) => (
-                    <tr key={r.id} className="border-t border-slate-100 hover:bg-slate-50">
-                      <td className="px-4 py-3 font-medium">
-                        <Link href={`/rfx/${r.id}`} className="text-indigo-700 hover:underline">{r.title}</Link>
-                      </td>
-                      <td className="px-4 py-3">{r.category ?? "—"}</td>
-                      <td className="px-4 py-3">{new Date(r.created_at).toLocaleDateString("en-IN", { day: "2-digit", month: "short", year: "numeric" })}</td>
-                      <td className="px-4 py-3">
-                        <span className={`rounded-full px-2 py-0.5 text-xs ${STATUS[r.status]?.cls ?? ""}`}>{STATUS[r.status]?.label ?? r.status}</span>
-                      </td>
-                      <td className="px-4 py-3 tabular-nums">{r.replied}/{r.invited}</td>
-                      <td className="px-4 py-3 tabular-nums">{r.openItems > 0 ? <span className="text-amber-700">⚠ {r.openItems}</span> : "0"}</td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            )}
+            {active.length === 0 ? (
+              <p className="px-4 py-6 text-sm text-slate-500">{closedRfx.length ? "No open RFx." : "No RFx yet."}</p>
+            ) : <RfxTable rows={active} />}
           </section>
+          {closedRfx.length > 0 && (
+            <details className="rounded-lg border border-slate-200 bg-white">
+              <summary className="cursor-pointer px-4 py-3 font-medium">Closed RFx <span className="ml-1 rounded-full bg-slate-100 px-2 text-xs text-slate-600">{closedRfx.length}</span></summary>
+              <RfxTable rows={closedRfx} />
+            </details>
+          )}
           <AdminTabs vendors={data.vendors} products={data.products} lastYear={data.lastYear} fx={data.fx} />
         </div>
       )}

@@ -511,6 +511,7 @@ export function normalize(b: RfxBundle, opts: NormalizeOptions = {}): Comparison
       }
     }
     else if (fr && fr.mode === "included") { summary.freight.status = "buyer_input"; fText = "Included (buyer confirmed)"; perUnit = () => 0; }
+    else if (fr && (fr.mode === "percent" || fr.mode === "annual_inr") && fr.value === 0) { summary.freight.status = "buyer_input"; fText = "Excluded — buyer entered 0 (landed cost = price without freight)"; summary.freight.annual_inr = 0; summary.freight.uplift_pct = 0; perUnit = () => 0; }
     else if (fr && fr.mode === "percent" && typeof fr.value === "number") {
       summary.freight.status = "buyer_input"; fText = `${fr.value}% of value (buyer input)`; summary.freight.uplift_pct = fr.value; summary.freight.annual_inr = valueBase * fr.value / 100;
       perUnit = (c) => c.net_inr! * (fr.value as number) / 100;
