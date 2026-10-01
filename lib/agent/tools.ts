@@ -517,11 +517,28 @@ export function what_if(ctx: Ctx, p: CommonParams & {
   scenario: "award_cheapest_per_line" | "rank_vendors";
   conditional_discounts?: { vendor: string; apply: boolean }[];
   price_changes?: { vendor: string; pct: number; line_nos?: number[]; categories?: string[] }[];
+  freight_changes?: { vendor: string; mode: "included" | "annual_inr" | "percent" | "per_unit_inr" | "per_shipment"; value?: number; shipments_per_year?: number; currency?: string }[];
 }): ToolResult {
   const force: Record<string, boolean> = {};
   const desc: string[] = [];
-  // Discounts only change landed cost, so discount scenarios are evaluated on landed.
-  if (p.conditional_discounts?.length && (p.basis ?? "unit_price") !== "landed") { p = { ...p, basis: "landed" }; desc.push("basis switched to landed cost (discounts only affect landed)"); }
+  // Discounts and freight only change landed cost, so those scenarios are evaluated on landed.
+  if ((p.conditional_discounts?.length || p.freight_changes?.length) && (p.basis ?? "unit_price") !== "landed") { p = { ...p, basis: "landed" }; desc.push("basis switched to landed cost (discounts and freight only affect landed)"); }
+  const freightOverride: NonNullable<NormalizeOptions["freightOverride"]> = {};
+  for (const f of p.freight_changes ?? []) {
+    const v = vendorByName(ctx, f.vendor); if (!v) continue;
+    if (f.mode === "per_shipment") {
+      // Convert a per-shipment amount to an annual amount (needs a shipment count).
+      if (f.value == null || !f.shipments_per_year) { desc.push(`${v.name} freight per shipment ignored — needs amount and shipments per year`); continue; }
+      const cur = (f.currency ?? "INR").toUpperCase();
+      const rate = cur === "INR" ? 1 : ctx.bundle.fx.find((x) => x.currency.toUpperCase() === cur)?.rate_to_inr;
+      if (!rate) { desc.push(`${v.name} freight ignored — no ${cur} rate`); continue; }
+      freightOverride[v.id] = { mode: "annual_inr", value: f.value * f.shipments_per_year * Number(rate) };
+      desc.push(`${v.name} freight ${cur} ${f.value} × ${f.shipments_per_year} shipments/yr`);
+    } else {
+      freightOverride[v.id] = { mode: f.mode, value: f.value };
+      desc.push(`${v.name} freight ${f.mode === "included" ? "included" : f.mode === "percent" ? `${f.value}% of value` : f.mode === "per_unit_inr" ? `₹${f.value}/unit` : `₹${f.value?.toLocaleString("en-IN")}/year`}`);
+    }
+  }
   for (const d of p.conditional_discounts ?? []) { const v = vendorByName(ctx, d.vendor); if (v) { force[v.id] = d.apply; desc.push(`${v.name}'s conditional discount ${d.apply ? "applied" : "not applied"}`); } }
   let bundle = ctx.bundle;
   if (p.price_changes?.length) {
@@ -545,7 +562,7 @@ export function what_if(ctx: Ctx, p: CommonParams & {
     const s = v ? ctx.cmp.vendors.find((x) => x.vendor_id === v.id) : undefined;
     return { vendor: v?.name ?? d.vendor, conditional_discounts: s?.discounts.filter((x) => x.condition).map((x) => `${x.text} [currently ${x.status === "pending" ? "NOT applied (not confirmed by buyer)" : x.status}]`) ?? [] };
   });
-  const afterCmp = normalize(bundle, { forceConditionalDiscounts: force });
+  const afterCmp = normalize(bundle, { forceConditionalDiscounts: force, freightOverride });
   const beforeRes = p.scenario === "rank_vendors" ? rank_vendors(ctx, p) : award_cheapest_per_line(ctx, p);
   const altCtx: Ctx = { ...ctx, bundle, cmp: afterCmp };
   const afterRes = p.scenario === "rank_vendors" ? rank_vendors(altCtx, p) : award_cheapest_per_line(altCtx, p);
@@ -565,9 +582,9 @@ export function what_if(ctx: Ctx, p: CommonParams & {
   // If the scenario equals today's state (e.g. "if the discount doesn't apply"
   // while it is not applied yet), also show the opposite so the effect is visible.
   let opposite: Record<string, unknown> | null = null;
-  if (p.scenario === "award_cheapest_per_line" && Object.keys(force).length && (diff.change_inr as number) === 0 && !p.price_changes?.length) {
+  if (p.scenario === "award_cheapest_per_line" && Object.keys(force).length && (diff.change_inr as number) === 0 && !p.price_changes?.length && !p.freight_changes?.length) {
     const flipped = Object.fromEntries(Object.entries(force).map(([k, v]) => [k, !v]));
-    const oppRes = award_cheapest_per_line({ ...ctx, bundle, cmp: normalize(bundle, { forceConditionalDiscounts: flipped }) }, p);
+    const oppRes = award_cheapest_per_line({ ...ctx, bundle, cmp: normalize(bundle, { forceConditionalDiscounts: flipped, freightOverride }) }, p);
     const od = oppRes.data as Record<string, unknown>;
     const bt = beforeRes.tables[0].rows, ot = oppRes.tables[0].rows;
     changedRows = ot.filter((r, i) => r.winner !== bt[i].winner || r.price_inr !== bt[i].price_inr).map((r) => {
@@ -695,11 +712,16 @@ export const TOOL_SCHEMAS = [
     lock_lines: { type: "array", items: { type: "object", properties: { line: { type: "integer" }, vendor: { type: "string" } }, required: ["line", "vendor"] } },
   }),
   fn("compare_to_last_year", "Line-by-line new prices vs last-year contract prices.", common),
-  fn("what_if", "Before/after for a hypothetical change: apply or remove a vendor's conditional discount, or change a vendor's prices by a percentage.", {
+  fn("what_if", "Before/after for a hypothetical change: apply or remove a vendor's conditional discount, change a vendor's prices by a percentage, or set a vendor's freight (included, ₹ per year, % of value, ₹ per unit, or an amount per shipment × shipments per year).", {
     ...common,
     scenario: { type: "string", enum: ["award_cheapest_per_line", "rank_vendors"] },
     conditional_discounts: { type: "array", items: { type: "object", properties: { vendor: { type: "string" }, apply: { type: "boolean" } }, required: ["vendor", "apply"] } },
     price_changes: { type: "array", items: { type: "object", properties: { vendor: { type: "string" }, pct: { type: "number" }, line_nos: { type: "array", items: { type: "integer" } }, categories: { type: "array", items: { type: "string" } } }, required: ["vendor", "pct"] } },
+    freight_changes: { type: "array", items: { type: "object", properties: {
+      vendor: { type: "string" }, mode: { type: "string", enum: ["included", "annual_inr", "percent", "per_unit_inr", "per_shipment"] },
+      value: { type: "number", description: "₹/year for annual_inr, % for percent, ₹ per unit for per_unit_inr, amount per shipment for per_shipment" },
+      shipments_per_year: { type: "number" }, currency: { type: "string", description: "for per_shipment, default INR" },
+    }, required: ["vendor", "mode"] } },
   }, ["scenario"]),
   fn("query_rows", "Generic filter/group/aggregate over comparison cells for questions other tools don't cover.", {
     ...common,

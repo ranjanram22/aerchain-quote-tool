@@ -101,6 +101,8 @@ export interface Comparison {
 export interface NormalizeOptions {
   // What-if switches; defaults reflect the buyer's confirmed state.
   forceConditionalDiscounts?: Record<string, boolean>; // vendor_id → apply all its conditional discounts
+  // vendor_id → hypothetical freight (what-if). Takes precedence over the quote and buyer input.
+  freightOverride?: Record<string, { mode: "included" | "annual_inr" | "percent" | "per_unit_inr"; value?: number }>;
 }
 
 const fmt = (n: number, d = 2) => n.toLocaleString("en-IN", { minimumFractionDigits: d, maximumFractionDigits: d });
@@ -495,7 +497,19 @@ export function normalize(b: RfxBundle, opts: NormalizeOptions = {}): Comparison
     const fr = fKey ? res(fKey) : null;
     let perUnit: ((c: Cell) => number | null) | null = null;
     let fText = "";
+    const fo = opts.freightOverride?.[v.id];
     if (!resp || resp.processing_status !== "done") { fText = resp ? "Response still processing" : "No response"; }
+    else if (fo) {
+      summary.freight.status = "buyer_input";
+      if (fo.mode === "included") { fText = "Included (what-if)"; perUnit = () => 0; }
+      else if (fo.mode === "percent" && fo.value != null) { fText = `${fo.value}% of value (what-if)`; summary.freight.uplift_pct = fo.value; summary.freight.annual_inr = valueBase * fo.value / 100; perUnit = (c) => c.net_inr! * fo.value! / 100; }
+      else if (fo.mode === "per_unit_inr" && fo.value != null) { fText = `${inr(fo.value)} per unit (what-if)`; perUnit = () => fo.value!; }
+      else if (fo.mode === "annual_inr" && fo.value != null && valueBase > 0) {
+        const pct = (fo.value / valueBase) * 100;
+        fText = `${inr(fo.value)}/year (what-if), allocated pro-rata to line value (+${fmt(pct, 2)}%)`; summary.freight.annual_inr = fo.value; summary.freight.uplift_pct = pct;
+        perUnit = (c) => c.net_inr! * pct / 100;
+      }
+    }
     else if (fr && fr.mode === "included") { summary.freight.status = "buyer_input"; fText = "Included (buyer confirmed)"; perUnit = () => 0; }
     else if (fr && fr.mode === "percent" && typeof fr.value === "number") {
       summary.freight.status = "buyer_input"; fText = `${fr.value}% of value (buyer input)`; summary.freight.uplift_pct = fr.value; summary.freight.annual_inr = valueBase * fr.value / 100;
@@ -548,7 +562,7 @@ export function normalize(b: RfxBundle, opts: NormalizeOptions = {}): Comparison
         };
       }
     }
-    if (resp && resp.processing_status === "done" && !perUnit) {
+    if (resp && resp.processing_status === "done" && !perUnit && !fo) {
       summary.freight.status = "unknown";
       fText = f ? (f.basis === "not_mentioned" ? "Freight not mentioned" : `Freight extra, amount not usable: "${f.note}"`) : "Freight not mentioned";
       if (!dismissed(fKey)) {
