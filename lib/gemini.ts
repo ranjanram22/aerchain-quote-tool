@@ -1,12 +1,18 @@
 import "server-only";
-import { GoogleGenAI, ApiError, type Content, type Part, type FunctionDeclaration } from "@google/genai";
+import { GoogleGenAI, ApiError, type Content, type Part, type FunctionDeclaration, type ThinkingLevel } from "@google/genai";
 import type { ChatCompletion, ChatCompletionMessageParam, ChatCompletionTool } from "openai/resources/chat/completions";
 import type { ChatParams } from "./llm";
 
 // Adapter: accepts the OpenAI-style request the rest of the app builds and
 // calls Gemini through its native SDK (inline PDFs and images supported),
 // returning an OpenAI-shaped completion. Gemini "thought signatures" on
-// function calls are kept in memory so multi-turn tool use works.
+// function calls are kept in memory so multi-turn tool use works within a
+// request. Tool calls made by a non-Gemini model earlier in the same
+// conversation (fallback chain) have no signature, so they are replayed as
+// plain-text summaries instead of functionCall parts (DECISIONS T9).
+//
+// geminiStream() is the native streaming path used by the co-pilot, which
+// keeps its own history in Gemini's format (lib/copilot.ts).
 
 let client: GoogleGenAI | null = null;
 function gemini(): GoogleGenAI {
@@ -29,6 +35,7 @@ function toContents(messages: ChatCompletionMessageParam[]): { system: string; c
   const system: string[] = [];
   const contents: Content[] = [];
   const nameById = new Map<string, string>();
+  const foreign = new Set<string>(); // tool_call ids with no Gemini part (made by another provider)
   const push = (role: "user" | "model", parts: Part[]) => {
     const last = contents[contents.length - 1];
     if (last && last.role === role) last.parts!.push(...parts);
@@ -61,13 +68,19 @@ function toContents(messages: ChatCompletionMessageParam[]): { system: string; c
         if (tc.type !== "function") continue;
         nameById.set(tc.id, tc.function.name);
         const orig = callParts.get(tc.id);
-        let args: Record<string, unknown> = {};
-        try { args = JSON.parse(tc.function.arguments || "{}"); } catch { /* keep empty */ }
-        parts.push(orig ?? { functionCall: { name: tc.function.name, args } });
+        if (orig) parts.push(orig);
+        else {
+          foreign.add(tc.id);
+          parts.push({ text: `[Earlier step: called ${tc.function.name} with ${tc.function.arguments || "{}"}]` });
+        }
       }
       if (parts.length) push("model", parts);
     } else if (m.role === "tool") {
       const raw = typeof m.content === "string" ? m.content : m.content.map((p) => p.text).join("");
+      if (foreign.has(m.tool_call_id)) {
+        push("user", [{ text: `[Result of ${nameById.get(m.tool_call_id) ?? "tool"}: ${raw}]` }]);
+        continue;
+      }
       let response: Record<string, unknown>;
       try {
         const j = JSON.parse(raw);
@@ -127,6 +140,57 @@ export async function geminiChat(modelId: string, params: ChatParams, timeoutMs:
     choices: [{ index: 0, finish_reason: tool_calls.length ? "tool_calls" : "stop", logprobs: null, message: { role: "assistant", content: text || null, refusal: null, ...(tool_calls.length ? { tool_calls } : {}) } }],
     usage: { prompt_tokens: res.usageMetadata?.promptTokenCount ?? 0, completion_tokens: (res.usageMetadata?.candidatesTokenCount ?? 0) + (res.usageMetadata?.thoughtsTokenCount ?? 0), total_tokens: res.usageMetadata?.totalTokenCount ?? 0 },
   } as ChatCompletion;
+}
+
+export interface GeminiTurn {
+  parts: Part[]; // every part exactly as streamed, thought signatures included
+  text: string; // visible text (non-thought)
+  calls: { name: string; args: Record<string, unknown> }[];
+  finishReason: string | null;
+  inputTokens: number | null;
+  outputTokens: number | null;
+}
+
+// Native streaming call. Text deltas go to onDelta as they arrive; the parts
+// are returned unmerged and unmodified so they can be replayed later.
+export async function geminiStream(
+  modelId: string,
+  req: { system: string; contents: Content[]; tools?: FunctionDeclaration[]; thinkingLevel?: ThinkingLevel; temperature?: number; maxOutputTokens?: number },
+  timeoutMs: number,
+  onDelta?: (text: string) => void,
+): Promise<GeminiTurn> {
+  const stream = await gemini().models.generateContentStream({
+    model: modelId,
+    contents: req.contents,
+    config: {
+      systemInstruction: req.system,
+      temperature: req.temperature,
+      maxOutputTokens: req.maxOutputTokens,
+      tools: req.tools?.length ? [{ functionDeclarations: req.tools }] : undefined,
+      thinkingConfig: req.thinkingLevel ? { thinkingLevel: req.thinkingLevel } : undefined,
+      abortSignal: AbortSignal.timeout(timeoutMs),
+    },
+  });
+  const parts: Part[] = [];
+  let finishReason: string | null = null;
+  let usage: { promptTokenCount?: number; candidatesTokenCount?: number; thoughtsTokenCount?: number } | undefined;
+  for await (const chunk of stream) {
+    const cand = chunk.candidates?.[0];
+    for (const p of cand?.content?.parts ?? []) {
+      parts.push(p);
+      if (p.text && !p.thought) onDelta?.(p.text);
+    }
+    if (cand?.finishReason) finishReason = cand.finishReason;
+    if (chunk.usageMetadata) usage = chunk.usageMetadata;
+  }
+  const visible = parts.filter((p) => p.text && !p.thought).map((p) => p.text).join("");
+  const calls = parts.filter((p) => p.functionCall).map((p) => ({ name: p.functionCall!.name ?? "", args: (p.functionCall!.args ?? {}) as Record<string, unknown> }));
+  if (!visible.trim() && !calls.length) throw new ApiError({ message: `Gemini returned no content (${finishReason ?? "empty response"})`, status: 502 });
+  return {
+    parts, text: visible, calls, finishReason,
+    inputTokens: usage?.promptTokenCount ?? null,
+    outputTokens: usage ? (usage.candidatesTokenCount ?? 0) + (usage.thoughtsTokenCount ?? 0) : null,
+  };
 }
 
 // Seconds the API asks us to wait (from a 429's RetryInfo), if present.

@@ -10,7 +10,8 @@ You're continuing work on the Aerchain take-home prototype ("Quote Desk") in `/U
 - **Free models only.** No OpenRouter credits and no paid models. `lib/models.ts` has the chains and `assertFree()` enforces the rule.
   - Extraction: gemini-3.8-flash → gemini-3.6-flash → gemini-3.5-flash-lite.
   - Analysis: the same chain, then `nvidia/nemotron-3-ultra-550b-a55b:free`.
-  - Co-pilot and follow-ups: Nemotron free → Flash-Lite.
+  - Co-pilot: gemini-3.5-flash-lite (minimal thinking) → gemini-3.7-flash → gemini-3.5-flash. Gemini only; history is in the `copilot_messages` table (DECISIONS T9/T10).
+  - Follow-ups: Nemotron free → Flash-Lite.
   - In practice 3.8 is over quota or busy and 3.6 is often 503, so Flash-Lite does most of the work.
   - Whether to move back to paid models is deferred to the very end; don't change it unprompted.
 - Ranjan is a PM, not a developer. Do the technical work yourself, give numbered copy-paste steps when he must act, and keep explanations short.
@@ -34,7 +35,7 @@ You're continuing work on the Aerchain take-home prototype ("Quote Desk") in `/U
 - **Next.js 16**: read `node_modules/next/dist/docs/` before using unfamiliar APIs. Run `npx next typegen` before `tsc` when you add routes.
 
 **Pending, in Ranjan's priority order:**
-1. **Two co-pilot issues.** Ranjan is about to describe them; start there.
+1. ~~Two co-pilot issues~~ — done 2026-10-01 (T9/T10; test `seed/eval/copilot-conversation.ts`).
 2. **Live photo upload on Vercel.** Ranjan is testing it himself. Risk: transcribe + read + second read on busy free models may exceed the 300 s function limit. If it fails, split the work (e.g. one pass per request with status polling).
 3. **Optional:**
    - A demo script for the interview, covering the ugly-edges walkthrough.

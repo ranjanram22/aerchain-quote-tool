@@ -128,3 +128,22 @@ Unseen samples (vs the Sonnet run of the same files):
 | Chat: "If Transpac agreed to include freight, how would the cheapest-per-line landed award change among compliant vendors?" | Chose what_if(freight included, mandatory, landed); −₹6.71 L; Transpac 2 → 14 lines; numbers traced ✓ |
 | Version history: Om Sai sent a revised email (₹40/kg 5-ply, ₹36/kg 3-ply, freight ₹1.5 L/yr) | v1 and v2 listed; v1 view shows files, values and per-line changed/new/dropped vs v2 |
 | Same revised email exposed a model computing prices ("7.56" for "₹36/kg") → shown as ₹1.59/pc | Fixed by E9: now ₹36/kg × 0.21 kg (RFx spec weight) = ₹7.56/pc with ⚠ |
+
+## Co-pilot: thought signatures and speed (2026-10-01)
+Test: `npx tsx --conditions=react-server --env-file=.env.local seed/eval/copilot-conversation.ts`.
+- The test runs offline history checks first. Then it holds a live 10-turn conversation on a fresh draft (`seed/eval/copilot-script.ts`), reloads the history from the database after turn 5, and forces turn 6 onto the fallback Flash models.
+- Assertions:
+  - No 400 errors.
+  - Every saved tool call has its thought signature and its result.
+  - After turn 5, 5 buyer messages and 5 replies reload from the database.
+  - Final draft: 3 lines (3-ply at 45,000, 5-ply at 12,000, edge protectors at 8,000; partitions removed), questionnaire with ISO 9001 mandatory, deadline 2026-10-20, payment 60 days, scope "rate contract".
+
+| Run | Model per turn | Avg s/turn | Notes |
+|---|---|---|---|
+| Before (old code, same 10 messages) | Nemotron free; Flash-Lite on turn 10 | **26.8** (4.0–57.5) | Turn 9 reproduced the 400 "missing thought_signature" after Nemotron returned 503 mid-turn; one Nemotron call sent a malformed `items` argument |
+| After, run 1 (before the 3.5 Flash fallback was added) | Flash-Lite; turn 6 forced to Flash | — | Turns 1–5 passed at 5–9 s; turn 6 failed because 3.7 Flash was 503 and 3.6 Flash was out of its daily free quota of 20 requests. The chain was changed to 3.7 Flash then 3.5 Flash (T10) |
+| After, run 2 | Flash-Lite; turn 6 3.5 Flash | 10.0 (6.6 without turn 6) | PASS, 9 tool calls |
+| After, run 3 (final code) | Flash-Lite; turn 6 3.5 Flash | **8.9** (**5.7** without turn 6) | PASS, 8 tool calls; turn 6 took 37 s waiting on busy free Flash models |
+
+- Browser check (local): the reply streams in as it is written, and the saved chat reappears after a page reload.
+- That check found a bug, now fixed: a catalog line sent without a description was skipped while the reply claimed it was added. Now the catalog name fills in the description, a skipped line is reported back to the model as a failure, and the prompt says to claim only what the tool result lists.

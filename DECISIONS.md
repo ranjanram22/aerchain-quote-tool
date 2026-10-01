@@ -177,3 +177,26 @@ Real email send/receive; vendor portal; authentication and roles (a VP uses the 
 - **Reset**: Admin → System → "Reset demo data" (type RESET). Same code as `npm run seed` (`lib/demo-reset.ts`), streamed progress, replies served from the extraction cache (~1 min, no AI calls). Wipes everything, including RFx created during a demo — deliberate, it is a demo reset.
 - **Version history**: every earlier reply from a vendor stays viewable in Responses (files, values as written, model) with a line-by-line "changed / new / dropped" comparison against the current version. Only the newest version feeds the comparison.
 - **Freight what-if**: the chat's what_if tool accepts freight changes (included, ₹/year, % of value, ₹/unit, amount per shipment × shipments/year with FX); evaluated on landed cost.
+
+### T9. Co-pilot history kept in Gemini's native format, thought signatures included (2026-10-01)
+- **Problem**: Gemini answered 400 "Function call is missing a thought_signature" (call `set_header`, position 8). Root cause, from `llm_calls`: Nemotron (first in the co-pilot chain) made a `set_header` call, then returned 503 overloaded on the next round of the same turn. Flash-Lite took over and received Nemotron's call, which has no Gemini signature. The chat history also lived only in the browser as plain text, so signatures could never survive a reload.
+- **What**:
+  - New table `copilot_messages` (migration 003). Every model response is stored exactly as streamed: all parts, unmerged, with their `thoughtSignature`s, the model that produced them, and the tool results.
+  - Each turn replays the stored parts unchanged, both in memory within a turn and after a reload from the database. The browser now sends only the new message, and the page loads the saved chat from the database (no more localStorage).
+  - The co-pilot chain is Gemini only, so another provider's tool calls can no longer enter the conversation. When the chain switches between Gemini models (Flash-Lite to Flash), earlier parts are resent as-is. Google's thinking guide (stateless mode) says to resend the previous model's thought blocks when switching models and that the backend manages compatibility.
+  - A tool call is never sent as a `functionCall` if it has no usable signature (e.g. from a non-Gemini model in old history) or if its result was never saved (a turn that failed half-way). Such calls, and their results, become plain-text summaries. The OpenAI-style adapter used by the analysis chat (`lib/gemini.ts`) applies the same text-summary rule to tool calls made by Nemotron earlier in the same question.
+- **Alternatives**:
+  - A dummy signature: the old workaround is no longer in Google's current docs.
+  - Converting every tool call after any model switch to text: unnecessary given the guide's stated compatibility, and confirmed unnecessary by the test.
+  - Keeping history in the browser: signatures would be lost on reload or tampered with.
+- **Test**: `seed/eval/copilot-conversation.ts` (TESTS.md).
+
+### T10. Faster co-pilot: Flash-Lite at minimal thinking, one update_draft tool, streamed text (2026-10-01)
+- **What**:
+  - **Chain**: gemini-3.5-flash-lite at thinking level "minimal", then Flash (gemini-3.7-flash at "low", its lowest level, then gemini-3.5-flash at "minimal"). Nemotron is removed from the co-pilot. 3.6 Flash was left out because its free tier allows only 20 requests a day, and that quota ran out during testing.
+  - **One tool**: the seven draft tools are replaced by one `update_draft` call. It takes header, terms, add_lines, update_lines, remove_lines and questionnaire together and applies them in a fixed order (updates, removals from the highest line number down, additions), so line numbers stay valid.
+  - **Catalog in the prompt**: the product catalog is in the system prompt as short refs (C1…), which removes the `search_catalog` round. Code maps a ref back to the product id and its spec. A line whose stated dimensions differ from the catalog product's is kept as the buyer described it.
+  - **Draft in the prompt**: the current draft snapshot is part of the system prompt and is not repeated in every stored message.
+  - **Streaming**: the assistant's text streams to the chat as it is generated, and a retry discards a failed attempt's partial text.
+- **Result**: average seconds per co-pilot turn on the same scripted 10-turn conversation went from **26.8 s before** to **8.9 s after**. The 8.9 s includes one turn deliberately forced onto the busy free Flash models (37 s). The 9 normal turns averaged **5.7 s**.
+- **Trade-off**: Flash-Lite at minimal thinking sometimes drafts the questionnaire before the buyer asks (allowed by the prompt). Once, the Flash fallback recorded a freight term the buyer had only implied (DAP). Both are visible in the draft and editable.

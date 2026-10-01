@@ -257,6 +257,21 @@ create table if not exists llm_calls (
   at timestamptz not null default now()
 );
 
+-- Co-pilot chat history in Gemini's native format (thought signatures kept; DECISIONS T9)
+create table if not exists copilot_messages (
+  id uuid primary key default gen_random_uuid(),
+  rfx_id uuid not null references rfxs(id) on delete cascade,
+  seq int not null,
+  turn int not null,
+  role text not null check (role in ('user','model')),
+  kind text not null check (kind in ('buyer','model','tool_result')),
+  parts jsonb not null,
+  model text,
+  meta jsonb not null default '{}',
+  at timestamptz not null default now(),
+  unique (rfx_id, seq)
+);
+
 -- ---------- Indexes ----------
 
 create index if not exists idx_rfx_lines_rfx on rfx_lines(rfx_id);
@@ -265,6 +280,7 @@ create index if not exists idx_quote_lines_resp on quote_lines(response_id);
 create index if not exists idx_open_items_rfx on open_items(rfx_id);
 create index if not exists idx_audit_rfx on audit_log(rfx_id);
 create index if not exists idx_qa_resp on questionnaire_answers(response_id);
+create index if not exists idx_copilot_messages_rfx on copilot_messages(rfx_id, seq);
 
 -- ---------- Security ----------
 -- The app talks to the database only from the server with the secret key,
@@ -276,7 +292,7 @@ begin
   foreach t in array array[
     'vendors','products','fx_rates','last_year_prices','rfxs','rfx_lines','rfx_questions',
     'rfx_vendors','outbox','responses','response_files','extractions','quote_lines',
-    'commercial_terms','questionnaire_answers','attachment_facts','open_items','audit_log','llm_calls'
+    'commercial_terms','questionnaire_answers','attachment_facts','open_items','audit_log','llm_calls','copilot_messages'
   ] loop
     execute format('alter table %I enable row level security', t);
   end loop;

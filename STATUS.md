@@ -62,6 +62,11 @@ Repo: github.com/ranjanram22/aerchain-quote-tool (private)
 - Chat what-if for freight changes.
 - Responses → Version history with compare-to-current.
 - Guard: extracted prices/weights must appear in the source text (E9).
+- Co-pilot fixes (T9/T10):
+  - Chat history is now saved in the database (Gemini format, thought signatures kept), which fixes the 400 "missing thought_signature" error.
+  - Gemini-only chain: Flash-Lite at minimal thinking, then Flash.
+  - One `update_draft` tool, and replies stream into the chat.
+  - About 27 s per turn before, about 6 s per turn after.
 
 ## Next
 - Ranjan to test live upload (photo) on Vercel within the 5-minute limit.
@@ -69,6 +74,7 @@ Repo: github.com/ranjanram22/aerchain-quote-tool (private)
 - Decide at the end: keep free models or move photo reading back to a paid model.
 
 ## Known issues
+- Co-pilot fallback Flash models on the free tier are often busy (503) or over quota. A turn that falls back can take 30–40 s; Flash-Lite turns take about 6 s.
 - Free models (mostly gemini-3.5-flash-lite in practice): the angled photo and the one-line incumbent email read less reliably than with Sonnet and vary between runs; errors are ⚠-flagged, never silent (TESTS.md). With the current seed read, Om Sai is no longer the headline-cheapest vendor and Mahalaxmi counts as mandatory-compliant.
 - Flash models on the free tier are often busy/over quota; answers then come from Flash-Lite (slower, less careful prose).
 - Vercel did not start a build on the initial import; an empty commit push triggered it. Pushes to `main` deploy normally now.

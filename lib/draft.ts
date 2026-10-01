@@ -73,7 +73,9 @@ export async function addLines(rfxId: string, items: DraftLineInput[]) {
     };
   });
   if (rows.length) await must(db().from("rfx_lines").insert(rows));
-  return `Added ${rows.length} line(s): ${rows.map((r) => r.line_no).join(", ")}`;
+  const skipped = items.length - rows.length;
+  if (!rows.length) throw new Error(`no line added: ${skipped} item(s) had no description`);
+  return `Added ${rows.length} line(s): ${rows.map((r) => r.line_no).join(", ")}${skipped ? ` (${skipped} skipped: no description)` : ""}`;
 }
 
 export async function updateLine(rfxId: string, lineNo: number, p: Partial<DraftLineInput>) {
@@ -112,21 +114,66 @@ export async function setQuestionnaire(rfxId: string, qs: DraftQuestionInput[]) 
   return `Questionnaire set: ${rows.length} question(s)`;
 }
 
-export async function searchCatalog(query: string) {
-  const words = query.toLowerCase().split(/[^a-z0-9]+/).filter((w) => w.length > 1);
+// Compact catalog for the co-pilot prompt: short refs (C1, C2…) instead of
+// UUIDs, mapped back to product ids and specs by code in updateDraft().
+export async function catalogIndex() {
   const all = (await must(db().from("products").select("*").order("name"))) as Record<string, unknown>[];
-  const scored = all
-    .map((p) => {
-      const hay = `${p.name} ${p.type} ${p.ply}ply ${p.ply}-ply ${p.flute} ${p.gsm} ${p.length_mm}x${p.width_mm}x${p.height_mm} ${p.print} ${p.notes}`.toLowerCase();
-      return { p, score: words.reduce((s, w) => s + (hay.includes(w) ? 1 : 0), 0) };
-    })
-    .filter((x) => x.score > 0)
-    .sort((a, b) => b.score - a.score)
-    .slice(0, 12);
-  return scored.map(({ p }) => ({
-    product_id: p.id, name: p.name, type: p.type, ply: p.ply, flute: p.flute, paper_gsm: p.gsm, bf: p.bf,
-    dimensions_mm: [p.length_mm, p.width_mm, p.height_mm].filter((x) => x != null).join(" x "), print: p.print, base_unit: p.base_unit, notes: p.notes,
+  return all.map((p, i) => ({
+    ref: `C${i + 1}`, product_id: p.id as string, name: p.name as string, base_unit: (p.base_unit as string) ?? "piece",
+    spec: Object.fromEntries(Object.entries({
+      type: p.type, ply: p.ply, flute: p.flute, paper_gsm: p.gsm, bf: p.bf,
+      dimensions_mm: [p.length_mm, p.width_mm, p.height_mm].filter((x) => x != null).join(" x ") || null, print: p.print, notes: p.notes,
+    }).filter(([, v]) => v != null && v !== "")),
   }));
+}
+export type CatalogItem = Awaited<ReturnType<typeof catalogIndex>>[number];
+
+export interface DraftChanges {
+  header?: { title?: string; category?: string; location?: string; scope?: string };
+  terms?: Record<string, unknown>;
+  update_lines?: (Partial<DraftLineInput> & { line_no: number; catalog_ref?: string })[];
+  remove_lines?: number[];
+  add_lines?: (DraftLineInput & { catalog_ref?: string })[];
+  questionnaire?: DraftQuestionInput[];
+}
+
+// All co-pilot edits in one call. Line numbers refer to the draft as it was
+// before this call: updates run first, then removals (highest number first),
+// then additions, so earlier numbers stay valid.
+export async function updateDraft(rfxId: string, c: DraftChanges, catalog: CatalogItem[]): Promise<string[]> {
+  await assertDraft(rfxId);
+  const arr = <T,>(v: unknown): T[] => (Array.isArray(v) ? (v as T[]) : v && typeof v === "object" ? [v as T] : []);
+  const byRef = new Map(catalog.map((p) => [p.ref.toUpperCase(), p]));
+  const fromCatalog = <T extends { catalog_ref?: string; product_id?: string | null; spec?: Record<string, unknown>; unit?: string }>(l: T): T => {
+    let p = l.catalog_ref ? byRef.get(String(l.catalog_ref).toUpperCase()) : undefined;
+    const { catalog_ref, ...rest } = l; void catalog_ref;
+    // Guard: dimensions stated on the line must match the catalog product's,
+    // otherwise the line is kept as the buyer described it (no catalog link).
+    const dims = (v: unknown) => (String(v ?? "").match(/\d+(?:\.\d+)?\s*[x×*]\s*\d+(?:\.\d+)?(?:\s*[x×*]\s*\d+(?:\.\d+)?)?/i)?.[0] ?? "").replace(/\s|[×*]/g, "x").replace(/x+/g, "x").toLowerCase();
+    const stated = dims((l as { description?: string }).description) || dims(l.spec?.dimensions_mm);
+    if (p && stated && dims(p.spec.dimensions_mm) && stated !== dims(p.spec.dimensions_mm)) p = undefined;
+    if (!p) return rest as T;
+    const description = (rest as { description?: string }).description?.trim() || p.name;
+    return { ...rest, description, product_id: p.product_id, spec: { ...p.spec, ...(l.spec ?? {}) }, unit: l.unit ?? p.base_unit } as unknown as T;
+  };
+  const done: string[] = [];
+  const run = async (label: string, f: () => Promise<string>) => {
+    try { done.push(await f()); } catch (e) { done.push(`${label} failed: ${e instanceof Error ? e.message : e}`); }
+  };
+  if (c.header && typeof c.header === "object") await run("Header", () => setHeader(rfxId, c.header!));
+  if (c.terms && typeof c.terms === "object" && Object.keys(c.terms).length) await run("Terms", () => setTerms(rfxId, c.terms!));
+  for (const u of arr<NonNullable<DraftChanges["update_lines"]>[number]>(c.update_lines)) {
+    const { line_no, ...rest } = fromCatalog(u);
+    await run(`Line ${line_no}`, () => updateLine(rfxId, Number(line_no), rest));
+  }
+  for (const n of arr<number>(c.remove_lines).map(Number).filter(Number.isFinite).sort((a, b) => b - a)) await run(`Line ${n}`, () => removeLine(rfxId, n));
+  const adds = arr<NonNullable<DraftChanges["add_lines"]>[number]>(c.add_lines).map(fromCatalog);
+  if (adds.length) await run("Lines", () => addLines(rfxId, adds));
+  if (c.questionnaire !== undefined) {
+    const qs = arr<DraftQuestionInput>(c.questionnaire);
+    if (qs.length) await run("Questionnaire", () => setQuestionnaire(rfxId, qs));
+  }
+  return done;
 }
 
 export async function publish(rfxId: string, vendorIds: string[], buyerName: string) {

@@ -12,6 +12,7 @@ export interface DraftProps {
   lines: Row[];
   questions: Row[];
   vendors: { id: string; name: string; email: string | null; categories: string[] }[];
+  chat: Msg[]; // saved conversation (server-side, copilot_messages)
 }
 type Msg = { role: "user" | "assistant"; content: string; actions?: string[] };
 
@@ -41,10 +42,11 @@ const TERM_FIELDS: [string, string][] = [
   ["delivery_terms", "Delivery terms"], ["incoterm", "Incoterm"], ["freight_expectation", "Freight"], ["gst_treatment", "GST"], ["currency", "Currency"],
 ];
 
-export default function CoPilot({ rfx, lines, questions, vendors }: DraftProps) {
+export default function CoPilot({ rfx, lines, questions, vendors, chat }: DraftProps) {
   const router = useRouter();
-  const storeKey = `copilot:${rfx.id}`;
-  const [msgs, setMsgs] = useState<Msg[]>([]);
+  const [msgs, setMsgs] = useState<Msg[]>(chat);
+  // Streamed reply: text of finished model rounds + text of the round in progress.
+  const [live, setLive] = useState<{ done: string; cur: string } | null>(null);
   const [input, setInput] = useState("");
   const [busy, setBusy] = useState(false);
   const [status, setStatus] = useState<string | null>(null);
@@ -56,23 +58,22 @@ export default function CoPilot({ rfx, lines, questions, vendors }: DraftProps) 
   const terms = (rfx.terms ?? {}) as Record<string, unknown>;
 
   useEffect(() => {
-    try { const s = localStorage.getItem(storeKey); if (s) setMsgs(JSON.parse(s)); } catch { /* ignore */ }  
-  }, [storeKey]);
-  useEffect(() => {
-    try { localStorage.setItem(storeKey, JSON.stringify(msgs.slice(-40))); } catch { /* ignore */ }
     endRef.current?.scrollIntoView({ behavior: "smooth" });
-  }, [msgs, storeKey]);
+  }, [msgs, live]);
 
   const send = async (text: string) => {
     if (!text.trim() || busy) return;
-    const history = msgs.map((m) => ({ role: m.role, content: m.content }));
     setMsgs((m) => [...m, { role: "user", content: text }]);
-    setInput(""); setBusy(true); setErr(null);
+    setInput(""); setBusy(true); setErr(null); setLive({ done: "", cur: "" });
     try {
       setStatus(null);
-      const r = await fetch(`/api/rfx/${rfx.id}/copilot`, { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ message: text, history }) });
+      const r = await fetch(`/api/rfx/${rfx.id}/copilot`, { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ message: text }) });
       if (!r.ok) { const e = await r.json().catch(() => ({})); throw new Error(e.error ?? "Something went wrong."); }
-      const j = await readNdjson<{ reply: string; actions: string[] }>(r, (t) => { setStatus(t); router.refresh(); });
+      const j = await readNdjson<{ reply: string; actions: string[] }>(r, (t) => { setStatus(t); if (t === "Draft updated") router.refresh(); }, (ev) => {
+        if (ev.type === "delta") setLive((l) => ({ done: l?.done ?? "", cur: (l?.cur ?? "") + String(ev.text ?? "") }));
+        else if (ev.type === "reset") setLive((l) => ({ done: l?.done ?? "", cur: "" }));
+        else if (ev.type === "commit") setLive((l) => ({ done: [l?.done, l?.cur?.trim()].filter(Boolean).join("\n\n"), cur: "" }));
+      });
       setMsgs((m) => [...m, { role: "assistant", content: j.reply, actions: j.actions }]);
       router.refresh();
     } catch (e) {
@@ -80,6 +81,7 @@ export default function CoPilot({ rfx, lines, questions, vendors }: DraftProps) 
     } finally {
       setBusy(false);
       setStatus(null);
+      setLive(null);
     }
   };
   const act = (f: () => Promise<{ ok: boolean; error?: string }>) => start(async () => { const r = await f(); if (!r.ok) setErr(r.error ?? "Failed"); else setErr(null); });
@@ -119,6 +121,9 @@ export default function CoPilot({ rfx, lines, questions, vendors }: DraftProps) 
                 {m.actions && m.actions.length > 0 && <div className="mt-1.5 space-y-0.5 border-t border-slate-100 pt-1.5 text-[11px] text-emerald-700">{m.actions.map((a, j) => <div key={j}>✓ {a}</div>)}</div>}
               </div>
             ))}
+            {live && (live.done || live.cur) && (
+              <div className="mr-6 rounded-lg bg-white px-3 py-2 text-sm ring-1 ring-slate-200"><div className="whitespace-pre-wrap">{[live.done, live.cur].filter(Boolean).join("\n\n")}</div></div>
+            )}
             {busy && (
               <div className={`flex items-center gap-2 text-xs ${status && /busy|retrying|backup/i.test(status) ? "text-amber-700" : "text-slate-500"}`}>
                 <span className={`h-2 w-2 animate-pulse rounded-full ${status && /busy|retrying|backup/i.test(status) ? "bg-amber-500" : "bg-indigo-500"}`} /> {status ?? "Thinking…"}

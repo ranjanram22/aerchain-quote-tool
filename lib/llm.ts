@@ -2,7 +2,7 @@ import "server-only";
 import OpenAI from "openai";
 import type { ChatCompletion, ChatCompletionCreateParamsNonStreaming } from "openai/resources/chat/completions";
 import { MODELS, assertFree, displayModel, type ModelTask } from "./models";
-import { geminiChat, geminiRetryDelay, GeminiApiError } from "./gemini";
+import { geminiChat, geminiRetryDelay, GeminiApiError, type GeminiTurn } from "./gemini";
 import { db, isSupabaseConfigured } from "./supabase";
 
 // One wrapper for every LLM call (free models only):
@@ -49,19 +49,28 @@ async function logCall(row: { task: string; model: string; latency_ms: number; i
 }
 
 async function attempt(task: ModelTask, model: string, params: ChatParams, timeoutMs: number): Promise<ChatResult> {
+  const started = Date.now();
+  const completion = await logged(task, model, async () => {
+    let c: ChatCompletion;
+    if (model.startsWith("gemini:")) c = await geminiChat(model.slice(7), params, timeoutMs);
+    else {
+      c = await orClient().chat.completions.create({ ...params, model: model.slice("openrouter:".length), stream: false }, { timeout: timeoutMs });
+      const e = (c as unknown as { error?: { message?: string; code?: number } }).error;
+      if (e) throw new OpenAI.APIError(e.code ?? 502, e, e.message ?? "Upstream error", undefined);
+    }
+    return { value: c, inputTokens: c.usage?.prompt_tokens, outputTokens: c.usage?.completion_tokens };
+  });
+  return { completion, model, latencyMs: Date.now() - started };
+}
+
+// Runs one model call, enforcing the free-models rule and logging it to llm_calls.
+async function logged<T>(task: ModelTask, model: string, call: () => Promise<{ value: T; inputTokens?: number | null; outputTokens?: number | null }>): Promise<T> {
   assertFree(model);
   const started = Date.now();
   try {
-    let completion: ChatCompletion;
-    if (model.startsWith("gemini:")) completion = await geminiChat(model.slice(7), params, timeoutMs);
-    else {
-      completion = await orClient().chat.completions.create({ ...params, model: model.slice("openrouter:".length), stream: false }, { timeout: timeoutMs });
-      const e = (completion as unknown as { error?: { message?: string; code?: number } }).error;
-      if (e) throw new OpenAI.APIError(e.code ?? 502, e, e.message ?? "Upstream error", undefined);
-    }
-    const latencyMs = Date.now() - started;
-    await logCall({ task, model, latency_ms: latencyMs, input_tokens: completion.usage?.prompt_tokens ?? null, output_tokens: completion.usage?.completion_tokens ?? null, ok: true });
-    return { completion, model, latencyMs };
+    const r = await call();
+    await logCall({ task, model, latency_ms: Date.now() - started, input_tokens: r.inputTokens ?? null, output_tokens: r.outputTokens ?? null, ok: true });
+    return r.value;
   } catch (err) {
     await logCall({ task, model, latency_ms: Date.now() - started, ok: false, error: (err instanceof Error ? err.message : String(err)).slice(0, 500) });
     throw err;
@@ -90,9 +99,22 @@ export async function chat(
   params: ChatParams,
   opts: { models?: string[]; timeoutMs?: number; onStatus?: StatusFn } = {},
 ): Promise<ChatResult> {
-  const chain = opts.models ?? MODELS[task].chain;
   const timeoutMs = opts.timeoutMs ?? MODELS[task].timeoutMs;
+  return withChain(task, opts.models ?? MODELS[task].chain, opts.onStatus, (model) => attempt(task, model, params, timeoutMs));
+}
+
+// Model chain with retry / back-off / cool-down / fallback around any call.
+// `call` gets the model chosen for this attempt; `onRetry` runs before each
+// new attempt (e.g. so a streaming UI can discard partial text).
+export async function withChain<T>(
+  task: ModelTask,
+  chain: string[],
+  onStatus: StatusFn | undefined,
+  call: (model: string) => Promise<T>,
+  onRetry?: () => void,
+): Promise<T> {
   let last: unknown;
+  let first = true;
   const now = Date.now();
   // Skip cooling models unless every model in the chain is cooling.
   const usable = chain.filter((m) => (coolUntil.get(m) ?? 0) <= now);
@@ -101,7 +123,9 @@ export async function chat(
     const model = order[i];
     for (let tryNo = 0; tryNo < 3; tryNo++) {
       try {
-        return await attempt(task, model, params, timeoutMs);
+        if (!first) onRetry?.();
+        first = false;
+        return await call(model);
       } catch (err) {
         last = err;
         if (!isRetryable(err)) break; // e.g. bad request → try the next model
@@ -111,13 +135,29 @@ export async function chat(
         // Long requested wait, or provider-side overload after one retry → switch model now.
         if (tryNo === 2 || (hinted != null && hinted > 20) || (overloaded && tryNo >= 1)) break;
         const wait = Math.max(1, Math.min(20, hinted ?? [2, 6][tryNo])) * 1000;
-        opts.onStatus?.(`${isRateLimit(err) ? "AI busy (rate limit)" : "AI not responding"} on ${displayModel(model)} — retrying in ${Math.round(wait / 1000)}s…`);
+        onStatus?.(`${isRateLimit(err) ? "AI busy (rate limit)" : "AI not responding"} on ${displayModel(model)} — retrying in ${Math.round(wait / 1000)}s…`);
         await sleep(wait);
       }
     }
-    if (i + 1 < order.length) opts.onStatus?.(`Switching to backup model ${displayModel(order[i + 1])}…`);
+    if (i + 1 < order.length) onStatus?.(`Switching to backup model ${displayModel(order[i + 1])}…`);
   }
   throw friendly(last);
+}
+
+// Same chain handling for a native Gemini streaming call (co-pilot).
+export function geminiStreamChain(
+  task: ModelTask,
+  run: (modelId: string, model: string) => Promise<GeminiTurn>,
+  opts: { models?: string[]; onStatus?: StatusFn; onRetry?: () => void } = {},
+): Promise<GeminiTurn & { model: string }> {
+  const chain = opts.models ?? MODELS[task].chain;
+  return withChain(task, chain, opts.onStatus, (model) => {
+    if (!model.startsWith("gemini:")) throw new Error(`${model} is not a Gemini model; the ${task} chain must be Gemini-only.`);
+    return logged(task, model, async () => {
+      const r = await run(model.slice(7), model);
+      return { value: { ...r, model }, inputTokens: r.inputTokens, outputTokens: r.outputTokens };
+    });
+  }, opts.onRetry);
 }
 
 export function textOf(result: ChatResult): string {

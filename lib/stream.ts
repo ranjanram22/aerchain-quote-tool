@@ -1,12 +1,13 @@
 // Newline-delimited JSON stream: {type:"status",text} … then {type:"result",data} or {type:"error",error}.
 // Lets the UI show "AI busy, retrying…" while a long free-model call runs.
-export function ndjson(run: (status: (text: string) => void) => Promise<unknown>): Response {
+// `event` sends any other line (e.g. {type:"delta",text} for streamed text).
+export function ndjson(run: (status: (text: string) => void, event: (o: { type: string } & Record<string, unknown>) => void) => Promise<unknown>): Response {
   const enc = new TextEncoder();
   const stream = new ReadableStream({
     async start(controller) {
       const send = (o: unknown) => controller.enqueue(enc.encode(JSON.stringify(o) + "\n"));
       try {
-        const data = await run((text) => send({ type: "status", text }));
+        const data = await run((text) => send({ type: "status", text }), send);
         send({ type: "result", data });
       } catch (e) {
         send({ type: "error", error: e instanceof Error ? e.message : String(e) });
@@ -19,7 +20,7 @@ export function ndjson(run: (status: (text: string) => void) => Promise<unknown>
 }
 
 // Client side: read the stream, reporting status lines; resolves with the result.
-export async function readNdjson<T>(res: Response, onStatus: (t: string) => void): Promise<T> {
+export async function readNdjson<T>(res: Response, onStatus: (t: string) => void, onEvent?: (o: { type: string } & Record<string, unknown>) => void): Promise<T> {
   if (!res.body) throw new Error("No response body");
   const reader = res.body.getReader();
   const dec = new TextDecoder();
@@ -37,6 +38,7 @@ export async function readNdjson<T>(res: Response, onStatus: (t: string) => void
       if (msg.type === "status") onStatus(msg.text);
       else if (msg.type === "result") return msg.data as T;
       else if (msg.type === "error") throw new Error(msg.error);
+      else onEvent?.(msg);
     }
   }
   throw new Error("The answer was cut off. Please try again.");
